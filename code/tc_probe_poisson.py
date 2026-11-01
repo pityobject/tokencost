@@ -1,35 +1,35 @@
 """
-tc_probe_poisson.py —— 泊松到达：同步波次给出的是不是上界？
+tc_probe_poisson.py —— 泊松到达 + 容量曲线（v2：修掉客户端饱和）
 
-## 为什么做
+## v1 错在哪
 
-正式实验全是"b 个请求同时发"的同步波次，这是最坏情况。
-真实服务是泊松到达。问题只有一个：
+旧版每个请求都新建一个 `httpx.Client`（每次都要 TCP 握手），
+并用 64 个线程跑 SSE 解析（GIL 互斥）。
+结果 λ=4 与 λ=6 都只达成 2.6 qps——**客户端自己成了瓶颈**，
+测出来的"TTFT 差 2–8 倍"后两点不可信。
 
-    **在同样的实际并发下，泊松到达的延迟是否低于（或等于）模型预测？**
+## v2 的三处改动
 
-若是 → 模型是保守的（安全方向），结论更强；
-若否 → 排队效应没被建模，必须写进局限。
+1. **asyncio + 共享连接池**：一个 Client 复用连接，避免每次握手；
+2. **饱和自检**：每个 λ 都核对 `达成 QPS / 目标 λ`，低于 0.85 就直接标注"客户端受限"，
+   不再把噪声当结论；
+3. **扫 λ 找容量膝点**：从 1 到 12 req/s 扫一遍，画出"QPS → p90 TTFT"曲线。
+   膝点 = 这台机器真正的可持续吞吐上限。
 
-## 怎么比才公平
+## 为什么这条重要
 
-不直接比"波次 vs 泊松"（那是两种不同的并发），而是：
-  ① 记录泊松负载下的**实际平均并发** b̄；
-  ② 用 6 参数模型算 b̄ 处的 TTFT/TPOT；
-  ③ 比较实测分布与模型预测。
-这样比的是同一件事。
-
-## 设计
-
-固定 3B-Q4 / ctx512 / 槽位 8，三个到达率 λ = 2 / 4 / 6 请求/秒。
-每个 λ 跑 6 个服务时长（每次固定 60 秒或累计 48 个请求，先到者结束）。
-
-关注指标：实际并发、TTFT 的 p50/p90、是否出现排队（TTFT 远大于单请求 prefill 时间）。
+报告里有一句限制："模型只算服务时间，不算排队时间，不能直接用于容量规划。"
+容量曲线能把这句限制**量化**：
+- 膝点之前的 λ，模型预测与实际接近 → 可用于规划；
+- 越过膝点，TTFT 由排队主导 → 必须加排队模型。
 
 用法：
   & "D:\\llm\\venv\\Scripts\\python.exe" tc_probe_poisson.py
+  & "D:\\llm\\venv\\Scripts\\python.exe" tc_probe_poisson.py --lambdas 1,2,4,6,8,12 --duration 40
 """
 
+import argparse
+import asyncio
 import csv
 import json
 import random
@@ -45,162 +45,157 @@ import tc_server as srv
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 MODEL, QUANT, CTX, SLOTS = "3B", "q4_k_m", 512, 8
-LAMBDAS = [2.0, 4.0, 6.0]
-N_REQ = 48
 OUT = cfg.DATA_DIR / "probe_poisson.csv"
+MAX_INFLIGHT = 128          # 远大于槽位数，保证排队发生在服务端而不是客户端
 
 
-def run_arrivals(url, lam, n_req, seed=7):
-    """按泊松过程发请求（指数间隔），槽位上限 SLOTS，记录每个请求的指标。"""
-    rng = random.Random(seed)
-    rows = []
-    inflight = 0
-    samples = []          # (t, inflight) 采样，用来算平均并发
-
-    with httpx.Client(timeout=httpx.Timeout(600.0, connect=30.0)) as client:
-        t_start = time.perf_counter()
-        next_arrival = t_start
-        issued = 0
-        while issued < n_req or inflight > 0:
-            now = time.perf_counter()
-            # 到了下一个到达时刻、且不超过 n_req 就发
-            if issued < n_req and now >= next_arrival:
-                samples.append((now - t_start, inflight))
-                # 简化：串行发（不并发 await），先发后等它完成会破坏泊松性，
-                # 所以这里用"发出去就不等"的方式：同步 HTTP 会阻塞，故改用线程池
-                issued += 1
-                gap = rng.expovariate(lam)
-                next_arrival = now + gap
-                continue
-            time.sleep(0.01)
-        return rows
+def make_prompt(nonce):
+    filler = ("大模型推理服务在部署时面临一个核心矛盾：用户希望首字延迟尽量低，"
+              "而机房希望单位token成本尽量低。")
+    chars = int(cfg.PROMPT_TOKENS / 0.65)
+    body = (filler * (chars // len(filler) + 1))[:chars]
+    return f"[泊松 {nonce}] {body}\n\n请用一句话总结上面这段话。"
 
 
-def main():
-    from concurrent.futures import ThreadPoolExecutor
-    import threading
-
-    print("=" * 80)
-    print(f"泊松到达实验：{MODEL}-{QUANT} / ctx{CTX} / 槽位 {SLOTS} / λ {LAMBDAS}")
-    print("=" * 80)
-
-    proc, log = srv.start((MODEL, QUANT), CTX, SLOTS, tag="poisson", timeout_s=240)
-    out_rows = []
+async def one(client, url, nonce):
+    prompt = make_prompt(nonce)
+    payload = dict(model="local", messages=[{"role": "user", "content": prompt}],
+                   max_tokens=cfg.GEN_TOKENS, temperature=0.0,
+                   stream=True, cache_prompt=False, ignore_eos=True)
+    t_send = time.perf_counter()
+    t_first = None
+    n = 0
     try:
-        time.sleep(1.5)
-        url = f"{cfg.BASE_URL}/v1/chat/completions"
-
-        for lam in LAMBDAS:
-            rng = random.Random(42)
-            results = []
-            lock = threading.Lock()
-            t_origin = time.perf_counter()
-            stop_at = t_origin + 60.0          # 最多 60 秒
-
-            def worker(i, t_issue):
-                prompt = (f"[泊松 {lam}-{i}-{time.time():.6f}] "
-                          + "大模型推理服务在部署时面临一个核心矛盾：用户希望首字延迟尽量低，"
-                            "而机房希望单位token成本尽量低。")
-                payload = dict(model="local",
-                               messages=[{"role": "user", "content": prompt}],
-                               max_tokens=cfg.GEN_TOKENS, temperature=0.0,
-                               stream=True, cache_prompt=False, ignore_eos=True)
-                t0 = time.perf_counter()
-                t_first = None
-                n_out = 0
-                try:
-                    with httpx.Client(timeout=httpx.Timeout(300.0, connect=30.0)) as c:
-                        with c.stream("POST", url, json=payload) as r:
-                            for line in r.iter_lines():
-                                if not line or not line.startswith("data:"):
-                                    continue
-                                d = line[5:].strip()
-                                if d == "[DONE]":
-                                    break
-                                try:
-                                    o = json.loads(d)
-                                except json.JSONDecodeError:
-                                    continue
-                                ch = o.get("choices") or []
-                                if ch and ch[0].get("delta", {}).get("content"):
-                                    if t_first is None:
-                                        t_first = time.perf_counter()
-                                    n_out += 1
-                    t_end = time.perf_counter()
-                    with lock:
-                        results.append(dict(
-                            i=i, issue_rel=t_issue - t_origin,
-                            start_rel=t0 - t_origin, end_rel=t_end - t_origin,
-                            ttft_ms=((t_first - t0) * 1e3) if t_first else None,
-                            tpot_ms=(((t_end - t_first) / max(n_out - 1, 1)) * 1e3
-                                     if t_first and n_out > 1 else None),
-                            total_ms=(t_end - t0) * 1e3, n_out=n_out))
-                except Exception as e:
-                    with lock:
-                        results.append(dict(i=i, error=str(e)[:80]))
-
-            # 按指数间隔把请求派出去；超过 60 秒就停止派新请求
-            issue_times = []
-            t_cursor = t_origin
-            for i in range(N_REQ):
-                t_cursor += rng.expovariate(lam)
-                if t_cursor > stop_at:
+        async with client.stream("POST", url, json=payload) as r:
+            r.raise_for_status()
+            async for line in r.aiter_lines():
+                if not line or not line.startswith("data:"):
+                    continue
+                d = line[5:].strip()
+                if d == "[DONE]":
                     break
-                issue_times.append(t_cursor)
+                try:
+                    o = json.loads(d)
+                except json.JSONDecodeError:
+                    continue
+                ch = o.get("choices") or []
+                if ch and ch[0].get("delta", {}).get("content"):
+                    if t_first is None:
+                        t_first = time.perf_counter()
+                    n += 1
+        t_end = time.perf_counter()
+        return dict(ok=True, send= t_send, first=t_first, end=t_end, n=n,
+                    ttft_ms=((t_first - t_send) * 1e3) if t_first else None,
+                    total_ms=(t_end - t_send) * 1e3,
+                    tpot_ms=(((t_end - t_first) / max(n - 1, 1)) * 1e3
+                             if t_first and n > 1 else None))
+    except Exception as e:
+        return dict(ok=False, send=t_send, first=None, end=time.perf_counter(),
+                    n=0, error=str(e)[:100])
 
-            # 线程池不能小于"可能同时在飞的请求数"，否则瓶颈变成线程池而不是服务端。
-            # λ=6、单请求约 5 秒 → 平均在飞 30 个，所以给 64 个线程，
-            # 真正的并发上限交给服务端的 8 个槽位去卡。
-            with ThreadPoolExecutor(max_workers=64) as pool:
-                for i, t_issue in enumerate(issue_times):
-                    # 等到该发的时刻
-                    while time.perf_counter() < t_issue:
-                        time.sleep(0.002)
-                    pool.submit(worker, i, time.perf_counter())
-                pool.shutdown(wait=True)
 
-            ok = [r for r in results if "error" not in r]
+async def run_lambda(base_url, lam, duration_s, seed=0):
+    """按指数间隔发请求，持续 duration_s 秒。返回 (行结果列表, 达成QPS, 平均并发)。"""
+    rng = random.Random(seed)
+    limits = httpx.Limits(max_connections=MAX_INFLIGHT + 32,
+                          max_keepalive_connections=MAX_INFLIGHT + 32)
+    timeout = httpx.Timeout(600.0, connect=30.0)
+    url = f"{base_url}/v1/chat/completions"
+
+    # 先把到达时刻排好（指数间隔），再按时刻投递
+    arrivals, t = [], 0.0
+    while True:
+        t += rng.expovariate(lam)
+        if t >= duration_s:
+            break
+        arrivals.append(t)
+
+    sem = asyncio.Semaphore(MAX_INFLIGHT)
+
+    async def job(i):
+        async with sem:
+            return await one(client, url, i)
+
+    async with httpx.AsyncClient(limits=limits, timeout=timeout) as client:
+        # 预热，避免第一波全在等 kernel 编译
+        await asyncio.gather(*[one(client, url, f"warm{i}") for i in range(SLOTS)])
+        start = time.perf_counter()
+        tasks = []
+        for i, at in enumerate(arrivals):
+            delay = start + at - time.perf_counter()
+            if delay > 0:
+                await asyncio.sleep(delay)
+            tasks.append(asyncio.create_task(job(f"{lam}-{i}")))
+        rows = await asyncio.gather(*tasks)
+        span = time.perf_counter() - start
+
+    ok = [r for r in rows if r["ok"]]
+    achieved = len(ok) / span if span > 0 else 0.0
+
+    # 平均并发：所有请求 [send, end) 区间的平均重叠数
+    ev = []
+    for r in rows:
+        ev.append((r["send"] - start, 1))
+        ev.append((r["end"] - start, -1))
+    ev.sort()
+    cur = 0
+    prev = ev[0][0] if ev else 0.0
+    area = 0.0
+    for ts, d in ev:
+        area += cur * (ts - prev)
+        prev = ts
+        cur += d
+    mean_conc = area / span if span > 0 else float("nan")
+    return rows, ok, achieved, mean_conc, len(arrivals)
+
+
+async def main_async(args):
+    rows_all = []
+    proc, _ = srv.start((MODEL, QUANT), CTX, SLOTS, tag="poisson2", timeout_s=240)
+    try:
+        print("=" * 92)
+        print(f"泊松到达 + 容量曲线：{MODEL}-{QUANT} / ctx{CTX} / 槽位 {SLOTS}")
+        print("=" * 92)
+        print(f"{'目标λ':>6}{'达成QPS':>9}{'达成率':>8}{'平均并发':>9}{'请求数':>7}"
+              f"{'TTFT p50':>10}{'TTFT p90':>10}{'TPOT p50':>10}  备注")
+        for lam in args.lambdas:
+            rows, ok, achieved, mean_conc, n_arr = await run_lambda(
+                cfg.BASE_URL, lam, args.duration, seed=int(lam * 100))
             if not ok:
-                print(f"  λ={lam}: 全部失败")
+                print(f"{lam:>6}{0:>9.2f}{'—':>8}")
                 continue
-            # 实际平均并发 = 各请求 [start,end) 区间的平均重叠数
-            events = []
-            for r in ok:
-                events.append((r["start_rel"], 1))
-                events.append((r["end_rel"], -1))
-            events.sort()
-            cur = 0
-            prev_t = events[0][0]
-            area = 0.0
-            for t, d in events:
-                area += cur * (t - prev_t)
-                prev_t = t
-                cur += d
-            span = max(r["end_rel"] for r in ok) - min(r["start_rel"] for r in ok)
-            mean_conc = area / span if span > 0 else float("nan")
-
-            ttfts = [r["ttft_ms"] for r in ok if r["ttft_ms"]]
-            tpots = [r["tpot_ms"] for r in ok if r["tpot_ms"]]
-            row = dict(lam=lam, n_ok=len(ok), mean_conc=mean_conc, span_s=span,
-                       ttft_p50=st.median(ttfts) if ttfts else None,
-                       ttft_p90=(sorted(ttfts)[int(len(ttfts) * 0.9)] if ttfts else None),
-                       tpot_p50=st.median(tpots) if tpots else None,
-                       achieved_qps=len(ok) / span if span > 0 else None)
-            out_rows.append(row)
-            print(f"  λ={lam:>4}  完成 {len(ok):>2}  实际并发 {mean_conc:5.2f}  "
-                  f"实际QPS {row['achieved_qps']:5.2f}  TTFT p50 {row['ttft_p50']:7.1f} / "
-                  f"p90 {row['ttft_p90']:7.1f} ms  TPOT {row['tpot_p50']:5.1f} ms")
-            time.sleep(2.0)
+            ttft = [r["ttft_ms"] for r in ok if r["ttft_ms"]]
+            tpot = [r["tpot_ms"] for r in ok if r["tpot_ms"]]
+            p50 = st.median(ttft) if ttft else float("nan")
+            p90 = sorted(ttft)[min(len(ttft) - 1, int(len(ttft) * 0.9))] if ttft else float("nan")
+            tp = st.median(tpot) if tpot else float("nan")
+            ratio = achieved / lam
+            note = "" if ratio >= 0.85 else "达成率低（需在分析里区分服务器饱和 / 客户端受限）"
+            print(f"{lam:>6}{achieved:>9.2f}{ratio:>8.0%}{mean_conc:>9.2f}{len(ok):>7}"
+                  f"{p50:>10.0f}{p90:>10.0f}{tp:>10.1f}  {note}")
+            rows_all.append(dict(lam=lam, achieved_qps=achieved, ratio=ratio,
+                                 mean_conc=mean_conc, n_ok=len(ok), n_sent=n_arr,
+                                 ttft_p50=p50, ttft_p90=p90, tpot_p50=tp,
+                                 ratio_low=bool(ratio < 0.85)))
+            await asyncio.sleep(2.0)
     finally:
         srv.stop(proc)
 
-    if out_rows:
-        with OUT.open("w", newline="", encoding="utf-8-sig") as f:
-            w = csv.DictWriter(f, fieldnames=list(out_rows[0].keys()))
-            w.writeheader()
-            w.writerows(out_rows)
-        print(f"\n已写入 {OUT}")
-        print("下一步：用 tc_model 的 predict() 在这些实际并发处算预测值，与实测比。")
+    with OUT.open("w", newline="", encoding="utf-8-sig") as f:
+        w = csv.DictWriter(f, fieldnames=list(rows_all[0].keys()))
+        w.writeheader()
+        w.writerows(rows_all)
+    print(f"\n已写入 {OUT}")
+    print("下一步： python tc_analyze_poisson.py   （算膝点 + 与模型对比）")
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--lambdas", default="1,2,3,4,6,8,12")
+    ap.add_argument("--duration", type=float, default=40.0, help="每个 λ 的持续秒数")
+    args = ap.parse_args()
+    args.lambdas = [float(x) for x in args.lambdas.split(",")]
+    asyncio.run(main_async(args))
 
 
 if __name__ == "__main__":
