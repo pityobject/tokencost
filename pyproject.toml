@@ -32,7 +32,7 @@ dependencies = [
 dev = ["pytest>=8.0"]
 
 [project.urls]
-Homepage = "https://github.com/<your-account>/tokencost"
+Repository = "https://gitee.com/pityobject/tokencost"
 
 [tool.setuptools]
 # 代码在 code/ 下、以脚本方式运行，不做包化改造（会动到 28 个脚本的导入路径）。
@@ -43,3 +43,4 @@ packages = []
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 addopts = "-q"
+

@@ -1,5 +1,7 @@
 # TokenCost
 
+> 仓库：<https://gitee.com/pityobject/tokencost> ｜ 全部数据与脚本可复现，对外数字由 `code/tc_claims.py` 统一生成并自动校验。
+
 **在单张 8 GB 消费级 GPU 上，把"大模型推理有多贵"写成一个可被实测证伪的解析模型。**
 
 给定（模型规模, 量化档位, 上下文上限, 并发数），预测单位 token 成本与延迟，
