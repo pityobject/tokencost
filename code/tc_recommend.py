@@ -207,22 +207,32 @@ def main():
     # 这说明"能接受多少质量损失"是**业务决策**，模型只负责把汇率算清楚。
     # ------------------------------------------------------------------
     if args.quality_sweep and best_acc is not None:
-        base = df[df["feasible"] & df["ctx_fits"] & df["meets_sla"]]
+        # 【唯一实现】第三轮复核指出：本函数与 tc_threshold_sensitivity.py
+        # 各自实现了一遍"SLA 过滤 + 候选集"，于是同一问题给出两套答案
+        # （半宽差 36.5 倍、候选集也不同）。现在两者都调 tc_common.rank()。
+        import tc_common as tc
         print("\n" + "=" * 76)
         print("质量—成本权衡表：允许的质量损失 → 满足 SLA 的最便宜配置")
         print("=" * 76)
-        print(f"{'质量损失上限':>12}{'质量门槛':>11}{'配置':<28}{'成本':>10}{'实际质量':>10}")
+        print(f"{'质量损失上限':>12}{'配置':<28}{'成本':>10}{'实际质量':>10}")
         prev = None
-        for drop in (0, 2, 4, 6, 8, 10, 15, 20, 30):
-            th = best_acc - drop / 100.0
-            sub = base[base["acc"] >= th]
-            if sub.empty:
+        sweep_rows = []
+        for drop in (0, 2, 4, 6, 7.5, 8, 10, 15, 20, 30):
+            pick, _ = tc.rank(params, fit, quality_drop_pp=drop,
+                              prompt_mean=args.prompt_mean, prompt_sigma=args.prompt_sigma,
+                              ttft_cap=args.ttft, tpot_cap=args.tpot,
+                              basis=args.quality_basis)
+            if pick is None:
                 continue
-            pick = sub.sort_values("cost").iloc[0]
-            mark = "" if prev is None or pick["cost"] >= prev else "   ← 成本降档"
-            print(f"{drop:>10} pp{th*100:>10.1f}%  {pick['cell_id']:<28}"
-                  f"{pick['cost']:>10.0f}{pick['acc']*100:>9.1f}%{mark}")
-            prev = pick["cost"]
+            mark = "" if prev is None or float(pick["cost"]) >= prev else "   ← 成本降档"
+            print(f"{drop:>10} pp  {pick['cell_id']:<28}"
+                  f"{float(pick['cost']):>10.0f}{float(pick['acc'])*100:>9.1f}%{mark}")
+            prev = float(pick["cost"])
+            sweep_rows.append(dict(drop=drop, cell_id=pick["cell_id"],
+                                   cost=float(pick["cost"]), acc=float(pick["acc"])))
+        import pandas as _pd
+        _pd.DataFrame(sweep_rows).to_csv(cfg.RESULTS_DIR / "recommendation_sweep.csv",
+                                         index=False, encoding="utf-8-sig")
         print("\n  读法：每一行是一个业务决策——'我愿意损失 N 个百分点质量'。")
         print("        跳跃点就是多花多少钱能买到多少质量；最终选哪行是业务方定，不是模型定。")
 

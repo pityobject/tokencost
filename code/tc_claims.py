@@ -128,7 +128,7 @@ def write_md(claims, d):
         "- **400 题 × 10 组合，配对 McNemar + Holm 校正：45 对里 32 对显著**（上一版 140 题说无差异是样本量假象）。",
         "- 7B-Q4 91.0% 显著最优；Q2 量化灾难（1.5B-Q2 仅 30.2%）；Q4 与 Q8 无显著差异。",
         "- 质量—成本：0–6pp 损失 → 7B（20847）；8pp → 3B-Q8（4919）；≥10pp → 1.5B-Q4（2182）。每 1 点质量约贵 27%。",
-        "- 推荐器用硬阈值剪枝，而 **6pp → 7pp 会让推荐从 3B-Q4 翻成 1.5B-Q4，成本差 36%**。",
+        "- 推荐器用硬阈值剪枝，而 **7B→3B-Q8 的翻转点在 7.5 pp（20847→4919），3B→1.5B-Q4 在 10 pp（4919→2182）**。",
         "- 因此质量—成本权衡的结论不应作为硬判断，应报出阈值敏感性。",
         "- **后悔值的负对照**：模型 0.1% / 随机选 268% / 选最大模型 813% —— 指标有分辨力。",
     ]
@@ -200,8 +200,27 @@ def check(claims, d):
             if s in text:
                 bad.append((doc.name, "过期数字", s, "删除或标注 deprecated"))
 
+    # 【交叉断言】fig6 的台阶必须与推荐器 sweep 一致。
+    # 第三轮复核发现两者各实现一遍"SLA 过滤"，于是同一问题给出两套数
+    # （7.5pp/1605 vs 8pp/2182）。现在两个脚本都调 tc_common.rank()，
+    # 这里再比对各自落盘的 CSV，防止以后再分叉。
+    run_p = RESULTS / "recommendation_sweep.csv"
+    thr_p = RESULTS / "threshold_sensitivity.csv"
+    if run_p.exists() and thr_p.exists():
+        import pandas as _pd
+        a = _pd.read_csv(run_p)
+        b = _pd.read_csv(thr_p)
+        for _, ra in a.iterrows():
+            rb = b[b["drop"] == ra["drop"]]
+            if rb.empty:
+                continue
+            if rb.iloc[0]["cell_id"] != ra["cell_id"]:
+                bad.append(("交叉断言", f"drop={ra['drop']}pp",
+                            f"fig6 选 {rb.iloc[0]['cell_id']}",
+                            f"推荐器选 {ra['cell_id']}"))
+
     if bad:
-        print("\n[CLAIMS][FAIL] 文档数字与产物不一致：")
+        print("\n[CLAIMS][FAIL] 文档数字与产物不一致，或两个脚本给出了不同答案：")
         seen = set()
         for name, key, got, want in bad:
             sig = (name, key, got)

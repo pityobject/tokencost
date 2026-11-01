@@ -307,8 +307,18 @@ def plot_pareto(g):
                         vmin=v_lo, vmax=v_hi,
                         s=95, edgecolor="white", linewidth=0.8, zorder=3,
                         label=f"满足质量底线（{len(ok)} 个）")
-        cbar = fig.colorbar(sc, ax=ax, pad=0.02)
-        cbar.set_label(clabel, fontsize=9)
+        # 【第三轮复核 3.3】6pp 质量线之后，合格集只剩 7B 一个组合，
+        # 16 个合格点的准确率全部相同 → 颜色维度没有任何信息量，色标反而误导。
+        # 因此不再画 colorbar，改在图注里写明"合格集全部为 7B-Q4"。
+        uniq = sorted({round(float(v), 3) for v in ok["acc"].dropna()})
+        if len(uniq) > 1:
+            cbar = fig.colorbar(sc, ax=ax, pad=0.02)
+            cbar.set_label(clabel, fontsize=9)
+        else:
+            ax.text(0.99, 0.02, f"合格集全部为 {ok['model'].iloc[0]}-{ok['quant'].iloc[0]}"
+                                f"（准确率 {uniq[0]*100:.1f}%）",
+                    transform=ax.transAxes, ha="right", va="bottom",
+                    fontsize=8, color="#666666")
     else:
         for combo, sub in d.assign(combo=d["model"] + "-" + d["quant"]).groupby("combo"):
             ax.scatter(sub[ycol], sub["cost_gpu_s_per_1m"], s=70, label=combo, zorder=3)

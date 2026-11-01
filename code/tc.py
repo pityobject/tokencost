@@ -16,6 +16,9 @@ tc.py —— 统一入口（P2-11）。
     python code/tc.py recommend          # 配置推荐
     python code/tc.py sweep              # 质量—成本权衡表
     python code/tc.py verify             # 决策后悔值（16 场景）
+    python code/tc.py threshold          # 阈值敏感性（fig6）
+    python code/tc.py regret-controls    # 后悔值负对照
+    python code/tc.py queue              # 排队层（WIP）
     python code/tc.py claims             # 生成对外数字表
     python code/tc.py claims --check     # 检查文档数字是否漂移（CI 用）
 
@@ -26,7 +29,22 @@ import subprocess
 import sys
 from pathlib import Path
 
-CODE_DIR = Path(__file__).resolve().parent
+def _locate_code_dir():
+    """定位脚本目录。
+
+    用 pip 安装后 `__file__` 在 site-packages 里，同级并没有 tc_*.py，
+    所以先找当前目录下的 code/，再退回 __file__ 的父目录。
+    """
+    here = Path(__file__).resolve().parent
+    if (here / "tc_recommend.py").exists():
+        return here
+    cwd_code = Path.cwd() / "code"
+    if (cwd_code / "tc_recommend.py").exists():
+        return cwd_code
+    return here
+
+
+CODE_DIR = _locate_code_dir()
 
 COMMANDS = {
     "check":         ("tc_env_check.py", []),
@@ -42,6 +60,10 @@ COMMANDS = {
     "verify":        ("tc_verify.py", []),
     "claims":        ("tc_claims.py", []),
     "decompose":     ("tc_decompose_csrv.py", []),
+    "threshold":     ("tc_threshold_sensitivity.py", []),
+    "regret-controls": ("tc_regret_controls.py", []),
+    "queue":         ("tc_queue.py", []),
+    "ci":            ("../scripts/ci.ps1", []),
     "reset":         ("tc_reset_data.py", []),
 }
 

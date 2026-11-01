@@ -2,21 +2,23 @@
 """
 tc_threshold_sensitivity.py —— 质量阈值敏感性图（fig6）。
 
-## 为什么这张图是"把破绽变素材"
+## 这张图在讲什么
 
-第二轮复核查出的最大矛盾是：
-报告说推荐 3B-Q4，但同一份报告的质量章节证明 7B 显著更好；
-而"6pp 还是 7pp"这个人为约定，能直接让推荐在 3B 与 7B 之间翻转、成本差数倍。
+报告说"推荐 7B"，而"6pp 还是 7pp"这个人为约定能让推荐在 7B 与 3B 之间翻转、
+成本差数倍。与其把它藏起来，不如**画出翻转本身**：
+横轴 = 允许的质量损失，纵轴 = 最便宜合规配置的成本。
 
-与其把它藏起来，不如**画出翻转本身**：
-横轴 = 允许的质量损失（0→14 pp），纵轴 = 满足 SLA 的最便宜配置成本，
-曲线上的台阶就是"质量汇率"。
+## 第三轮复核的教训（为什么要改成现在这样）
+
+本脚本原来自己实现了一遍"候选集 + SLA 过滤"，结果与推荐器给出两套答案
+（预测区间半宽差 36.5 倍、候选集也不同：一个用 cfg.all_cells()、
+一个用实测汇总表）。现已改为**全部调用 `tc_common.rank()`**，
+保证与推荐器是同一个实现。
 
 用法：
     python tc_threshold_sensitivity.py
 """
 
-import json
 import sys
 
 import numpy as np
@@ -25,8 +27,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+import tc_common as tc
 import tc_config as cfg
-from tc_recommend import simulate
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
@@ -34,58 +36,27 @@ TTFT_CAP, TPOT_CAP, PMEAN, SIGMA = 600.0, 60.0, 256.0, 0.5
 
 
 def main():
-    summ = pd.read_csv(cfg.DATA_DIR / "summary_steady.csv")
-    fit = json.loads((cfg.RESULTS_DIR / "fit.json").read_text(encoding="utf-8"))
-    params = dict(bw_gbs=fit["bw"], peak_tflops=fit["peak"],
-                  peak_prefill_tflops=fit.get("peak_prefill", fit["peak"]),
-                  c_srv_ms=fit["c_srv"], b_sat=fit["b_sat"], ovh_ttft_ms=fit["ovh_ttft"])
-    half_log = 0.5 * np.log(1 + (fit.get("sigma_log") or 0.1) ** 2)
+    params, fit = tc.load_params()
 
-    q = pd.read_csv(cfg.DATA_DIR / "quality.csv").dropna(subset=["acc"])
-    acc = {(r["model"], r["quant"]): float(r["acc"]) for _, r in q.iterrows()}
-    lo = {(r["model"], r["quant"]): float(r["acc_lo"]) for _, r in q.iterrows()
-          if "acc_lo" in q.columns and r["acc_lo"] == r["acc_lo"]}
-    best_lo = max(lo.values())
-
-    need_ctx = int(PMEAN * np.exp(1.645 * SIGMA) + cfg.GEN_TOKENS)
-
-    # 先筛出满足上下文与 SLA 的候选（质量后面按阈值动态筛）
-    base = []
-    for _, r in summ.iterrows():
-        key = (r["model"], r["quant"])
-        if key not in lo or int(r["ctx"]) < need_ctx:
-            continue
-        sim = simulate(params, r["model"], r["quant"], int(r["conc"]),
-                       PMEAN, SIGMA, ctx=int(r["ctx"]))
-        if (sim["ttft_cvar90"] * np.exp(half_log) > TTFT_CAP or
-                sim["tpot_cvar90"] * np.exp(half_log) > TPOT_CAP):
-            continue
-        base.append(dict(cell_id=r["cell_id"], key=key,
-                         cost=sim["cost_gpu_s_per_1m"], lo=lo[key], acc=acc[key]))
-    if not base:
-        raise SystemExit("没有满足 SLA 的候选，检查参数")
-    bdf = pd.DataFrame(base)
-
-    drops = np.arange(0, 15.0, 0.5)
     rows = []
-    for d in drops:
-        th = best_lo - d / 100.0
-        sub = bdf[bdf["lo"] >= th]
-        if sub.empty:
+    for d in np.arange(0, 15.01, 0.5):
+        pick, _ = tc.rank(params, fit, quality_drop_pp=float(d),
+                          prompt_mean=PMEAN, prompt_sigma=SIGMA,
+                          ttft_cap=TTFT_CAP, tpot_cap=TPOT_CAP)
+        if pick is None:
             continue
-        pick = sub.sort_values("cost").iloc[0]
-        rows.append(dict(drop=d, th=th, cost=pick["cost"], model=pick["key"][0],
-                         acc=pick["acc"], cell_id=pick["cell_id"]))
+        rows.append(dict(drop=float(d), cell_id=pick["cell_id"], model=pick["model"],
+                         cost=float(pick["cost"]), acc=float(pick["acc"])))
     t = pd.DataFrame(rows)
+    if t.empty:
+        raise SystemExit("没有可行配置")
 
-    # ---- 作图 ----
     fig, ax = plt.subplots(figsize=(8.6, 5.4))
     colors = {"0.5B": "#999999", "1.5B": "#4C72B0", "3B": "#DD8452", "7B": "#C44E52"}
     for m, sub in t.groupby("model"):
         ax.step(sub["drop"], sub["cost"], where="post", lw=2.2,
                 color=colors.get(m, "#333333"), label=f"{m} 档")
 
-    # 标注翻转点
     flips = t[t["model"] != t["model"].shift(1)]
     for _, r in flips.iterrows():
         ax.axvline(r["drop"], color="#bbbbbb", ls=":", lw=1, zorder=0)
@@ -105,13 +76,12 @@ def main():
     fig.savefig(out, dpi=150)
     plt.close(fig)
 
-    print(f"{'允许损失':>8}{'质量门槛':>10}{'推荐':<28}{'成本':>10}{'质量':>8}")
+    print(f"{'允许损失':>9}{'推荐':<28}{'成本':>10}{'质量':>8}")
     for _, r in flips.iterrows():
-        print(f"{r['drop']:>7.1f}pp{r['th']*100:>9.1f}%  {r['cell_id']:<28}"
-              f"{r['cost']:>10.0f}{r['acc']*100:>7.1f}%")
+        print(f"{r['drop']:>8.1f}pp  {r['cell_id']:<28}{r['cost']:>10.0f}{r['acc']*100:>7.1f}%")
     print(f"\n已保存 {out}")
-
-    t.to_csv(cfg.RESULTS_DIR / "threshold_sensitivity.csv", index=False, encoding="utf-8-sig")
+    t.to_csv(cfg.RESULTS_DIR / "threshold_sensitivity.csv", index=False,
+             encoding="utf-8-sig")
     print(f"已写入 {cfg.RESULTS_DIR / 'threshold_sensitivity.csv'}")
 
 
