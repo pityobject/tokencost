@@ -1,0 +1,5 @@
+﻿cell_id,model,quant,ctx_per_slot,conc,ctx_total_requested,server_n_ctx,server_total_slots,short_evaluated,long_evaluated,long_truncated,long_cached,ok
+3B_q4_k_m_ctx2048_c1,3B,q4_k_m,2048,1,2048,2048,1,63,1305,False,1305,True
+3B_q4_k_m_ctx2048_c16,3B,q4_k_m,2048,16,32768,2048,16,63,1305,False,1305,True
+7B_q4_k_m_ctx512_c32,7B,q4_k_m,512,32,16384,512,32,63,329,False,329,True
+3B_q4_k_m_ctx8192_c4,3B,q4_k_m,8192,4,32768,8192,4,63,5206,False,5206,True

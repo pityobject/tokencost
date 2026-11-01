@@ -1,0 +1,78 @@
+"""
+tc.py —— 统一入口（P2-11）。
+
+原来每个脚本都要 `cd code && python tc_xxx.py`，对外人来说门槛太高。
+这里给一个单入口，把常用流程串起来：
+
+    python code/tc.py check              # 环境自检
+    python code/tc.py preflight          # 跑一格真实测量，确认机器满频
+    python code/tc.py run                # 跑核心网格（45 格）
+    python code/tc.py run dense          # 跑扩展预设（dense/high/ctx/quant/step/wave/knee/xfamily）
+    python code/tc.py analyze            # 汇总 + 出图
+    python code/tc.py steady             # 稳态口径重算
+    python code/tc.py model              # 六参数拟合 + 留出验证
+    python code/tc.py eval               # 质量基准（400 题）
+    python code/tc.py quality-stats      # 配对检验 + 分层 + 阈值敏感性
+    python code/tc.py recommend          # 配置推荐
+    python code/tc.py sweep              # 质量—成本权衡表
+    python code/tc.py verify             # 决策后悔值（16 场景）
+    python code/tc.py claims             # 生成对外数字表
+    python code/tc.py claims --check     # 检查文档数字是否漂移（CI 用）
+
+实现上只是转发给对应脚本，不改变任何既有行为。
+"""
+
+import subprocess
+import sys
+from pathlib import Path
+
+CODE_DIR = Path(__file__).resolve().parent
+
+COMMANDS = {
+    "check":         ("tc_env_check.py", []),
+    "preflight":     ("tc_preflight.py", []),
+    "run":           ("tc_run_grid.py", []),
+    "analyze":       ("tc_analyze.py", []),
+    "steady":        ("tc_recompute_steady.py", []),
+    "model":         ("tc_model.py", []),
+    "eval":          ("tc_eval.py", []),
+    "quality-stats": ("tc_eval_stats.py", []),
+    "recommend":     ("tc_recommend.py", []),
+    "sweep":         ("tc_recommend.py", ["--quality-sweep"]),
+    "verify":        ("tc_verify.py", []),
+    "claims":        ("tc_claims.py", []),
+    "decompose":     ("tc_decompose_csrv.py", []),
+    "reset":         ("tc_reset_data.py", []),
+}
+
+
+def usage():
+    print(__doc__)
+    print("可用命令：")
+    for k in COMMANDS:
+        print(f"  {k}")
+    sys.exit(2)
+
+
+def main():
+    if len(sys.argv) < 2:
+        usage()
+    cmd = sys.argv[1]
+    if cmd not in COMMANDS:
+        print(f"未知命令：{cmd}\n")
+        usage()
+
+    script, pre = COMMANDS[cmd]
+    rest = sys.argv[2:]
+
+    # run 的子预设：`tc.py run dense` → tc_run_grid.py --preset dense
+    if cmd == "run" and rest and not rest[0].startswith("-"):
+        rest = ["--preset", rest[0]] + rest[1:]
+
+    argv = [sys.executable, str(CODE_DIR / script)] + pre + rest
+    print(f"[tc.py] {' '.join([Path(argv[0]).name] + argv[2:])}\n", flush=True)
+    sys.exit(subprocess.call(argv, cwd=str(CODE_DIR)))
+
+
+if __name__ == "__main__":
+    main()

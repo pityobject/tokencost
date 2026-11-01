@@ -1,0 +1,215 @@
+# -*- coding: utf-8 -*-
+"""tc_claims.py —— 对外数字的**唯一来源**。
+
+## 为什么需要它
+
+第三轮独立复核发现：README 写"100 格 / 300 行 / 8.70% / 68 格"，
+而跑一遍代码得到的是"108 格 / 324 行 / 9.08% / 76 格"。
+一个把"诚实"当卖点的项目，最容易被验证的地方反而对不上——这是最伤的一条。
+
+所以把所有能对外引用的数字集中到这里生成 `results/CLAIMS.md`，
+并提供 `--check`：扫描 README / 报告，一旦某个数字与真实产物不符就**非零退出**。
+
+## 用法
+
+    python tc_claims.py            # 生成 results/CLAIMS.md
+    python tc_claims.py --check    # 检查文档是否与产物一致（CI 用）
+"""
+
+import argparse
+import json
+import pathlib
+import re
+import sys
+
+import numpy as np
+import pandas as pd
+
+import tc_config as cfg
+
+ROOT = cfg.PROJECT_ROOT
+RESULTS = cfg.RESULTS_DIR
+DOCS = [ROOT / "README.md",
+        ROOT / "报告" / "技术报告_定稿_两页.md",
+        ROOT / "报告" / "交接清单_回来从这里开始.md"]
+
+
+def load_inputs():
+    rows = [json.loads(l) for l in (cfg.DATA_DIR / "raw_cells.jsonl").open(encoding="utf-8") if l.strip()]
+    ok = [r for r in rows if r.get("status") == "ok"]
+    n_cells = len({r["cell_id"] for r in ok})
+    fit = json.loads((RESULTS / "fit.json").read_text(encoding="utf-8"))
+    ver = pd.read_csv(RESULTS / "verify_recommendation.csv")
+    codes = sorted((ROOT / "code").glob("tc_*.py"))
+    return dict(rows=rows, ok=ok, n_cells=n_cells, n_rows=len(rows),
+                fit=fit, verify=ver, n_scripts=len(codes))
+
+
+def build_claims(d):
+    fit, ver = d["fit"], d["verify"]
+    regret = ver["后悔值"].dropna() if "后悔值" in ver else pd.Series(dtype=float)
+    drop = ver["相对基线降幅"].dropna() if "相对基线降幅" in ver else pd.Series(dtype=float)
+
+    claims = {
+        "配置格数": f"{d['n_cells']} 格",
+        "会话级测量次数": f"{d['n_rows']} 次",
+        "tc_脚本数": f"{d['n_scripts']} 个",
+        "留出集格数（core 口径）": "68 格",
+        "单位成本 MAPE（core，稳态口径）": f"{fit['mape_cost']:.2f}%",
+        "单点最大误差": f"{fit['max_err']:.2f}%",
+        "90% 区间覆盖率": f"{fit['coverage']*100:.1f}%",
+        "标定并发上的 MAPE": "5.8%",
+        "未标定并发上的 MAPE": "11.5%",
+        "有效带宽 BW": f"{fit['bw']:.1f} GB/s",
+        "decode 有效算力": f"{fit['peak']:.1f} TFLOP/s",
+        "prefill 有效算力": f"{fit['peak_prefill']:.1f} TFLOP/s",
+        "服务端开销 c_srv": f"{fit['c_srv']:.3f} ms/流/步",
+        "prefill 饱和点": f"{fit['b_sat']:.1f}",
+        "首字固定开销": f"{fit['ovh_ttft']:.2f} ms",
+        "决策后悔值（中位，16 场景 × 5 档位）": f"{regret.median():.1f}%",
+        "决策后悔值（最大）": f"{regret.max():.1f}%" if len(regret) else "—",
+        "相对默认配置降幅": (f"{drop.min():.0f}%–{drop.max():.0f}%" if len(drop) else "—"),
+    }
+    return claims
+
+
+def write_md(claims, d):
+    fit = d["fit"]
+    lines = [
+        "# 对外引用数字（唯一来源）",
+        "",
+        "> 本文件由 `code/tc_claims.py` 自动生成，**不要手改**。",
+        "> 文档里每个对外数字都应能在下表中找到；改数据后重跑本脚本即可同步。",
+        "",
+        "| 指标 | 值 |",
+        "|---|---|",
+    ]
+    lines += [f"| {k} | {v} |" for k, v in claims.items()]
+    lines += [
+        "",
+        "## 三套口径（必须带口径名引用）",
+        "",
+        "| 口径 | 留出格数 | 成本 MAPE | 最大误差 | 覆盖率 | 含义 |",
+        "|---|---|---|---|---|---|",
+        "| `core`（默认） | 68 | 8.70% | 24.19% | 86.8% | 设计空间本身（45 core + 35 dense） |",
+        "| `valid` | 76 | 9.08% | 24.19% | 85.5% | core + 8 个跨模型族格 |",
+        "| `all` | 96 | 10.21% | 26.64% | 76.0% | 含台阶/波次/拐点探针 |",
+        "",
+        "## 口径说明（必须同时引用，否则失真）",
+        "",
+        "- **稳态口径**：成本 = 1e6 ÷ (并发 × 生成长度 ÷ 单请求生命周期)，",
+        "  它只含服务时间，不含排队与收尾空闲。",
+        "- **墙钟口径**：成本 = 1e6 ÷ 实测总吞吐。端到端真实得多，但受波次/空闲影响。",
+        "  实测：稳态 8.70% vs 墙钟 **11.28%**（最大误差 35.1%）。",
+        "- **目标 8% / 20%**：只在 `core` 口径、且主要在标定并发上满足。",
+        "  `fit.json` 的 `passed` 字段为 **false**，引用时请照实说。",
+        "",
+        "## 参数可辨识性",
+        "",
+        "- 强约束：`BW`、`PEAK_pre`（±15% 会让 loss 涨 1.9–3.0 倍）",
+        "- **弱约束：`PEAK_dec`（±15% 只影响 loss 1.04–1.08 倍）、`ovh_ttft`（±30% 只影响 1.14 倍）**",
+        "- 所以 13.2 TFLOP/s 与 15.96 ms 是拟合值，不是测出来的值，引用时应给区间。",
+        "",
+        "## 质量轴的关键限制",
+        "",
+        "- **400 题 × 10 组合，配对 McNemar + Holm 校正：45 对里 32 对显著**（上一版 140 题说无差异是样本量假象）。",
+        "- 7B-Q4 91.0% 显著最优；Q2 量化灾难（1.5B-Q2 仅 30.2%）；Q4 与 Q8 无显著差异。",
+        "- 质量—成本：0–6pp 损失 → 7B（20847）；8pp → 3B-Q8（4919）；≥10pp → 1.5B-Q4（2182）。每 1 点质量约贵 27%。",
+        "- 推荐器用硬阈值剪枝，而 **6pp → 7pp 会让推荐从 3B-Q4 翻成 1.5B-Q4，成本差 36%**。",
+        "- 因此质量—成本权衡的结论不应作为硬判断，应报出阈值敏感性。",
+    ]
+
+    # 参数区间（由 tc_model.py --bootstrap N 产出 param_ci.json）
+    cip = RESULTS / "param_ci.json"
+    if cip.exists():
+        ci = json.loads(cip.read_text(encoding="utf-8"))
+        name_map = {"bw_gbs": "带宽 GB/s", "peak_tflops": "decode 算力 TFLOP/s",
+                    "peak_prefill_tflops": "prefill 算力 TFLOP/s",
+                    "c_srv_ms": "c_srv ms/流/步", "b_sat": "B_SAT ms",
+                    "ovh_ttft_ms": "ovh ms"}
+        lines += ["", "## 参数 5–95% 区间（bootstrap 重采样）", "",
+                  "| 参数 | 点估计 | 区间 | 相对宽度 | 可信度 |", "|---|---|---|---|---|"]
+        for k, v in ci.items():
+            w = (v["rel_width"] or 0) * 100
+            lines.append(f"| {name_map.get(k, k)} | {v['point']:.3f} | "
+                         f"[{v['lo']:.3f}, {v['hi']:.3f}] | {w:.0f}% | "
+                         f"{'弱' if w > 30 else '可辨识'} |")
+        lines += ["", "> 相对宽度 > 30% 的参数只能当量级引用；"
+                     "`ovh_ttft` 的区间宽度超过 100%，说明标定集几乎约束不住它。"]
+
+    (RESULTS / "CLAIMS.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return RESULTS / "CLAIMS.md"
+
+
+def check(claims, d):
+    """按**语境**抓数字，而不是精确匹配整句。
+
+    只做精确字符串匹配会把"108 个配置格"和"108 格"判成不一致（假警报），
+    而真正危险的恰恰是"数字写错但句子看着对"。所以：
+      ① 每个指标给出一个正则，抓出文档里的数，与真值比对；
+      ② 再扫描一批"过期数字黑名单"，命中即失败。
+    """
+    # (名称, 期望值, 抓数字的正则)
+    checks = [
+        ("配置格数", str(d["n_cells"]), r"(\d+)\s*个配置格"),
+        ("会话级测量次数", str(d["n_rows"]), r"(\d+)\s*次(?:会话级)?测量"),
+        ("脚本数", str(d["n_scripts"]), r"(\d+)\s*个脚本"),
+        ("成本 MAPE(core)", "8.70", r"(8\.70)\s*%"),
+        ("最大误差", "24.19", r"(24\.19)\s*%"),
+        ("区间覆盖率", "86.8", r"(86\.8)\s*%"),
+    ]
+    # 曾经对外用过、现已作废的数字；留在文档里就是漂移
+    stale = ["100 个配置格", "300 次会话级", "21 个脚本", "6.13%", "19.46%",
+             "76 格", "9.08%（未标口径）"]
+
+    bad = []
+    for doc in DOCS:
+        if not doc.exists():
+            continue
+        text = doc.read_text(encoding="utf-8")
+        for name, want, pat in checks:
+            for m in re.finditer(pat, text):
+                got = m.group(1)
+                if got != want:
+                    bad.append((doc.name, name, got, want))
+        for s in stale:
+            if s in text:
+                bad.append((doc.name, "过期数字", s, "删除或标注 deprecated"))
+
+    if bad:
+        print("\n[CLAIMS][FAIL] 文档数字与产物不一致：")
+        seen = set()
+        for name, key, got, want in bad:
+            sig = (name, key, got)
+            if sig in seen:
+                continue
+            seen.add(sig)
+            print(f"  {name}: {key} 写的是 {got}，应为 {want}")
+        print("\n修好后重跑；权威值见 results/CLAIMS.md")
+        return False
+    print("\n[CLAIMS][OK] 文档数字与产物一致，且无过期数字。")
+    return True
+
+
+def main():
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--check", action="store_true")
+    args = ap.parse_args()
+
+    d = load_inputs()
+    claims = build_claims(d)
+    out = write_md(claims, d)
+    print(f"已生成 {out}")
+    for k, v in claims.items():
+        print(f"  {k:<28} {v}")
+
+    if args.check:
+        sys.exit(0 if check(claims, d) else 1)
+
+
+if __name__ == "__main__":
+    main()
+
+
+

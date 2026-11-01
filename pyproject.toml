@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tokencost"
+version = "0.1.0"
+description = "成本—延迟—质量前沿与配置推荐器：单卡 LLM 推理的六参数解析模型"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "王钟垚", email = "3138303600@qq.com" }]
+requires-python = ">=3.10"
+keywords = ["llm", "inference", "cost-model", "roofline", "llama.cpp", "benchmark"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Operating System :: Microsoft :: Windows",
+]
+
+# 只列直接依赖；llama.cpp 是可执行文件，通过 TOKENCOST_LLAMA_BIN 指定
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.0",
+    "scipy>=1.11",
+    "matplotlib>=3.8",
+    "httpx>=0.27",
+    "psutil>=5.9",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.urls]
+Homepage = "https://github.com/<your-account>/tokencost"
+
+[tool.setuptools]
+# 代码在 code/ 下、以脚本方式运行，不做包化改造（会动到 28 个脚本的导入路径）。
+# 打包信息仅用于元数据与依赖声明，入口见下面的 script。
+packages = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-q"
