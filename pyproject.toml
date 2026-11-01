@@ -34,10 +34,16 @@ dev = ["pytest>=8.0"]
 [project.urls]
 Repository = "https://gitee.com/pityobject/tokencost"
 
+[project.scripts]
+# 单入口：装好后可直接 `tokencost recommend`，
+# 等价于 `python code/tc.py recommend`（tc.py 里有 14 个子命令）。
+tokencost = "tc:main"
+
 [tool.setuptools]
-# 代码在 code/ 下、以脚本方式运行，不做包化改造（会动到 28 个脚本的导入路径）。
-# 打包信息仅用于元数据与依赖声明，入口见下面的 script。
-packages = []
+# 代码在 code/ 下、以脚本方式运行，不做包化改造（会动到 30 个脚本的导入路径）。
+# 因此这里只声明 py-modules（让 tc.py 可作为模块安装），不声明 packages。
+py-modules = ["tc"]
+package-dir = { "" = "code" }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

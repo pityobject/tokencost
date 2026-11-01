@@ -160,14 +160,23 @@ def main():
             oracle = df.sort_values("meas").iloc[0]
             regret = (pick["meas"] / oracle["meas"] - 1) * 100
 
+            # 【配对 bootstrap】旧实现把 pick 与 oracle 的实测成本**独立**重采样，
+            # 于是 oracle 可能被抽成比 pick 更贵 → 后悔值出现负值（如 [-8%, +9%]），
+            # 而按定义 pick_meas ≥ oracle_meas，下限不可能为负。那种区间不能当 CI 用。
+            # 正确做法：每轮抽一个**共同的重复序号**，在重采样后的成本集里**重新选 oracle**，
+            # 这样 oracle 永远是重采样集里的最小值，后悔值恒 ≥ 0。
             boots = []
+            all_ids = list(df["cell_id"])
+            n_rep = max((len(v) for v in per.values()), default=0)
             for _ in range(args.boot):
-                vp, vo = per.get(pick["cell_id"], []), per.get(oracle["cell_id"], [])
-                if not vp or not vo:
-                    continue
-                pm, om = rng.choice(vp), rng.choice(vo)
-                if om > 0:
-                    boots.append((pm / om - 1) * 100)
+                k = rng.randrange(max(n_rep, 1))
+                def cost_at(cid):
+                    v = per.get(cid, [])
+                    return v[k % len(v)] if v else np.nan
+                om = min(cost_at(c) for c in all_ids if cost_at(c) == cost_at(c))
+                pm = cost_at(pick["cell_id"])
+                if pm == pm and om == om and om > 0:
+                    boots.append(max(0.0, (pm / om - 1) * 100))
             lo_ci, hi_ci = (np.percentile(boots, [5, 95]) if len(boots) > 20 else (np.nan, np.nan))
 
             base = df[df["cell_id"] == DEFAULT_BASE]

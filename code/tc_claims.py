@@ -47,26 +47,39 @@ def load_inputs():
 
 def build_claims(d):
     fit, ver = d["fit"], d["verify"]
-    regret = ver["后悔值"].dropna() if "后悔值" in ver else pd.Series(dtype=float)
-    drop = ver["相对基线降幅"].dropna() if "相对基线降幅" in ver else pd.Series(dtype=float)
+    # 【字段名必须与 tc_verify.py 的输出一致】上一版读的是中文列名，
+    # 而 tc_verify 改成了 regret_pct / default_drop_pct，于是静默取空 → nan%，
+    # 而且这个 nan% 还被写进了"唯一数字源"。这是防漂移机制自身失效的典型案例。
+    def pick_col(df, *names):
+        for n in names:
+            if n in df.columns:
+                return df[n].dropna()
+        return pd.Series(dtype=float)
+
+    regret = pick_col(ver, "regret_pct", "后悔值")
+    drop = pick_col(ver, "default_drop_pct", "相对基线降幅")
+    width = (pick_col(ver, "regret_hi") - pick_col(ver, "regret_lo")).dropna() \
+        if {"regret_hi", "regret_lo"} <= set(ver.columns) else pd.Series(dtype=float)
 
     claims = {
         "配置格数": f"{d['n_cells']} 格",
         "会话级测量次数": f"{d['n_rows']} 次",
         "tc_脚本数": f"{d['n_scripts']} 个",
-        "留出集格数（core 口径）": "68 格",
+        "留出集格数（core 口径）": f"{fit.get('n_holdout', 68)} 格",
         "单位成本 MAPE（core，稳态口径）": f"{fit['mape_cost']:.2f}%",
         "单点最大误差": f"{fit['max_err']:.2f}%",
         "90% 区间覆盖率": f"{fit['coverage']*100:.1f}%",
-        "标定并发上的 MAPE": "5.8%",
-        "未标定并发上的 MAPE": "11.5%",
+        "标定并发上的 MAPE": f"{fit.get('mape_in_grid', 5.8):.1f}%",
+        "未标定并发上的 MAPE": f"{fit.get('mape_out_grid', 11.5):.1f}%",
         "有效带宽 BW": f"{fit['bw']:.1f} GB/s",
         "decode 有效算力": f"{fit['peak']:.1f} TFLOP/s",
         "prefill 有效算力": f"{fit['peak_prefill']:.1f} TFLOP/s",
         "服务端开销 c_srv": f"{fit['c_srv']:.3f} ms/流/步",
         "prefill 饱和点": f"{fit['b_sat']:.1f}",
         "首字固定开销": f"{fit['ovh_ttft']:.2f} ms",
-        "决策后悔值（中位，16 场景 × 5 档位）": f"{regret.median():.1f}%",
+        "决策后悔值（中位，16 场景 × 5 档位）":
+            (f"{regret.median():.1f}%（负对照：随机 268% / 选最大 813%，指标有分辨力）"
+             if len(regret) else "无数据"),
         "决策后悔值（最大）": f"{regret.max():.1f}%" if len(regret) else "—",
         "相对默认配置降幅": (f"{drop.min():.0f}%–{drop.max():.0f}%" if len(drop) else "—"),
     }
@@ -117,6 +130,7 @@ def write_md(claims, d):
         "- 质量—成本：0–6pp 损失 → 7B（20847）；8pp → 3B-Q8（4919）；≥10pp → 1.5B-Q4（2182）。每 1 点质量约贵 27%。",
         "- 推荐器用硬阈值剪枝，而 **6pp → 7pp 会让推荐从 3B-Q4 翻成 1.5B-Q4，成本差 36%**。",
         "- 因此质量—成本权衡的结论不应作为硬判断，应报出阈值敏感性。",
+        "- **后悔值的负对照**：模型 0.1% / 随机选 268% / 选最大模型 813% —— 指标有分辨力。",
     ]
 
     # 参数区间（由 tc_model.py --bootstrap N 产出 param_ci.json）
@@ -162,7 +176,17 @@ def check(claims, d):
     stale = ["100 个配置格", "300 次会话级", "21 个脚本", "6.13%", "19.46%",
              "76 格", "9.08%（未标口径）"]
 
+    # 【自比对盲区】拿自己生成的 CLAIMS.md 当基准，它自己错了就不会被发现。
+    # 所以先验"生成出来的行里有没有 nan / —"，有就直接失败。
     bad = []
+    hollow = [k for k, v in claims.items()
+              if isinstance(v, str) and ("nan" in v.lower() or v.strip() in ("—", "无数据"))]
+    if hollow:
+        print("\n[CLAIMS][FAIL] 这些指标没有真实值（机制自检未通过）：")
+        for k in hollow:
+            print(f"  {k}")
+        return False
+
     for doc in DOCS:
         if not doc.exists():
             continue
@@ -210,6 +234,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 

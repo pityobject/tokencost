@@ -289,36 +289,54 @@ def plot_pareto(g):
             front_pts.append(r)
     front = pd.DataFrame(front_pts)
 
-    fig, ax = plt.subplots(figsize=(8.6, 5.8))
+    fig, ax = plt.subplots(figsize=(9.0, 6.0))
+    # ---- 图层顺序：剪枝（灰）→ 合格（彩色）→ 前沿（红线）----
     if quality:
-        sc = ax.scatter(ok[ycol], ok["cost_gpu_s_per_1m"], c=ok["acc"], cmap="viridis",
-                        s=75, edgecolor="white", linewidth=0.6, zorder=3,
-                        label="满足质量底线")
-        cbar = fig.colorbar(sc, ax=ax)
-        cbar.set_label("质量（60 题准确率）", fontsize=9)
-        drop = d[~d["pass_q"]]
-        if len(drop):
-            ax.scatter(drop[ycol], drop["cost_gpu_s_per_1m"], s=55, facecolor="none",
-                       edgecolor="#999999", linewidth=1.0, zorder=2,
-                       label=f"质量不达标，被剪枝（{len(drop)} 个）")
+        pruned = d[~d["pass_q"]]
+        if len(pruned):
+            ax.scatter(pruned[ycol], pruned["cost_gpu_s_per_1m"], s=16,
+                       facecolors="none", edgecolors="#c4c4c4", linewidths=0.6,
+                       zorder=1, label=f"被质量剪枝或未评测（{len(pruned)} 个）")
+
+        # 着色口径：用**全局**质量范围（含被剪枝组合），让色标本身有信息量。
+        # 若只用合格点的范围，而 6pp 底线只剩 7B 一个组合，色标会退化成单一颜色。
+        cvals, clabel = ok["acc"], "质量（400 题库准确率）"
+        v_lo = float(d["acc"].min()) if d["acc"].notna().any() else 0.0
+        v_hi = float(d["acc"].max()) if d["acc"].notna().any() else 1.0
+        sc = ax.scatter(ok[ycol], ok["cost_gpu_s_per_1m"], c=cvals, cmap="viridis",
+                        vmin=v_lo, vmax=v_hi,
+                        s=95, edgecolor="white", linewidth=0.8, zorder=3,
+                        label=f"满足质量底线（{len(ok)} 个）")
+        cbar = fig.colorbar(sc, ax=ax, pad=0.02)
+        cbar.set_label(clabel, fontsize=9)
     else:
-        for combo, s in d.assign(combo=d["model"] + "-" + d["quant"]).groupby("combo"):
-            ax.scatter(s[ycol], s["cost_gpu_s_per_1m"], s=70, label=combo, zorder=3)
+        for combo, sub in d.assign(combo=d["model"] + "-" + d["quant"]).groupby("combo"):
+            ax.scatter(sub[ycol], sub["cost_gpu_s_per_1m"], s=70, label=combo, zorder=3)
 
     ax.plot(front[ycol], front["cost_gpu_s_per_1m"], "r-o", lw=1.6, ms=6,
             zorder=4, label="Pareto 前沿")
-    for i, (_, r) in enumerate(front.iterrows()):
+    # 只标前沿的首尾两点，且强制落在坐标轴内，避免压图例/被裁切
+    for i in [j for j in (0, len(front) - 1) if 0 <= j < len(front)]:
+        r = front.iloc[i]
         ax.annotate(f"{r['model']}-{r['quant']} ctx{r['ctx']}/c{r['conc']}",
                     (r[ycol], r["cost_gpu_s_per_1m"]),
-                    textcoords="offset points", xytext=(8, 7 if i % 2 == 0 else -14),
-                    fontsize=7, color="darkred")
+                    textcoords="offset points",
+                    xytext=(8, 8) if i == 0 else (-10, -16),
+                    ha="left" if i == 0 else "right",
+                    fontsize=7, color="darkred",
+                    annotation_clip=True, clip_on=True)
 
     ax.set_yscale("log")
     ax.set_xlabel("尾部出字延迟 CVaR90（毫秒，越小越好）")
     ax.set_ylabel("单位成本（GPU 秒 / 百万 token，越小越好）")
-    ax.set_title("可行配置的代价：只有落在红色前沿上的值得选")
+    if quality:
+        ax.set_title(f"只有红色前沿上的配置值得选"
+                     f"（合格 {int(d['pass_q'].sum())} / 剪枝 {int((~d['pass_q']).sum())}）")
+    else:
+        ax.set_title("可行配置的代价：只有红色前沿上的值得选")
     ax.grid(alpha=0.3, which="both")
-    ax.legend(fontsize=8, loc="upper left")
+    ax.margins(x=0.12, y=0.10)          # 留边距，标签不会被裁
+    ax.legend(fontsize=8, loc="upper right")
     fig.tight_layout()
     fig.savefig(cfg.FIG_DIR / "fig5_pareto_frontier.png", dpi=150)
     plt.close(fig)
