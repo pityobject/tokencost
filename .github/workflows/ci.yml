@@ -1,0 +1,40 @@
+name: ci
+
+# 说明：
+#   · 本仓库主托管在 Gitee；这份配置在镜像到 GitHub 时生效。
+#   · 在 Gitee 上想跑同样的检查，直接执行 `powershell -File scripts\ci.ps1`，
+#     或用 Gitee Go 的 .workflow/ 语法另写一份（内容等价）。
+#
+# 检查内容与 scripts/ci.ps1 完全一致：
+#   ① tc_claims.py --check   对外数字是否与产物一致（漂移即失败）
+#   ② tests/test_core.py     三个零依赖单元测试
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy pandas scipy matplotlib httpx psutil
+
+      - name: Generate claim table and verify docs match artifacts
+        working-directory: code
+        run: |
+          python tc_claims.py
+          python tc_claims.py --check
+
+      - name: Unit tests
+        run: python tests/test_core.py
