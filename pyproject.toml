@@ -32,7 +32,8 @@ dependencies = [
 dev = ["pytest>=8.0"]
 
 [project.urls]
-Repository = "https://gitee.com/pityobject/tokencost"
+Homepage = "https://github.com/pityobject/tokencost"
+Mirror = "https://gitee.com/pityobject/tokencost"
 
 [project.scripts]
 # 单入口：装好后可直接 `tokencost recommend`，
@@ -49,4 +50,5 @@ package-dir = { "" = "code" }
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 addopts = "-q"
+
 
