@@ -33,6 +33,7 @@ tc_lint_docs.py —— "已作废数字"扫描器
 """
 
 import argparse
+import re
 import sys
 
 import tc_config as cfg
@@ -74,6 +75,41 @@ DEPRECATED = {
 }
 
 
+
+# ---------------------------------------------------------------- 一致性扫描
+PARAM_COUNT = 6      # 唯一真值：六参数模型
+PARAM_PAT = re.compile(r"(\d+)\s*个\s*(?:待定)?参数")
+MUL3_PAT = re.compile(r"(\d+)\s*[×x]\s*(\d+)\s*[×x]\s*(\d+)\s*[=＝]\s*(\d+)")
+MUL2_PAT = re.compile(r"(\d+)\s*[×x]\s*(\d+)\s*[=＝]\s*(\d+)")
+
+
+def consistent_checks(text, rel, line_no, line):
+    """返回 [(级别, 说明)]；只做"能机器判定"的两种。"""
+    out = []
+    for m in PARAM_PAT.finditer(line):
+        n = int(m.group(1))
+        # 只报"当前版本"的错：本项目里 3 个参数永远是 v1 历史叙述，
+        # 1/2 个参数是推导过程中的中间量，都不该报。
+        if n >= 4 and n != PARAM_COUNT:
+            out.append(("参数数", f"写了 {n} 个参数，当前版本是 {PARAM_COUNT} 个"))
+
+    spans = []
+    for m in MUL3_PAT.finditer(line):
+        nums = [int(x) for x in m.groups()]
+        prod = nums[0] * nums[1] * nums[2]
+        if prod != nums[3]:
+            out.append(("算式", f"{nums[0]} × {nums[1]} × {nums[2]} = {nums[3]}，实际应为 {prod}"))
+        spans.append(m.span())
+    for m in MUL2_PAT.finditer(line):
+        # 跳过被 3 因子表达式覆盖的位置（否则 "5 × 3 × 4 = 60" 会再被读成 "3 × 4 = 60"）
+        if any(m.start() >= a and m.end() <= b for a, b in spans):
+            continue
+        nums = [int(x) for x in m.groups()]
+        if nums[0] * nums[1] != nums[2]:
+            out.append(("算式", f"{nums[0]} × {nums[1]} = {nums[2]}，实际应为 {nums[0] * nums[1]}"))
+    return out
+
+
 def main():
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser()
@@ -81,6 +117,7 @@ def main():
     args = ap.parse_args()
 
     hits = []
+    consistency = []
     for rel in TARGETS:
         p = ROOT / rel
         if not p.exists():
@@ -94,16 +131,29 @@ def main():
             for bad, (why, now) in DEPRECATED.items():
                 if bad in line:
                     hits.append((rel, i, bad, why, now, line.strip()[:58]))
+            # 一致性：参数量与乘法算式（v8 指出这类错误"只能靠人看"，
+            # 但其中这两类是可以机器判定的）
+            for kind, msg in consistent_checks(None, rel, i, line):
+                consistency.append((rel, i, kind, msg, line.strip()[:58]))
 
-    if not hits:
+    if not hits and not consistency:
         print(f"[LINT][OK] 对外文档里没有出现已作废数字（检查了 {len(TARGETS)} 份）。")
         return
+    if not hits:
+        print("[LINT][OK] 无已作废数字。")
 
-    print(f"[LINT][WARN] 命中 {len(hits)} 处已作废数字：")
+    if hits:
+        print(f"[LINT][WARN] 命中 {len(hits)} 处已作废数字：")
     for rel, i, bad, why, now, ctx in hits:
         print(f"  {rel}:{i}")
         print(f"    发现「{bad}」—— {why}；现在应为「{now}」")
         print(f"    上下文：{ctx}")
+    if consistency:
+        print(f"\n[LINT][WARN] 另有 {len(consistency)} 处一致性可疑：")
+        for rel, i, kind, msg, ctx in consistency:
+            print(f"  {rel}:{i}  [{kind}] {msg}")
+            print(f"    上下文：{ctx}")
+
     print("\n  这是 warning 级检查，不影响 CI 通过。")
     if args.strict:
         sys.exit(1)
@@ -111,3 +161,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
