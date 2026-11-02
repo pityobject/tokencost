@@ -91,7 +91,9 @@ def main():
                   peak_prefill_tflops=fit.get("peak_prefill", fit["peak"]),
                   c_srv_ms=fit["c_srv"], b_sat=fit["b_sat"], ovh_ttft_ms=fit["ovh_ttft"])
     sigma = float(fit.get("sigma_log") or 0.1)
-    half_log = 0.5 * np.log(1 + sigma ** 2)
+    # 同上：与推荐器共用同一个半宽实现（第四轮复核 5.1-1）
+    from tc_common import half_log as _common_half_log
+    half_log = _common_half_log(fit)
 
     qdf = pd.read_csv(cfg.DATA_DIR / "quality.csv").dropna(subset=["acc"])
     lo = {(r["model"], r["quant"]): float(r["acc_lo"]) for _, r in qdf.iterrows()

@@ -24,6 +24,11 @@ tc_common.py —— 决策链路的**唯一实现**（第三轮复核 §6 的治
     rank()               给定约束下选最优（唯一实现）
 
 **验收标准：同一个问题，仓库里只有一个函数能回答它。**
+
+现状（第四轮复核后）：`load_params` / `half_log` / `quality_table` 已被
+`tc_recommend`、`tc_threshold_sensitivity`、`tc_verify`、`tc_regret_controls` 共用；
+`rank()` 目前由 `tc_recommend --quality-sweep` 与 `tc_threshold_sensitivity` 调用，
+`tc_verify` 与 `tc_regret_controls` 因为要遍历自己的场景集合，只复用了前两样。
 """
 
 import json

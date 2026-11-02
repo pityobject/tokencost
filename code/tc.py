@@ -91,8 +91,13 @@ def main():
     if cmd == "run" and rest and not rest[0].startswith("-"):
         rest = ["--preset", rest[0]] + rest[1:]
 
-    argv = [sys.executable, str(CODE_DIR / script)] + pre + rest
-    print(f"[tc.py] {' '.join([Path(argv[0]).name] + argv[2:])}\n", flush=True)
+    target = CODE_DIR / script
+    if target.suffix.lower() == ".ps1":
+        # .ps1 不能用 sys.executable 跑（会当 Python 语法报错）
+        argv = ["powershell", "-ExecutionPolicy", "Bypass", "-File", str(target)] + pre + rest
+    else:
+        argv = [sys.executable, str(target)] + pre + rest
+    print(f"[tc.py] {' '.join([Path(argv[0]).name] + argv[1:])}\n", flush=True)
     sys.exit(subprocess.call(argv, cwd=str(CODE_DIR)))
 
 

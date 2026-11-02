@@ -112,7 +112,12 @@ def main():
     params = dict(bw_gbs=fit["bw"], peak_tflops=fit["peak"],
                   peak_prefill_tflops=fit.get("peak_prefill", fit["peak"]),
                   c_srv_ms=fit["c_srv"], b_sat=fit["b_sat"], ovh_ttft_ms=fit["ovh_ttft"])
-    half_log = 0.5 * np.log(1 + (fit.get("sigma_log") or 0.1) ** 2)
+    # 【唯一实现】必须与推荐器用同一个半宽。
+    # 原来这里用 0.5*log(1+σ²)（≈ lognormal 的均值换算项），与推荐器的
+    # fit["half_width_log"] 相差 36.5 倍 → 后悔值是在一条与推荐器不同的候选集上算的，
+    # 逻辑上不能用来度量"推荐器的决策有多好"。
+    from tc_common import half_log as _common_half_log
+    half_log = _common_half_log(fit)
 
     qp = cfg.DATA_DIR / "quality.csv"
     qdf = pd.read_csv(qp).dropna(subset=["acc"]) if qp.exists() else pd.DataFrame()
@@ -192,7 +197,8 @@ def main():
                                  pick=pick["cell_id"], pick_meas=pick["meas"],
                                  oracle=oracle["cell_id"], oracle_meas=oracle["meas"],
                                  regret_pct=regret, regret_lo=lo_ci, regret_hi=hi_ci,
-                                 default_drop_pct=drop, n_cands=len(df)))
+                                 default_drop_pct=drop, n_cands=len(df),
+                                 half_width_log=float(half_log)))
 
     out = cfg.RESULTS_DIR / "verify_recommendation.csv"
     d = pd.DataFrame(all_rows)

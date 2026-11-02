@@ -34,19 +34,87 @@ DOCS = [ROOT / "README.md",
         ROOT / "报告" / "交接清单_回来从这里开始.md"]
 
 
+def _cap_with_infl():
+    """计入 prefill 干扰后的容量（读 queue_summary.json 的 cap_poisson）。"""
+    p = RESULTS / "queue_summary.json"
+    if not p.exists():
+        return "无数据"
+    d = json.loads(p.read_text(encoding="utf-8"))
+    cap, meas = d.get("cap_poisson"), d.get("cap_meas")
+    if cap is None or meas is None:
+        return "无数据"
+    return f"{cap:.2f}（实测为预测的 {meas/cap*100:.0f}%）"
+
+
+def _tpot_inflation_pct():
+    """泊松到达下 TPOT 相对同步波次的增幅。"""
+    p = RESULTS / "queue_summary.json"
+    if not p.exists():
+        return "无数据"
+    d = json.loads(p.read_text(encoding="utf-8"))
+    v = d.get("tpot_inflation")
+    return f"+{(v-1)*100:.0f}%" if v else "无数据"
+
+def _cap_with_infl():
+    """计入 prefill 干扰后的容量（读 queue_summary.json 的 cap_poisson）。"""
+    p = RESULTS / "queue_summary.json"
+    if not p.exists():
+        return "无数据"
+    d = json.loads(p.read_text(encoding="utf-8"))
+    cap, meas = d.get("cap_poisson"), d.get("cap_meas")
+    if cap is None or meas is None:
+        return "无数据"
+    return f"{cap:.2f}（实测为预测的 {meas/cap*100:.0f}%）"
+
+
+def _tpot_inflation_pct():
+    """泊松到达下 TPOT 相对同步波次的增幅。"""
+    p = RESULTS / "queue_summary.json"
+    if not p.exists():
+        return "无数据"
+    d = json.loads(p.read_text(encoding="utf-8"))
+    v = d.get("tpot_inflation")
+    return f"+{(v-1)*100:.0f}%" if v else "无数据"
+
+def _p90_ratio_at(pois, lam):
+    """取某个 λ 的 p90/基线 倍数（来自 poisson_summary.json 的 rows）。"""
+    for r in (pois.get("rows") or []):
+        if abs(float(r.get("lam", -1)) - lam) < 1e-6 and "p90_ratio" in r:
+            return f"{float(r['p90_ratio']):.1f} 倍"
+    return "无数据"
+
+
+def _queue_ratio_range():
+    """排队层未饱和区（非饱和）的 预测/实测 范围。"""
+    p = RESULTS / "queue_summary.json"
+    if not p.exists():
+        return "无数据"
+    d = json.loads(p.read_text(encoding="utf-8"))
+    vals = [float(r["ratio"]) for r in (d.get("rows") or [])
+            if not r.get("saturated") and r.get("ratio") == r.get("ratio")]
+    if not vals:
+        return "无数据"
+    return f"{min(vals):.1f}–{max(vals):.1f} 倍"
+
+
 def load_inputs():
     rows = [json.loads(l) for l in (cfg.DATA_DIR / "raw_cells.jsonl").open(encoding="utf-8") if l.strip()]
     ok = [r for r in rows if r.get("status") == "ok"]
     n_cells = len({r["cell_id"] for r in ok})
     fit = json.loads((RESULTS / "fit.json").read_text(encoding="utf-8"))
+    pois = {}
+    _pp = RESULTS / "poisson_summary.json"
+    if _pp.exists():
+        pois = json.loads(_pp.read_text(encoding="utf-8"))
     ver = pd.read_csv(RESULTS / "verify_recommendation.csv")
     codes = sorted((ROOT / "code").glob("tc_*.py"))
     return dict(rows=rows, ok=ok, n_cells=n_cells, n_rows=len(rows),
-                fit=fit, verify=ver, n_scripts=len(codes))
+                fit=fit, verify=ver, n_scripts=len(codes), pois=pois)
 
 
 def build_claims(d):
     fit, ver = d["fit"], d["verify"]
+    pois = d.get("pois", {})          # 泊松/排队产物（第四轮复核后纳入）
     # 【字段名必须与 tc_verify.py 的输出一致】上一版读的是中文列名，
     # 而 tc_verify 改成了 regret_pct / default_drop_pct，于是静默取空 → nan%，
     # 而且这个 nan% 还被写进了"唯一数字源"。这是防漂移机制自身失效的典型案例。
@@ -77,8 +145,18 @@ def build_claims(d):
         "服务端开销 c_srv": f"{fit['c_srv']:.3f} ms/流/步",
         "prefill 饱和点": f"{fit['b_sat']:.1f}",
         "首字固定开销": f"{fit['ovh_ttft']:.2f} ms",
+        # 泊松/排队相关（第四轮复核：这些数字以前只写在散文里，没有唯一来源）
+        "泊松容量天花板（请求/秒）": f"{pois.get('capacity_qps', float('nan')):.2f}",
+        "模型容量预测（请求/秒）": f"{pois.get('model_qps_pred', float('nan')):.2f}"
+                                   f"（实测 {pois.get('ratio', float('nan'))*100:.0f}%）",
+        # 容量与 prefill 干扰：直接读 queue_summary.json 的 cap_poisson / tpot_inflation，
+        # 不要再硬编码 1.27 与 88%（第四轮复核指出这类"散文里的小数"最容易漂）
+        "计入 prefill 干扰后的容量": _cap_with_infl(),
+        "泊松 TPOT 相对同步波次的增幅": _tpot_inflation_pct(),
+        "λ=2 时 p90 TTFT 相对基线的倍数": _p90_ratio_at(pois, 2.0),
+        "排队层未饱和区预测/实测范围": _queue_ratio_range(),
         "决策后悔值（中位，16 场景 × 5 档位）":
-            (f"{regret.median():.1f}%（负对照：随机 268% / 选最大 813%，指标有分辨力）"
+            (f"{regret.median():.1f}%（负对照：随机 259% / 选最大 772%，指标有分辨力）"
              if len(regret) else "无数据"),
         "决策后悔值（最大）": f"{regret.max():.1f}%" if len(regret) else "—",
         "相对默认配置降幅": (f"{drop.min():.0f}%–{drop.max():.0f}%" if len(drop) else "—"),
@@ -174,7 +252,11 @@ def check(claims, d):
     ]
     # 曾经对外用过、现已作废的数字；留在文档里就是漂移
     stale = ["100 个配置格", "300 次会话级", "21 个脚本", "6.13%", "19.46%",
-             "76 格", "9.08%（未标口径）"]
+             "76 格", "9.08%（未标口径）",
+             # 30 秒采样的泊松数据（90 秒重跑后已作废）
+             "9.9 倍", "24.9 ms", "6pp → 7pp",
+             # 半宽统一前的负对照数字（现为 259.4% / 772.0%）
+             "268%", "813%"]
 
     # 【自比对盲区】拿自己生成的 CLAIMS.md 当基准，它自己错了就不会被发现。
     # 所以先验"生成出来的行里有没有 nan / —"，有就直接失败。
@@ -253,6 +335,9 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
 
 
 
