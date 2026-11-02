@@ -36,16 +36,16 @@ Write-Host ""
 
 $fail = 0
 
-Write-Host "[CI] 1/3 regenerate claims table ..."
+Write-Host "[CI] 1/5 regenerate claims table ..."
 & $py "code\tc_claims.py" | Out-Null
 if ($LASTEXITCODE -ne 0) { $fail = 1 }
 
-Write-Host "[CI] 2/3 verify docs match artifacts ..."
+Write-Host "[CI] 2/5 verify docs match artifacts ..."
 & $py "code\tc_claims.py" --check
 if ($LASTEXITCODE -ne 0) { $fail = 1 }
 
 Write-Host ""
-Write-Host "[CI] 3/4 unit tests ..."
+Write-Host "[CI] 3/5 unit tests ..."
 & $py "tests\test_core.py"
 if ($LASTEXITCODE -ne 0) { $fail = 1 }
 

@@ -1,13 +1,15 @@
 name: ci
 
 # 说明：
-#   · 本仓库主托管在 Gitee；这份配置在镜像到 GitHub 时生效。
-#   · 在 Gitee 上想跑同样的检查，直接执行 `powershell -File scripts\ci.ps1`，
-#     或用 Gitee Go 的 .workflow/ 语法另写一份（内容等价）。
+#   · 本仓库同时托管在 GitHub（本文件生效）与 Gitee（用 scripts/ci.ps1 本地跑）。
+#   · 两边**必须同为 5 步**，否则"绿勾"的含义在两端不同。
 #
-# 检查内容与 scripts/ci.ps1 完全一致：
-#   ① tc_claims.py --check   对外数字是否与产物一致（漂移即失败）
-#   ② tests/test_core.py     三个零依赖单元测试
+# 五步与 scripts/ci.ps1 一一对应：
+#   ① tc_claims.py          生成对外数字表
+#   ② tc_claims.py --check  文档与产物对账（漂移即失败）
+#   ③ tests/test_core.py    三个零依赖单元测试
+#   ④ tc_lint_docs.py       "已作废数字"扫描（warning 级，不阻断）
+#   ⑤ tc_audit.py --fast    全项目体检（CI 跳过裸克隆以控时）
 
 on:
   push:
@@ -38,3 +40,14 @@ jobs:
 
       - name: Unit tests
         run: python tests/test_core.py
+
+      # 与 scripts/ci.ps1 的第 4、5 步保持一致：
+      # 本地 5 步、CI 也必须 5 步，否则"绿勾"的含义在两端不同（第七轮复核指出）。
+      - name: Doc number lint (warning only)
+        working-directory: code
+        continue-on-error: true
+        run: python tc_lint_docs.py
+
+      - name: Project audit (skip bare-clone in CI for runtime)
+        working-directory: code
+        run: python tc_audit.py --fast
