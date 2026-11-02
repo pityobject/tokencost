@@ -33,6 +33,7 @@ import sys
 import numpy as np
 import pandas as pd
 
+import tc_common as tc
 import tc_config as cfg
 from tc_model import predict
 from tc_recommend import simulate
@@ -113,20 +114,19 @@ def main():
         th = best_lo - tier / 100.0
         elig = {k for k, v in lo.items() if v >= th}
         for name, ttft_cap, tpot_cap, pmean in SCENARIOS:
-            need_ctx = int(pmean * np.exp(1.645 * 0.5) + cfg.GEN_TOKENS)
+            # 【唯一实现】候选集交给 tc_common.rank()，与推荐器/验算/图 6 同一路径。
+            # 第五轮复核的核心教训：每处自己写一遍过滤，就会给出不同答案。
+            _pick, cdf = tc.rank(params, fit, quality_drop_pp=tier,
+                                 prompt_mean=pmean, prompt_sigma=0.5,
+                                 ttft_cap=ttft_cap, tpot_cap=tpot_cap)
+            ok_df = cdf[cdf["feasible"] & cdf["ctx_fits"]
+                        & cdf["sla_ok"] & cdf["meets_quality"]]
             cands = []
-            for _, r in summ.iterrows():
-                if (r["model"], r["quant"]) not in elig or int(r["ctx"]) < need_ctx:
-                    continue
-                sim = simulate(params, r["model"], r["quant"], int(r["conc"]),
-                               pmean, 0.5, ctx=int(r["ctx"]))
-                if (sim["ttft_cvar90"] * np.exp(half_log) > ttft_cap or
-                        sim["tpot_cvar90"] * np.exp(half_log) > tpot_cap):
-                    continue
+            for _, r in ok_df.iterrows():
                 if r["cell_id"] not in med:
                     continue
                 cands.append(dict(cell_id=r["cell_id"], model=r["model"],
-                                  pred=sim["cost_gpu_s_per_1m"], meas=med[r["cell_id"]]))
+                                  pred=float(r["cost"]), meas=med[r["cell_id"]]))
             if len(cands) < 2:
                 continue
             oracle = min(c["meas"] for c in cands)
@@ -192,3 +192,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

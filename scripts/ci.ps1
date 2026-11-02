@@ -45,9 +45,17 @@ Write-Host "[CI] 2/3 verify docs match artifacts ..."
 if ($LASTEXITCODE -ne 0) { $fail = 1 }
 
 Write-Host ""
-Write-Host "[CI] 3/3 unit tests ..."
+Write-Host "[CI] 3/4 unit tests ..."
 & $py "tests\test_core.py"
 if ($LASTEXITCODE -ne 0) { $fail = 1 }
+
+Write-Host ""
+Write-Host "[CI] 4/4 doc number lint (warning only) ..."
+& $py "code\tc_lint_docs.py"
+$lintExit = $LASTEXITCODE
+if ($lintExit -ne 0) {
+    Write-Host "[CI] lint reported suspects (not failing the build)" -ForegroundColor Yellow
+}
 
 Write-Host ""
 if ($fail -eq 0) {

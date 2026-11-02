@@ -34,6 +34,24 @@ DOCS = [ROOT / "README.md",
         ROOT / "报告" / "交接清单_回来从这里开始.md"]
 
 
+
+def _control(which):
+    """从 regret_controls.csv 现算负对照的均值（唯一来源，避免散文写死）。
+
+    第五轮复核指出：同一份 CLAIMS.md 里，表格行（算出来的）是 259%/772%，
+    而散文块（写死的）还是 268%/813%。根因就是散文没走同一来源。
+    """
+    p = RESULTS / "regret_controls.csv"
+    if not p.exists():
+        return "无数据"
+    import pandas as _pd
+    d = _pd.read_csv(p)
+    col = f"regret_{which}"
+    if col not in d.columns or d[col].dropna().empty:
+        return "无数据"
+    return f"{d[col].mean():.1f}%"
+
+
 def _cap_with_infl():
     """计入 prefill 干扰后的容量（读 queue_summary.json 的 cap_poisson）。"""
     p = RESULTS / "queue_summary.json"
@@ -66,15 +84,6 @@ def _cap_with_infl():
         return "无数据"
     return f"{cap:.2f}（实测为预测的 {meas/cap*100:.0f}%）"
 
-
-def _tpot_inflation_pct():
-    """泊松到达下 TPOT 相对同步波次的增幅。"""
-    p = RESULTS / "queue_summary.json"
-    if not p.exists():
-        return "无数据"
-    d = json.loads(p.read_text(encoding="utf-8"))
-    v = d.get("tpot_inflation")
-    return f"+{(v-1)*100:.0f}%" if v else "无数据"
 
 def _p90_ratio_at(pois, lam):
     """取某个 λ 的 p90/基线 倍数（来自 poisson_summary.json 的 rows）。"""
@@ -208,7 +217,8 @@ def write_md(claims, d):
         "- 质量—成本：0–6pp 损失 → 7B（20847）；8pp → 3B-Q8（4919）；≥10pp → 1.5B-Q4（2182）。每 1 点质量约贵 27%。",
         "- 推荐器用硬阈值剪枝，而 **7B→3B-Q8 的翻转点在 7.5 pp（20847→4919），3B→1.5B-Q4 在 10 pp（4919→2182）**。",
         "- 因此质量—成本权衡的结论不应作为硬判断，应报出阈值敏感性。",
-        "- **后悔值的负对照**：模型 0.1% / 随机选 268% / 选最大模型 813% —— 指标有分辨力。",
+        f"- **后悔值的负对照**：模型 {_control('model')} / 随机选 {_control('random')}"
+        f" / 选最大模型 {_control('largest')} —— 指标有分辨力。",
     ]
 
     # 参数区间（由 tc_model.py --bootstrap N 产出 param_ci.json）

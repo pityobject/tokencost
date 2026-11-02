@@ -19,7 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----------------------------------------------------------------------------
-实验数据（data/、results/、figures/）同样以 MIT 协议发布，供复核与引用。
-引用时请注明：TokenCost — LLM 推理服务的成本—延迟—质量前沿（2026）。

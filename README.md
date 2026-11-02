@@ -15,7 +15,7 @@
 | 单点最大误差 | 24.2% |
 | 90% 预测区间实测覆盖率 | 86.8% |
 | 跨模型族（Llama-3.2-1B，零重标定） | **11.6%**（成本 MAPE） |
-| 决策后悔值（16 场景 × 5 档位） | 模型 **0.1%** · 随机选 **259%** · 选最大模型 **772%**（负对照证明指标有分辨力） |
+| 决策后悔值（16 场景 × 5 档位） | 模型 **0.0%** · 随机选 **274%** · 选最大模型 **740%**（负对照证明指标有分辨力） |
 | 质量—成本权衡 | 0–6pp 损失→20847 · 8pp→4919 · ≥10pp→2182（每 1 点质量贵约 27%） |
 
 数据规模：**108 个配置格 / 324 次会话级测量**，全部在本机实测（RTX 4060 Laptop 8 GB）。
@@ -160,7 +160,7 @@ KV 量化（`--cache-type-k/v q8_0`）能救回一部分：1.5B 上吞吐 +238%�
 python code/tc_env_check.py        # 依赖/显存/llama.cpp 自检
 python code/tc_preflight.py        # 跑一格真实测量，确认机器满频（关键！）
 
-# 采集（约 90 分钟，100 格 × 3 轮）
+# 采集（约 90 分钟，108 格 × 3 轮）
 python code/tc_run_grid.py                 # 核心 45 格
 python code/tc_run_grid.py --preset dense  # 35 格（并发加密）
 python code/tc_run_grid.py --preset step   # 探针：定位非线性位置
@@ -189,7 +189,7 @@ python code/tc_decompose_csrv.py   # c_srv 三向分解
 ## 目录
 
 ```
-code/          33 个脚本（采集 / 分析 / 拟合 / 推荐 / 探针 / 对账）
+code/          34 个脚本（采集 / 分析 / 拟合 / 推荐 / 探针 / 对账）
 data/          原始数据（raw_cells.jsonl 300 行、raw_requests.jsonl 逐请求明细）
 results/       fit.json（6 参数）、predictions.csv、recommendation.csv
 figures/       fig1–fig5（吞吐、成本、带宽、预测vs实测、Pareto）
@@ -270,6 +270,8 @@ notes/         学习笔记与踩坑记录
 
 `报告/第三方复核意见_20261101.md` 是一份独立通读代码 + 复算全部对外数字的审查意见，它的结论是「内核是真的，外壳（对外数字）是虚的」。
 本仓库的 P0 修复（三套口径、`tc_claims.py` 防漂移、Pareto 的 NaN 逻辑）全部来自那份意见，修复过程记在 `报告/审计记录_十四轮对抗性复核.md` 的第 12–13 轮。
+
+
 
 
 

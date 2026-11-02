@@ -25,6 +25,11 @@ tc_common.py —— 决策链路的**唯一实现**（第三轮复核 §6 的治
 
 **验收标准：同一个问题，仓库里只有一个函数能回答它。**
 
+> 现状：`load_params` / `half_log` / `quality_table` / `evaluate` / `rank` 已被
+> `tc_recommend`、`tc_threshold_sensitivity`、`tc_verify`、`tc_regret_controls` 使用；
+> 其中 `tc_verify` 通过 `rank()` 取候选集，`tc_regret_controls` 复用前两样并按自己的
+> 策略（随机 / 最大模型 / 扰动）挑选，因此它不调 `rank()`——这是设计，不是遗漏。
+
 现状（第四轮复核后）：`load_params` / `half_log` / `quality_table` 已被
 `tc_recommend`、`tc_threshold_sensitivity`、`tc_verify`、`tc_regret_controls` 共用；
 `rank()` 目前由 `tc_recommend --quality-sweep` 与 `tc_threshold_sensitivity` 调用，

@@ -30,6 +30,7 @@ import sys
 import numpy as np
 import pandas as pd
 
+import tc_common as tc
 import tc_config as cfg
 from tc_model import predict          # noqa: F401  （保留导入，便于扩展）
 from tc_recommend import simulate
@@ -116,8 +117,7 @@ def main():
     # 原来这里用 0.5*log(1+σ²)（≈ lognormal 的均值换算项），与推荐器的
     # fit["half_width_log"] 相差 36.5 倍 → 后悔值是在一条与推荐器不同的候选集上算的，
     # 逻辑上不能用来度量"推荐器的决策有多好"。
-    from tc_common import half_log as _common_half_log
-    half_log = _common_half_log(fit)
+    half_log = tc.half_log(fit)
 
     qp = cfg.DATA_DIR / "quality.csv"
     qdf = pd.read_csv(qp).dropna(subset=["acc"]) if qp.exists() else pd.DataFrame()
@@ -141,20 +141,17 @@ def main():
         print(f"{'场景':<12}{'推荐':<24}{'推荐实测':>9}{'事后最优':<24}{'最优实测':>9}"
               f"{'后悔值':>8}{'90%区间':>16}{'较默认':>9}")
         for name, ttft_cap, tpot_cap, pmean in SCENARIOS:
-            need_ctx = int(pmean * np.exp(1.645 * args.sigma) + cfg.GEN_TOKENS)
-            cands = []
-            for _, r in summ.iterrows():
-                if (r["model"], r["quant"]) not in eligible_q:
-                    continue
-                if int(r["ctx"]) < need_ctx:
-                    continue
-                sim = simulate(params, r["model"], r["quant"], int(r["conc"]),
-                               pmean, args.sigma, ctx=int(r["ctx"]))
-                if (sim["ttft_cvar90"] * np.exp(half_log) > ttft_cap or
-                        sim["tpot_cvar90"] * np.exp(half_log) > tpot_cap):
-                    continue
-                cands.append(dict(cell_id=r["cell_id"], pred=sim["cost_gpu_s_per_1m"],
-                                  meas=med.get(r["cell_id"], np.nan)))
+            # 【唯一实现】候选集与 SLA 过滤全部交给 tc_common.rank()。
+            # 第五轮复核指出：这里曾经自己写了一遍过滤，于是与推荐器/图 6
+            # 各有一套候选集（半宽也不一样），同一问题给出不同答案。
+            pick_row, cdf = tc.rank(params, fit, quality_drop_pp=tier,
+                                    prompt_mean=pmean, prompt_sigma=args.sigma,
+                                    ttft_cap=ttft_cap, tpot_cap=tpot_cap)
+            ok_df = cdf[cdf["feasible"] & cdf["ctx_fits"]
+                        & cdf["sla_ok"] & cdf["meets_quality"]]
+            cands = [dict(cell_id=r["cell_id"], pred=float(r["cost"]),
+                          meas=med.get(r["cell_id"], np.nan))
+                     for _, r in ok_df.iterrows()]
             if not cands:
                 print(f"{name:<12}{'（无可行配置）'}")
                 continue

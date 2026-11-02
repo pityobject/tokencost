@@ -63,6 +63,7 @@ COMMANDS = {
     "threshold":     ("tc_threshold_sensitivity.py", []),
     "regret-controls": ("tc_regret_controls.py", []),
     "queue":         ("tc_queue.py", []),
+    "lint":          ("tc_lint_docs.py", []),
     "ci":            ("../scripts/ci.ps1", []),
     "reset":         ("tc_reset_data.py", []),
 }
