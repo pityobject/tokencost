@@ -79,7 +79,7 @@ def audit_hygiene(files):
             continue
         text = f.read_text(encoding="utf-8", errors="replace")
         rel = f.relative_to(ROOT).as_posix()
-        if rel == "code/tc_config.py" or rel == "code/tc_env_check.py":
+        if rel in ("code/tc_config.py", "code/tc_env_check.py", "code/tc_audit.py"):
             continue
         if re.search(r'C:[\\/]Users|C:[\\/]文档', text) or \
            (re.search(r'D:[\\/]llm', text) and "_diag" not in rel):
@@ -95,6 +95,9 @@ def audit_hygiene(files):
     # 密钥
     leaked = []
     for f in files:
+        # 本文件里就有 ghp_ 之类的正则字面量，跳过自己
+        if f.name in ("tc_audit.py", "tc_lint_docs.py"):
+            continue
         if f.suffix not in (".py", ".md", ".txt", ".toml", ".yml", ".yaml", ".ps1"):
             continue
         t = f.read_text(encoding="utf-8", errors="replace")
@@ -269,3 +272,4 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+
