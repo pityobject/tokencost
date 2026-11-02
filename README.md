@@ -1,6 +1,7 @@
 # TokenCost
 
-> 仓库：<https://gitee.com/pityobject/tokencost> ｜ 全部数据与脚本可复现，对外数字由 `code/tc_claims.py` 统一生成并自动校验。
+> 仓库：Gitee <https://gitee.com/pityobject/tokencost> ｜ GitHub（见 About 栏）<br>
+> 全部数据与脚本可复现；对外数字由 `code/tc_claims.py` 统一生成并在 CI 里自动校验。
 
 **在单张 8 GB 消费级 GPU 上，把"大模型推理有多贵"写成一个可被实测证伪的解析模型。**
 
@@ -269,5 +270,6 @@ notes/         学习笔记与踩坑记录
 
 `报告/第三方复核意见_20261101.md` 是一份独立通读代码 + 复算全部对外数字的审查意见，它的结论是「内核是真的，外壳（对外数字）是虚的」。
 本仓库的 P0 修复（三套口径、`tc_claims.py` 防漂移、Pareto 的 NaN 逻辑）全部来自那份意见，修复过程记在 `报告/审计记录_十四轮对抗性复核.md` 的第 12–13 轮。
+
 
 
