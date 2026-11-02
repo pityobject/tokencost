@@ -98,6 +98,9 @@ def audit_hygiene(files):
         # 本文件里就有 ghp_ 之类的正则字面量，跳过自己
         if f.name in ("tc_audit.py", "tc_lint_docs.py"):
             continue
+        # 改名/删除还没提交时，git 索引里仍会列出已不存在的路径
+        if not f.exists():
+            continue
         if f.suffix not in (".py", ".md", ".txt", ".toml", ".yml", ".yaml", ".ps1"):
             continue
         t = f.read_text(encoding="utf-8", errors="replace")
@@ -204,7 +207,7 @@ def audit_contract(files):
     ref_pat = re.compile(r"`((?:code|data|results|figures|tests|scripts|报告|手册)/[^`\s]+?\.(?:py|csv|json|jsonl|md|png|ps1|yml))`")
     missing = set()
     for f in files:
-        if f.suffix != ".md":
+        if f.suffix != ".md" or not f.exists():
             continue
         for m in ref_pat.finditer(f.read_text(encoding="utf-8", errors="replace")):
             if "*" in m.group(1):

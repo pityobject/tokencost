@@ -204,7 +204,7 @@ data/          原始数据（raw_cells.jsonl 300 行、raw_requests.jsonl 逐�
 results/       fit.json（6 参数）、predictions.csv、recommendation.csv
 figures/       fig1–fig5（吞吐、成本、带宽、预测vs实测、Pareto）
 报告/          技术报告定稿、迁移一页纸、简历条目与答辩稿、交接清单
-手册/          从零复现的 10 篇教程（含每一步的"为什么"）
+手册/          从零复现的 10 篇教程（含每一步的"为什么"）；写于 45 格时期，数字以 results/CLAIMS.md 为准
 notes/         学习笔记与踩坑记录
 ```
 
