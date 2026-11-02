@@ -7,7 +7,7 @@ import sys
 from collections import defaultdict
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-p = pathlib.Path(r"C:\Users\王钟垚\Desktop\find_career\tokencost\data\raw_cells.jsonl")
+p = pathlib.Path(__file__).resolve().parents[2] / "data" / "raw_cells.jsonl"
 rows = [json.loads(l) for l in p.open(encoding="utf-8") if l.strip()]
 ok = [r for r in rows if r.get("status") == "ok"]
 g = defaultdict(list)

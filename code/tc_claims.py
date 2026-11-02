@@ -38,7 +38,7 @@ DOCS = [ROOT / "README.md",
 def _control(which):
     """从 regret_controls.csv 现算负对照的均值（唯一来源，避免散文写死）。
 
-    第五轮复核指出：同一份 CLAIMS.md 里，表格行（算出来的）是 259%/772%，
+    第五轮复核指出：同一份 CLAIMS.md 里，表格行（曾是硬编码的旧值）与散文行，
     而散文块（写死的）还是 268%/813%。根因就是散文没走同一来源。
     """
     p = RESULTS / "regret_controls.csv"
@@ -50,6 +50,20 @@ def _control(which):
     if col not in d.columns or d[col].dropna().empty:
         return "无数据"
     return f"{d[col].mean():.1f}%"
+
+
+
+def _control_ctx():
+    """给 --check 用：README/报告里允许出现的后悔值写法。
+
+    第六轮复核的核心教训：表格、散文、README 三处都写这个数字，
+    变一次就要人肉同步三处。所以把它纳入自动比对——
+    文档里写 259%/772% 就会和 CLAIMS 的 274%/740% 对不上。
+    """
+    return [
+        rf"随机选 \*\*{_control('random')}\*\*",
+        rf"选最大模型 \*\*{_control('largest')}\*\*",
+    ]
 
 
 def _cap_with_infl():
@@ -165,7 +179,8 @@ def build_claims(d):
         "λ=2 时 p90 TTFT 相对基线的倍数": _p90_ratio_at(pois, 2.0),
         "排队层未饱和区预测/实测范围": _queue_ratio_range(),
         "决策后悔值（中位，16 场景 × 5 档位）":
-            (f"{regret.median():.1f}%（负对照：随机 259% / 选最大 772%，指标有分辨力）"
+            (f"{regret.median():.1f}%（负对照：随机 {_control('random')}"
+             f" / 选最大 {_control('largest')}，指标有分辨力）"
              if len(regret) else "无数据"),
         "决策后悔值（最大）": f"{regret.max():.1f}%" if len(regret) else "—",
         "相对默认配置降幅": (f"{drop.min():.0f}%–{drop.max():.0f}%" if len(drop) else "—"),
@@ -265,7 +280,7 @@ def check(claims, d):
              "76 格", "9.08%（未标口径）",
              # 30 秒采样的泊松数据（90 秒重跑后已作废）
              "9.9 倍", "24.9 ms", "6pp → 7pp",
-             # 半宽统一前的负对照数字（现为 259.4% / 772.0%）
+             # 历史值：268/813（半宽公式错误）→ 259/772（候选集未统一）→ 现为 274/740
              "268%", "813%"]
 
     # 【自比对盲区】拿自己生成的 CLAIMS.md 当基准，它自己错了就不会被发现。

@@ -50,12 +50,17 @@ Write-Host "[CI] 3/4 unit tests ..."
 if ($LASTEXITCODE -ne 0) { $fail = 1 }
 
 Write-Host ""
-Write-Host "[CI] 4/4 doc number lint (warning only) ..."
+Write-Host "[CI] 4/5 doc number lint (warning only) ..."
 & $py "code\tc_lint_docs.py"
 $lintExit = $LASTEXITCODE
 if ($lintExit -ne 0) {
     Write-Host "[CI] lint reported suspects (not failing the build)" -ForegroundColor Yellow
 }
+
+Write-Host ""
+Write-Host "[CI] 5/5 project audit (hygiene / self-contained / data chain / contract) ..."
+& $py "code\tc_audit.py" --fast
+if ($LASTEXITCODE -ne 0) { $fail = 1 }
 
 Write-Host ""
 if ($fail -eq 0) {

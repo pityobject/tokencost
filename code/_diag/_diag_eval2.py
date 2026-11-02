@@ -6,7 +6,7 @@ import sys
 from collections import defaultdict
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-ROOT = pathlib.Path(r"C:\Users\王钟垚\Desktop\find_career\tokencost")
+ROOT = pathlib.Path(__file__).resolve().parents[2]
 rows = [json.loads(l) for l in (ROOT / "data/quality_details.jsonl").open(encoding="utf-8") if l.strip()]
 
 by = defaultdict(list)

@@ -6,7 +6,7 @@ import sys
 import pandas as pd
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-df = pd.read_csv(pathlib.Path(r"C:\Users\王钟垚\Desktop\find_career\tokencost\data\summary.csv"))
+df = pd.read_csv(pathlib.Path(__file__).resolve().parents[2] / "data" / "summary.csv")
 
 cols = ["cell_id", "ttft_p50_ms", "tpot_p50_ms", "throughput_tps",
         "cost_gpu_s_per_1m", "temp_c_median", "clock_sm_median", "util_pct_median"]

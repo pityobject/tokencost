@@ -6,7 +6,7 @@ import sys
 import pandas as pd
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-ROOT = pathlib.Path(r"C:\Users\王钟垚\Desktop\find_career\tokencost")
+ROOT = pathlib.Path(__file__).resolve().parents[2]
 df = pd.read_csv(ROOT / "results/predictions.csv")
 
 print(f"共 {len(df)} 格（标定 {(df['group']=='标定').sum()} / 留出 {(df['group']=='留出').sum()}）\n")

@@ -41,6 +41,7 @@ ROOT = cfg.PROJECT_ROOT
 
 # 对外文档（历史留档不在其中）
 TARGETS = [
+    "results/CLAIMS.md",      # 自称"唯一数字源"，更要扫（第六轮复核指出）
     "README.md",
     "报告/技术报告_定稿_两页.md",
     "报告/简历条目与答辩稿_实测版.md",
@@ -79,6 +80,10 @@ def main():
         if not p.exists():
             continue
         for i, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1):
+            # 历史叙述里的旧值是合法的（"上一版 140 题……"这种对比句）
+            if any(h in line for h in
+                   ("上一版", "曾经", "旧值", "历史", "此前", "早先", "→", "改为")):
+                continue
             for bad, (why, now) in DEPRECATED.items():
                 if bad in line:
                     hits.append((rel, i, bad, why, now, line.strip()[:58]))

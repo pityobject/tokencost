@@ -360,6 +360,8 @@ def report(pred, params, sigma_noise=0.0, repeats=3, n_params_fit=3):
                 coverage=inside, sigma_log=sigma_pred, sigma_noise=sigma_noise,
                 half_width_log=half, passed=bool(ok_mape and ok_max),
                 coverage_ok=bool(ok_cov),
+                # 数据规模写进产物：CLAIMS 之前只能靠默认值 68，一旦 --population 变了会静默失配
+                n_holdout=int(len(hold)), n_calib=int(len(cal)),
                 calc_bound_cells=int(active), calc_bound_total=int(len(cal)))
 
 

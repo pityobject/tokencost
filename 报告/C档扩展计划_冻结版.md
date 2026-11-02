@@ -119,7 +119,7 @@ $MS = "D:\llm\venv\Scripts\modelscope.exe"
 再看留出格是否仍能预测。CPU 的带宽/算力与 GPU 差 10 倍以上，是天然的"另一台机器"。
 
 - 需要改：`tc_server.start(..., ngl=0)` 参数、`tc_run_grid --preset cpu`
-- 预期产物：`data/cpu_ref.csv` + 一张"GPU vs CPU 同一模型"的对照表
+- 预期产物：cpu_ref.csv（**实际落地为 `data/probe_cpu.csv`**，名字改过） + 一张"GPU vs CPU 同一模型"的对照表
 - **风险**：CPU 上 7B 极慢（可能 2–3 token/s），只跑 1.5B/3B
 
 ---
@@ -169,3 +169,4 @@ $MS = "D:\llm\venv\Scripts\modelscope.exe"
 **P2/P3/P4 的所有新格，标定集一个字都不许动。**
 新增数据只用来做留出验证。理由：现在的 12 格标定是历史结论的基础，
 一旦为了"拟合得更好"而调整，之前所有结论都要重算，而且失去了"预注册"的意义。
+

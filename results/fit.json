@@ -20,6 +20,8 @@
   "half_width_log": 0.1630516886743354,
   "passed": false,
   "coverage_ok": true,
+  "n_holdout": 68,
+  "n_calib": 12,
   "calc_bound_cells": 1,
   "calc_bound_total": 12,
   "mape_cost_wall": 11.282100396380805,

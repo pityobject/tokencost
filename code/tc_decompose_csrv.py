@@ -17,7 +17,7 @@ import statistics as st
 import sys
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-ROOT = pathlib.Path(r"C:\Users\王钟垚\Desktop\find_career\tokencost")
+ROOT = pathlib.Path(__file__).resolve().parents[1]
 import tc_config as cfg  # noqa: E402
 
 PAT = re.compile(r"eval time =\s+([\d.]+) ms /\s+(\d+) tokens \(\s*([\d.]+) ms per token")

@@ -6,7 +6,7 @@ import pathlib
 import sys
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-ROOT = pathlib.Path(r"C:\Users\王钟垚\Desktop\find_career\tokencost")
+ROOT = pathlib.Path(__file__).resolve().parents[2]
 import tc_config as cfg  # noqa: E402
 
 path = ROOT / "data" / "raw_cells.jsonl"

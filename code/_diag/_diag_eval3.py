@@ -5,7 +5,7 @@ import pathlib
 import sys
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-p = pathlib.Path(r"C:\Users\王钟垚\Desktop\find_career\tokencost\data\quality_details.jsonl")
+p = pathlib.Path(__file__).resolve().parents[2] / "data" / "quality_details.jsonl"
 rows = [json.loads(l) for l in p.open(encoding="utf-8") if l.strip()]
 
 for kind in ["reverse", "count", "sort"]:
