@@ -91,16 +91,24 @@ def xfamily():
     xf["prompt_tokens"] = xf.get("prompt_tokens_median", cfg.PROMPT_TOKENS).fillna(cfg.PROMPT_TOKENS)
     xf["ctx_avg_tokens"] = xf["prompt_tokens"] + cfg.GEN_TOKENS / 2
     params = load_params()
-    print(f"{'格':<32}{'实测TPOT':>9}{'预测':>8}{'误差':>7}{'实测TTFT':>10}{'预测':>9}{'误差':>7}")
-    errs = []
+    # 【口径统一】主指标是"单位成本 MAPE"，跨族检验也必须用同一口径，
+    # 否则会出现"跨族 12.7%"（TPOT/TTFT 平均误差）与"core 8.70%"（成本 MAPE）
+    # 混着引用的问题（第三轮复核指出）。
+    print(f"{'格':<32}{'实测成本':>10}{'预测成本':>10}{'成本误差':>9}"
+          f"{'TPOT误差':>9}{'TTFT误差':>9}")
+    cost_err, other_err = [], []
     for _, r in xf.iterrows():
         pr = tm.predict(params, r)
+        ec = pr["pred_cost_gpu_s_per_1m"] / r["cost_gpu_s_per_1m"] - 1
         e1 = pr["pred_tpot_ms"] / r["tpot_p50_ms"] - 1
         e2 = pr["pred_ttft_ms"] / r["ttft_p50_ms"] - 1
-        errs += [abs(e1), abs(e2)]
-        print(f"{r['cell_id']:<32}{r['tpot_p50_ms']:>9.2f}{pr['pred_tpot_ms']:>8.2f}{e1*100:>6.0f}%"
-              f"{r['ttft_p50_ms']:>10.1f}{pr['pred_ttft_ms']:>9.1f}{e2*100:>6.0f}%")
-    print(f"\n  平均绝对误差 {np.mean(errs)*100:.1f}%（完全零重标定）")
+        cost_err.append(abs(ec))
+        other_err += [abs(e1), abs(e2)]
+        print(f"{r['cell_id']:<32}{r['cost_gpu_s_per_1m']:>10.0f}"
+              f"{pr['pred_cost_gpu_s_per_1m']:>10.0f}{ec*100:>8.0f}%"
+              f"{e1*100:>8.0f}%{e2*100:>8.0f}%")
+    print(f"\n  成本 MAPE            {np.mean(cost_err)*100:.1f}%（与主指标同口径，零重标定）")
+    print(f"  TPOT/TTFT 平均误差   {np.mean(other_err)*100:.1f}%（旧口径，仅作对照）")
     print("  判读：<15% 说明模型刻画的是硬件与部署栈，与模型族无关；>30% 说明词表/注意力实现对 c_srv 有影响。\n")
 
 
