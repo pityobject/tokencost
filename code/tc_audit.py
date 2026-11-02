@@ -204,17 +204,50 @@ def audit_contract(files):
            "; ".join(bad[:4]) if bad else "")
 
     # 4.2 文档里引用到的仓库内文件是否都存在
-    ref_pat = re.compile(r"`((?:code|data|results|figures|tests|scripts|报告|手册)/[^`\s]+?\.(?:py|csv|json|jsonl|md|png|ps1|yml))`")
+    # 同时匹配 `code/...` 这类仓内路径与 `../...` 这种**指向仓库外**的引用；
+    # 后者一定有问题（clone 下来不存在），必须报出来。
+    def _inside(p, r):
+        try:
+            p.relative_to(r)
+            return True
+        except ValueError:
+            return False
+
+    ref_pat = re.compile(
+        r"`((?:\.\./)+(?:[^`\s]+\.(?:py|csv|json|jsonl|md|png|ps1|yml))"   # 仓外
+        r"|(?:code|data|results|figures|tests|scripts|报告|手册)/[^`\s]+?\.(?:py|csv|json|jsonl|md|png|ps1|yml))`")
     missing = set()
     for f in files:
         if f.suffix != ".md" or not f.exists():
             continue
+        # 引用路径有两种写法，都要试：
+        #   ① 仓库根相对：`code/tc.py`、`results/CLAIMS.md`（本仓库文档的惯例）
+        #   ② 文档所在目录相对：data/README.md 里写 `../results/x.md`
+        #
+        # 关键判据是**是否落在仓库内**，而不是"在我这台机器上是否存在"：
+        # `../审计记录.md` 在作者机器上真实存在（仓库外），但别人 clone 下来就没有。
+        root_abs = ROOT.resolve()
+        base = f.parent
         for m in ref_pat.finditer(f.read_text(encoding="utf-8", errors="replace")):
-            if "*" in m.group(1):
+            raw = m.group(1)
+            if "*" in raw:
                 continue
-            target = ROOT / m.group(1)
-            if not target.exists():
-                missing.add(m.group(1))
+            hits_inside = False
+            for cand in ((ROOT / raw).resolve(), (base / raw).resolve()):
+                try:
+                    cand.relative_to(root_abs)
+                except ValueError:
+                    continue          # 仓库外，不计
+                if cand.exists():
+                    hits_inside = True
+                    break
+            if hits_inside:
+                continue
+            # 两条都不成立：要么指向仓库外，要么仓内缺失
+            outside_only = all(
+                not _inside(c, root_abs)
+                for c in ((ROOT / raw).resolve(), (base / raw).resolve()))
+            missing.add(raw + ("（指向仓库外）" if outside_only else ""))
     record("契约", "文档中引用的文件都存在", not missing,
            "; ".join(sorted(missing)[:5]) if missing else "已检查所有 .md")
 
@@ -275,4 +308,5 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+
 
