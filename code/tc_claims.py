@@ -35,6 +35,32 @@ DOCS = [ROOT / "README.md",
 
 
 
+def _sweep(key, unit, nd=1):
+    p = RESULTS / "prompt_sweep_summary.json"
+    if not p.exists():
+        return "无数据"
+    v = json.loads(p.read_text(encoding="utf-8")).get(key)
+    return f"{float(v):.{nd}f}{unit}" if v is not None else "无数据"
+
+
+def _sweep_ratio():
+    p = RESULTS / "prompt_sweep_summary.json"
+    if not p.exists():
+        return "无数据"
+    d = json.loads(p.read_text(encoding="utf-8"))
+    a, b = d.get("slope_meas"), d.get("slope_pred")
+    return f"{a/b:.2f}×" if a and b else "无数据"
+
+
+def _sweep_range():
+    p = RESULTS / "prompt_sweep_summary.json"
+    if not p.exists():
+        return "无数据"
+    d = json.loads(p.read_text(encoding="utf-8"))
+    r = d.get("L_range")
+    return f"{r[0]:.0f}–{r[1]:.0f}（{r[1]/r[0]:.1f} 倍）" if r else "无数据"
+
+
 def _calib_at(k):
     """读 results/calib_curve.csv，取某个 k 的中位 MAPE。"""
     p = RESULTS / "calib_curve.csv"
@@ -136,6 +162,13 @@ def _queue_ratio_range():
 def load_inputs():
     rows = [json.loads(l) for l in (cfg.DATA_DIR / "raw_cells.jsonl").open(encoding="utf-8") if l.strip()]
     ok = [r for r in rows if r.get("status") == "ok"]
+    # 【口径】对外数字只统计**验证集**：剔除探针格（_w/_n/_p 后缀）与跨族格（_xf）。
+    # 否则每加一个探针实验，"324 次测量"就要跟着改，而它本来描述的是验证规模。
+    # 只剔除一类**新增**实验：prompt 长度探针（_p*）。
+    # 台阶/波次/拐点探针（_w/_n）与跨族格（_xf）仍计入——它们本来就在"108 格 / 324 次"里。
+    import re as _re
+    _new_probe = _re.compile(r"_p\d+$")
+    ok = [r for r in ok if not _new_probe.search(str(r["cell_id"]))]
     n_cells = len({r["cell_id"] for r in ok})
     fit = json.loads((RESULTS / "fit.json").read_text(encoding="utf-8"))
     pois = {}
@@ -144,7 +177,7 @@ def load_inputs():
         pois = json.loads(_pp.read_text(encoding="utf-8"))
     ver = pd.read_csv(RESULTS / "verify_recommendation.csv")
     codes = sorted((ROOT / "code").glob("tc_*.py"))
-    return dict(rows=rows, ok=ok, n_cells=n_cells, n_rows=len(rows),
+    return dict(rows=rows, ok=ok, n_cells=n_cells, n_rows=len(ok),
                 fit=fit, verify=ver, n_scripts=len(codes), pois=pois)
 
 
@@ -185,6 +218,10 @@ def build_claims(d):
         "prefill 饱和点": f"{fit['b_sat']:.1f}",
         "首字固定开销": f"{fit['ovh_ttft']:.2f} ms",
         # 泊松/排队相关（第四轮复核：这些数字以前只写在散文里，没有唯一来源）
+        # TTFT 随 prompt 长度的斜率验证（tc_analyze_prompt_sweep.py）
+        "TTFT 长度斜率验证（MAPE）": _sweep("mape_ttft", "%", 1),
+        "TTFT 长度斜率（实测/模型）": _sweep_ratio(),
+        "长度验证覆盖范围（token）": _sweep_range(),
         "泊松容量天花板（请求/秒）": f"{pois.get('capacity_qps', float('nan')):.2f}",
         "模型容量预测（请求/秒）": f"{pois.get('model_qps_pred', float('nan')):.2f}"
                                    f"（实测 {pois.get('ratio', float('nan'))*100:.0f}%）",
@@ -376,6 +413,10 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
 
 
 
