@@ -158,7 +158,12 @@ def build_word_items(n=30, seed=20261103):
             prompt = (f"一个仓库每天入库 {a} 箱货物，连续 {b} 天，"
                       f"期间出库了 {c} 箱。现在仓库里增加了多少箱？只输出数字。")
         elif variant == 1:
-            ans = a + b * c
+            # 【必须与语义一致】"还剩多少" = 原有的 − 花掉的。
+            # 原来写成 a + b*c，题干和答案对不上（17 元买 4 本 6 元 → 负数），
+            # 导致所有模型几乎全错——那是**题错**，不是模型差。
+            spent = b * c
+            a = spent + rng.randint(5, 20)      # 保证钱够花，答案是正数
+            ans = a - spent
             prompt = (f"小红有 {a} 元，她买了 {b} 本笔记本，每本 {c} 元。"
                       f"还剩多少元？只输出数字。")
         else:
@@ -327,7 +332,13 @@ def main():
     merged = merged.sort_values(by=["model", "quant"], key=lambda s: s.map(order) if s.name == "model" else s)
     merged.to_csv(out, index=False, encoding="utf-8-sig")
 
-    det = cfg.DATA_DIR / "quality_details.jsonl"
+    # 【不要污染主基准】指定了 --out（第二任务族）时，明细写到同名 _details.jsonl；
+    # 否则新题型的明细会混进 400 题基准的 details 里，把配对检验的数据源搞乱。
+    if args.out:
+        det = (cfg.DATA_DIR / args.out).with_name(
+            (cfg.DATA_DIR / args.out).stem + "_details.jsonl")
+    else:
+        det = cfg.DATA_DIR / "quality_details.jsonl"
     with det.open("a", encoding="utf-8") as f:
         for d in all_details:
             f.write(json.dumps(d, ensure_ascii=False) + "\n")
@@ -363,4 +374,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
