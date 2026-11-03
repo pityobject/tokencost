@@ -516,7 +516,7 @@ def main():
     #   all   = 全部 108 格（含台阶/波次/拐点探针，只作参考）
     # ---------------------------------------------------------------
     cid_series = df["cell_id"].astype(str)
-    has_suffix = cid_series.str.contains(r"_(?:w\d+|n\d+)$", regex=True)
+    has_suffix = cid_series.str.contains(r"_(?:w\d+|n\d+|p\d+)$", regex=True)
     is_xf = cid_series.str.endswith("_xf")
     pops = {
         "core": df[~has_suffix & ~is_xf],
@@ -603,6 +603,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 

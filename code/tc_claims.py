@@ -35,6 +35,19 @@ DOCS = [ROOT / "README.md",
 
 
 
+def _calib_at(k):
+    """读 results/calib_curve.csv，取某个 k 的中位 MAPE。"""
+    p = RESULTS / "calib_curve.csv"
+    if not p.exists():
+        return "无数据"
+    import pandas as _pd
+    d = _pd.read_csv(p)
+    row = d[d["k"] == k]
+    if row.empty:
+        return "无数据"
+    return f"{float(row.iloc[0]['mape_med']):.2f}%（12 格全用为基准）"
+
+
 def _control(which):
     """从 regret_controls.csv 现算负对照的均值（唯一来源，避免散文写死）。
 
@@ -162,6 +175,9 @@ def build_claims(d):
         "90% 区间覆盖率": f"{fit['coverage']*100:.1f}%",
         "标定并发上的 MAPE": f"{fit.get('mape_in_grid', 5.8):.1f}%",
         "未标定并发上的 MAPE": f"{fit.get('mape_out_grid', 11.5):.1f}%",
+        # 标定点数敏感性（tc_calib_curve.py）：回答"12 个点够吗"
+        "标定点数 k=7 时的留出 MAPE": _calib_at(7),
+        "标定点数 k=4 时的留出 MAPE": _calib_at(4),
         "有效带宽 BW": f"{fit['bw']:.1f} GB/s",
         "decode 有效算力": f"{fit['peak']:.1f} TFLOP/s",
         "prefill 有效算力": f"{fit['peak_prefill']:.1f} TFLOP/s",
@@ -360,6 +376,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 

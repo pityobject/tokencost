@@ -106,6 +106,69 @@ def build_items(n_per_kind=10, seed=20261019):
     return items
 
 
+
+# ---------------------------------------------------------------- 第二任务族
+# 【为什么要加】原来的 6 种题型全是"算术/字符串操作"，任务族单一。
+# 加这两族是为了回答"质量轴是不是只对算术有效"这个质疑——
+# 格式遵循测的是"听不听话"，应用题测的是"多步推理"，都不是纯计算。
+def build_format_items(n=30, seed=20261103):
+    """格式遵循：答案对不够，还要守格式。这是线上服务最常见的失败模式。"""
+    rng = random.Random(seed)
+    items = []
+    for i in range(n):
+        variant = i % 5
+        a, b = rng.randint(20, 89), rng.randint(11, 59)
+        if variant == 0:
+            items.append(dict(
+                kind="format", check="json_n",
+                prompt=f"计算 {a} + {b}。只输出 JSON，形如 {{\"n\": 数字}}，不要任何解释。",
+                expected=str(a + b)))
+        elif variant == 1:
+            items.append(dict(
+                kind="format", check="maxlen",
+                prompt=f"用不超过 8 个汉字回答：{a} 和 {b} 哪个大？只给答案。",
+                expected="8"))
+        elif variant == 2:
+            items.append(dict(
+                kind="format", check="upper",
+                prompt="把单词 token 全部大写输出，不要标点。",
+                expected="TOKEN"))
+        elif variant == 3:
+            items.append(dict(
+                kind="format", check="bullets",
+                prompt="列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。",
+                expected="3"))
+        else:
+            items.append(dict(
+                kind="format", check="no_explain",
+                prompt=f"{a} 乘以 {b} 等于多少？只输出数字，一个字都不要多说。",
+                expected=str(a * b)))
+    return items
+
+
+def build_word_items(n=30, seed=20261103):
+    """多步应用题：需要两到三步推理，答案唯一。比纯算术更接近真实使用。"""
+    rng = random.Random(seed)
+    items = []
+    for i in range(n):
+        variant = i % 3
+        a, b, c = rng.randint(12, 40), rng.randint(3, 9), rng.randint(2, 7)
+        if variant == 0:
+            ans = a * b - c
+            prompt = (f"一个仓库每天入库 {a} 箱货物，连续 {b} 天，"
+                      f"期间出库了 {c} 箱。现在仓库里增加了多少箱？只输出数字。")
+        elif variant == 1:
+            ans = a + b * c
+            prompt = (f"小红有 {a} 元，她买了 {b} 本笔记本，每本 {c} 元。"
+                      f"还剩多少元？只输出数字。")
+        else:
+            ans = (a - c) * b
+            prompt = (f"一条流水线原来每小时生产 {a} 件，改造后每小时少 {c} 件，"
+                      f"运行 {b} 小时共生产多少件？只输出数字。")
+        items.append(dict(kind="word", check="number",
+                          prompt=prompt, expected=str(ans)))
+    return items
+
 def grade(item, answer):
     """判分。宽容一点：只看关键内容，不管格式。"""
     if not answer:
@@ -124,6 +187,32 @@ def grade(item, answer):
     if kind == "sort":
         got = re.findall(r"\d+", text)
         return got == exp.split(",")
+
+    # ---- 第二任务族 ----
+    if kind == "word":
+        m = re.search(r"-?\d+", text.replace(",", ""))
+        return bool(m) and m.group(0) == exp
+
+    if kind == "format":
+        chk = item.get("check")
+        if chk == "json_n":
+            m = re.search(r'"n"\s*:\s*(-?\d+)', text)
+            return bool(m) and m.group(1) == exp
+        if chk == "number":
+            m = re.search(r"-?\d+", text.replace(",", ""))
+            return bool(m) and m.group(0) == exp
+        if chk == "maxlen":
+            body = re.sub(r"[\s，。.,!！?？]", "", answer.strip())
+            return len(body) <= int(exp)
+        if chk == "upper":
+            letters = re.sub(r"[^A-Za-z]", "", answer)
+            return letters == exp and answer.strip().upper().startswith("TOKEN")
+        if chk == "bullets":
+            lines = [ln for ln in answer.splitlines() if ln.strip().startswith("-")]
+            return len(lines) >= int(exp)
+        if chk == "no_explain":
+            body = re.sub(r"[\s，。.,!！?？]", "", answer.strip())
+            return body == exp
 
     return False
 
@@ -166,6 +255,10 @@ async def eval_model(key, items, verbose=True):
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--kinds", default="default",
+                    help="default=原 6 种题型；或 format,word（第二任务族）")
+    ap.add_argument("--out", default=None,
+                    help="输出 CSV；默认 quality.csv（第二任务族务必另指定）")
     ap.add_argument("--only", nargs=2, metavar=("MODEL", "QUANT"))
     ap.add_argument("--n-per-kind", type=int, default=10)
     ap.add_argument("--models", default="0.5B,1.5B,3B,7B",
@@ -173,7 +266,21 @@ def main():
     args = ap.parse_args()
 
     cfg.ensure_dirs()
-    items = build_items(n_per_kind=args.n_per_kind)
+    if args.kinds == "default":
+        items = build_items(n_per_kind=args.n_per_kind)
+    else:
+        # 第二任务族：只生成被点名的题型，题量与原来同量级（每题独立、确定性生成）
+        want = [k.strip() for k in args.kinds.split(",") if k.strip()]
+        items = []
+        if "format" in want:
+            items += build_format_items(n=args.n_per_kind * 3)
+        if "word" in want:
+            items += build_word_items(n=args.n_per_kind * 3)
+        if not items:
+            raise SystemExit(f"--kinds 里没有可用题型：{want}")
+        # 稳定编号（配对检验要用）
+        for i, it in enumerate(items):
+            it["idx"] = i
     print(f"评测集：{len(items)} 题（{sorted(set(i['kind'] for i in items))}）")
 
     if args.only:
@@ -209,7 +316,7 @@ def main():
                 srv.stop(proc)
 
     # 合并写入（支持分次跑）
-    out = cfg.DATA_DIR / "quality.csv"
+    out = (cfg.DATA_DIR / args.out) if args.out else (cfg.DATA_DIR / "quality.csv")
     old = []
     if out.exists():
         import pandas as pd
@@ -256,3 +363,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

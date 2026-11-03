@@ -48,17 +48,23 @@ def _client_cpu_seconds():
 
 
 def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
-             warmup=2, settle_s=2.0, verbose=True, requests=None, suffix=""):
+             warmup=2, settle_s=2.0, verbose=True, requests=None, suffix="",
+             prompt_tokens=None):
     """跑一格，返回这一格每一轮的指标列表。失败时返回带 status='failed' 的单行。"""
     key = (model, quant)
     repeats = repeats or cfg.REPEATS
     # requests 显式给定时用它：做"波次对照"和"固定波次"实验必须绕开默认值
     n_req = requests if requests else cfg.requests_per_repeat(conc)
+    # 提示长度可覆盖：TTFT 的 prefill 项随 L 线性增长，而原数据集只有一种长度，
+    # 不做这个维度就永远在把"长文档场景"当外推。
+    prompt_tokens = int(prompt_tokens or cfg.PROMPT_TOKENS)
+    if prompt_tokens != cfg.PROMPT_TOKENS and not suffix:
+        suffix = f"_p{prompt_tokens}"        # 自动加后缀，避免覆盖已有格
     cid = cfg.cell_id(model, quant, ctx, conc, suffix)
 
     spec = cfg.MODEL_SPECS[key]
     # decode 阶段平均要读多长的 KV cache：提示长度 + 生成到一半
-    ctx_avg = cfg.PROMPT_TOKENS + cfg.GEN_TOKENS / 2.0
+    ctx_avg = prompt_tokens + cfg.GEN_TOKENS / 2.0
 
     base = dict(
         cell_id=cid, model=model, quant=quant, ctx=ctx, conc=conc,
@@ -66,6 +72,7 @@ def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
         ctx_avg_tokens=ctx_avg,
         vram_est_gb=round(cfg.estimate_vram_gb(key, ctx, conc), 2),
         requests=n_req, gen_tokens=cfg.GEN_TOKENS,
+        prompt_tokens_nominal=prompt_tokens,
     )
 
     proc, log_path = None, None
@@ -81,7 +88,7 @@ def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
         # 预热（结果丢弃）
         if warmup:
             asyncio.run(lg.run_load(url, conc, max(warmup, 1) * conc,
-                                    cfg.PROMPT_TOKENS, 16, timeout_s=180))
+                                    prompt_tokens, 16, timeout_s=180))
             time.sleep(1.0)
 
         with GpuMonitor(interval_s=2.0) as mon:
@@ -89,7 +96,7 @@ def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
                 t0 = time.perf_counter()
                 cpu0 = _client_cpu_seconds()
                 req_rows = asyncio.run(lg.run_load(
-                    url, conc, n_req, cfg.PROMPT_TOKENS, cfg.GEN_TOKENS,
+                    url, conc, n_req, prompt_tokens, cfg.GEN_TOKENS,
                     timeout_s=max(300, 20 * n_req)))
                 cpu1 = _client_cpu_seconds()
                 dur = max(time.perf_counter() - t0, 1e-9)
@@ -153,11 +160,15 @@ def main():
     ap.add_argument("ctx", type=int)
     ap.add_argument("conc", type=int)
     ap.add_argument("--repeats", type=int, default=1, help="调试时用 1 轮")
+    ap.add_argument("--prompt-tokens", type=int, default=None,
+                    help="提示长度（默认 cfg.PROMPT_TOKENS=256）；"
+                         "用于补 TTFT 随 prompt 长度的斜率，会自动加 _pNNN 后缀")
     args = ap.parse_args()
 
     cfg.ensure_dirs()
     print(f"=== 单格实验：{args.model} {args.quant} ctx={args.ctx} 并发={args.conc} ===")
-    rows = run_cell(args.model, args.quant, args.ctx, args.conc, repeats=args.repeats)
+    rows = run_cell(args.model, args.quant, args.ctx, args.conc,
+                    repeats=args.repeats, prompt_tokens=args.prompt_tokens)
     print("\n结果：")
     for r in rows:
         for k, v in r.items():
