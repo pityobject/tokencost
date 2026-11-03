@@ -1,0 +1,600 @@
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#0", "kind": "format", "prompt": "计算 31 + 20。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "51", "answer": "{\"n\":51}", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#1", "kind": "format", "prompt": "用不超过 8 个汉字回答：40 和 21 哪个大？只给答案。", "expected": "8", "answer": "40 大", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#2", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#3", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 3D游戏\n- 机器学习和深度学习模型训练\n- 视频转码和图像处理", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#4", "kind": "format", "prompt": "87 乘以 27 等于多少？只输出数字，一个字都不要多说。", "expected": "2349", "answer": "237", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#5", "kind": "format", "prompt": "计算 87 + 58。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "145", "answer": "{\"n\":145}", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#6", "kind": "format", "prompt": "用不超过 8 个汉字回答：85 和 18 哪个大？只给答案。", "expected": "8", "answer": "18大", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#7", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#8", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 3D游戏\n- 机器学习和深度学习模型训练\n- 视频转码和图像处理", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#9", "kind": "format", "prompt": "84 乘以 22 等于多少？只输出数字，一个字都不要多说。", "expected": "1848", "answer": "188", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#10", "kind": "format", "prompt": "计算 60 + 31。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "91", "answer": "{\"n\":91}", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#11", "kind": "format", "prompt": "用不超过 8 个汉字回答：78 和 58 哪个大？只给答案。", "expected": "8", "answer": "78 大", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#12", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#13", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 3D游戏\n- 机器学习和深度学习模型训练\n- 视频转码和图像处理", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#14", "kind": "format", "prompt": "87 乘以 18 等于多少？只输出数字，一个字都不要多说。", "expected": "1566", "answer": "156", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#15", "kind": "format", "prompt": "计算 23 + 15。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "38", "answer": "{\"n\":38}", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#16", "kind": "format", "prompt": "用不超过 8 个汉字回答：59 和 24 哪个大？只给答案。", "expected": "8", "answer": "59 大", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#17", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#18", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 3D游戏\n- 机器学习和深度学习模型训练\n- 视频转码和图像处理", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#19", "kind": "format", "prompt": "70 乘以 34 等于多少？只输出数字，一个字都不要多说。", "expected": "2380", "answer": "2380", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#20", "kind": "format", "prompt": "计算 25 + 16。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "41", "answer": "{\"n\":41}", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#21", "kind": "format", "prompt": "用不超过 8 个汉字回答：82 和 19 哪个大？只给答案。", "expected": "8", "answer": "82 大", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#22", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#23", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 3D游戏\n- 机器学习和深度学习模型训练\n- 视频转码和图像处理", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#24", "kind": "format", "prompt": "25 乘以 47 等于多少？只输出数字，一个字都不要多说。", "expected": "1175", "answer": "1175", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#25", "kind": "format", "prompt": "计算 33 + 32。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "65", "answer": "{\"n\":65}", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#26", "kind": "format", "prompt": "用不超过 8 个汉字回答：46 和 38 哪个大？只给答案。", "expected": "8", "answer": "46 大", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#27", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#28", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 3D游戏\n- 机器学习和深度学习模型训练\n- 视频转码和图像处理", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "format#29", "kind": "format", "prompt": "83 乘以 21 等于多少？只输出数字，一个字都不要多说。", "expected": "1743", "answer": "1781", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#30", "kind": "word", "prompt": "一个仓库每天入库 14 箱货物，连续 4 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "53", "answer": "11", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#31", "kind": "word", "prompt": "小红有 33 元，她买了 4 本笔记本，每本 6 元。还剩多少元？只输出数字。", "expected": "9", "answer": "5", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#32", "kind": "word", "prompt": "一条流水线原来每小时生产 13 件，改造后每小时少 4 件，运行 7 小时共生产多少件？只输出数字。", "expected": "63", "answer": "56", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#33", "kind": "word", "prompt": "一个仓库每天入库 28 箱货物，连续 8 天，期间出库了 7 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "217", "answer": "28", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#34", "kind": "word", "prompt": "小红有 24 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "10", "answer": "6", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#35", "kind": "word", "prompt": "一条流水线原来每小时生产 26 件，改造后每小时少 3 件，运行 9 小时共生产多少件？只输出数字。", "expected": "207", "answer": "165", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#36", "kind": "word", "prompt": "一个仓库每天入库 22 箱货物，连续 8 天，期间出库了 6 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "170", "answer": "22", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#37", "kind": "word", "prompt": "小红有 39 元，她买了 5 本笔记本，每本 4 元。还剩多少元？只输出数字。", "expected": "19", "answer": "14", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#38", "kind": "word", "prompt": "一条流水线原来每小时生产 35 件，改造后每小时少 4 件，运行 9 小时共生产多少件？只输出数字。", "expected": "279", "answer": "273", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#39", "kind": "word", "prompt": "一个仓库每天入库 26 箱货物，连续 4 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "101", "answer": "75", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#40", "kind": "word", "prompt": "小红有 13 元，她买了 3 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "7", "answer": "3", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#41", "kind": "word", "prompt": "一条流水线原来每小时生产 21 件，改造后每小时少 6 件，运行 4 小时共生产多少件？只输出数字。", "expected": "60", "answer": "120", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#42", "kind": "word", "prompt": "一个仓库每天入库 27 箱货物，连续 4 天，期间出库了 2 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "106", "answer": "115", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#43", "kind": "word", "prompt": "小红有 17 元，她买了 5 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "7", "answer": "7", "ok": true}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#44", "kind": "word", "prompt": "一条流水线原来每小时生产 27 件，改造后每小时少 3 件，运行 4 小时共生产多少件？只输出数字。", "expected": "96", "answer": "240", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#45", "kind": "word", "prompt": "一个仓库每天入库 30 箱货物，连续 5 天，期间出库了 4 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "146", "answer": "10", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#46", "kind": "word", "prompt": "小红有 29 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "15", "answer": "5", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#47", "kind": "word", "prompt": "一条流水线原来每小时生产 18 件，改造后每小时少 3 件，运行 6 小时共生产多少件？只输出数字。", "expected": "90", "answer": "126", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#48", "kind": "word", "prompt": "一个仓库每天入库 36 箱货物，连续 6 天，期间出库了 2 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "214", "answer": "28", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#49", "kind": "word", "prompt": "小红有 74 元，她买了 9 本笔记本，每本 6 元。还剩多少元？只输出数字。", "expected": "20", "answer": "26", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#50", "kind": "word", "prompt": "一条流水线原来每小时生产 17 件，改造后每小时少 2 件，运行 8 小时共生产多少件？只输出数字。", "expected": "120", "answer": "128", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#51", "kind": "word", "prompt": "一个仓库每天入库 38 箱货物，连续 9 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "339", "answer": "105", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#52", "kind": "word", "prompt": "小红有 31 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "17", "answer": "5", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#53", "kind": "word", "prompt": "一条流水线原来每小时生产 15 件，改造后每小时少 6 件，运行 8 小时共生产多少件？只输出数字。", "expected": "72", "answer": "60", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#54", "kind": "word", "prompt": "一个仓库每天入库 15 箱货物，连续 7 天，期间出库了 4 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "101", "answer": "7", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#55", "kind": "word", "prompt": "小红有 27 元，她买了 4 本笔记本，每本 3 元。还剩多少元？只输出数字。", "expected": "15", "answer": "6", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#56", "kind": "word", "prompt": "一条流水线原来每小时生产 40 件，改造后每小时少 2 件，运行 3 小时共生产多少件？只输出数字。", "expected": "114", "answer": "320", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#57", "kind": "word", "prompt": "一个仓库每天入库 18 箱货物，连续 4 天，期间出库了 6 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "66", "answer": "24", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#58", "kind": "word", "prompt": "小红有 25 元，她买了 3 本笔记本，每本 4 元。还剩多少元？只输出数字。", "expected": "13", "answer": "5", "ok": false}
+{"model": "1.5B", "quant": "q4_k_m", "iid": "word#59", "kind": "word", "prompt": "一条流水线原来每小时生产 37 件，改造后每小时少 3 件，运行 7 小时共生产多少件？只输出数字。", "expected": "238", "answer": "277", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#0", "kind": "format", "prompt": "计算 31 + 20。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "51", "answer": "{\"n\": 51}", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#1", "kind": "format", "prompt": "用不超过 8 个汉字回答：40 和 21 哪个大？只给答案。", "expected": "8", "answer": "40 大", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#2", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#3", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 机器学习和深度学习模型训练\n- 大规模图像和视频处理\n- 高性能计算和科学计算", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#4", "kind": "format", "prompt": "87 乘以 27 等于多少？只输出数字，一个字都不要多说。", "expected": "2349", "answer": "2409", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#5", "kind": "format", "prompt": "计算 87 + 58。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "145", "answer": "{\"n\": 145}", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#6", "kind": "format", "prompt": "用不超过 8 个汉字回答：85 和 18 哪个大？只给答案。", "expected": "8", "answer": "85 大", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#7", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#8", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 机器学习和深度学习模型训练\n- 大规模图像和视频处理\n- 高性能计算和科学计算", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#9", "kind": "format", "prompt": "84 乘以 22 等于多少？只输出数字，一个字都不要多说。", "expected": "1848", "answer": "184", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#10", "kind": "format", "prompt": "计算 60 + 31。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "91", "answer": "{\"n\": 91}", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#11", "kind": "format", "prompt": "用不超过 8 个汉字回答：78 和 58 哪个大？只给答案。", "expected": "8", "answer": "78 大", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#12", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#13", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 机器学习和深度学习模型训练\n- 大规模图像和视频处理\n- 高性能计算和科学计算", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#14", "kind": "format", "prompt": "87 乘以 18 等于多少？只输出数字，一个字都不要多说。", "expected": "1566", "answer": "156", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#15", "kind": "format", "prompt": "计算 23 + 15。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "38", "answer": "{\"n\": 38}", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#16", "kind": "format", "prompt": "用不超过 8 个汉字回答：59 和 24 哪个大？只给答案。", "expected": "8", "answer": "59 大", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#17", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#18", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 机器学习和深度学习模型训练\n- 大规模图像和视频处理\n- 高性能计算和科学计算", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#19", "kind": "format", "prompt": "70 乘以 34 等于多少？只输出数字，一个字都不要多说。", "expected": "2380", "answer": "2380", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#20", "kind": "format", "prompt": "计算 25 + 16。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "41", "answer": "{\"n\": 41}", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#21", "kind": "format", "prompt": "用不超过 8 个汉字回答：82 和 19 哪个大？只给答案。", "expected": "8", "answer": "82 大", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#22", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#23", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 机器学习和深度学习模型训练\n- 大规模图像和视频处理\n- 高性能计算和科学计算", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#24", "kind": "format", "prompt": "25 乘以 47 等于多少？只输出数字，一个字都不要多说。", "expected": "1175", "answer": "1225", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#25", "kind": "format", "prompt": "计算 33 + 32。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "65", "answer": "{\"n\": 65}", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#26", "kind": "format", "prompt": "用不超过 8 个汉字回答：46 和 38 哪个大？只给答案。", "expected": "8", "answer": "46 大", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#27", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#28", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 机器学习和深度学习模型训练\n- 大规模图像和视频处理\n- 高性能计算和科学计算", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "format#29", "kind": "format", "prompt": "83 乘以 21 等于多少？只输出数字，一个字都不要多说。", "expected": "1743", "answer": "1743", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#30", "kind": "word", "prompt": "一个仓库每天入库 14 箱货物，连续 4 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "53", "answer": "25", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#31", "kind": "word", "prompt": "小红有 33 元，她买了 4 本笔记本，每本 6 元。还剩多少元？只输出数字。", "expected": "9", "answer": "5", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#32", "kind": "word", "prompt": "一条流水线原来每小时生产 13 件，改造后每小时少 4 件，运行 7 小时共生产多少件？只输出数字。", "expected": "63", "answer": "63", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#33", "kind": "word", "prompt": "一个仓库每天入库 28 箱货物，连续 8 天，期间出库了 7 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "217", "answer": "28", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#34", "kind": "word", "prompt": "小红有 24 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "10", "answer": "8", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#35", "kind": "word", "prompt": "一条流水线原来每小时生产 26 件，改造后每小时少 3 件，运行 9 小时共生产多少件？只输出数字。", "expected": "207", "answer": "207", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#36", "kind": "word", "prompt": "一个仓库每天入库 22 箱货物，连续 8 天，期间出库了 6 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "170", "answer": "22", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#37", "kind": "word", "prompt": "小红有 39 元，她买了 5 本笔记本，每本 4 元。还剩多少元？只输出数字。", "expected": "19", "answer": "14", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#38", "kind": "word", "prompt": "一条流水线原来每小时生产 35 件，改造后每小时少 4 件，运行 9 小时共生产多少件？只输出数字。", "expected": "279", "answer": "279", "ok": true}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#39", "kind": "word", "prompt": "一个仓库每天入库 26 箱货物，连续 4 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "101", "answer": "75", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#40", "kind": "word", "prompt": "小红有 13 元，她买了 3 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "7", "answer": "2", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#41", "kind": "word", "prompt": "一条流水线原来每小时生产 21 件，改造后每小时少 6 件，运行 4 小时共生产多少件？只输出数字。", "expected": "60", "answer": "108", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#42", "kind": "word", "prompt": "一个仓库每天入库 27 箱货物，连续 4 天，期间出库了 2 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "106", "answer": "110", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#43", "kind": "word", "prompt": "小红有 17 元，她买了 5 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "7", "answer": "2", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#44", "kind": "word", "prompt": "一条流水线原来每小时生产 27 件，改造后每小时少 3 件，运行 4 小时共生产多少件？只输出数字。", "expected": "96", "answer": "108", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#45", "kind": "word", "prompt": "一个仓库每天入库 30 箱货物，连续 5 天，期间出库了 4 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "146", "answer": "10", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#46", "kind": "word", "prompt": "小红有 29 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "15", "answer": "5", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#47", "kind": "word", "prompt": "一条流水线原来每小时生产 18 件，改造后每小时少 3 件，运行 6 小时共生产多少件？只输出数字。", "expected": "90", "answer": "108", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#48", "kind": "word", "prompt": "一个仓库每天入库 36 箱货物，连续 6 天，期间出库了 2 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "214", "answer": "28", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#49", "kind": "word", "prompt": "小红有 74 元，她买了 9 本笔记本，每本 6 元。还剩多少元？只输出数字。", "expected": "20", "answer": "26", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#50", "kind": "word", "prompt": "一条流水线原来每小时生产 17 件，改造后每小时少 2 件，运行 8 小时共生产多少件？只输出数字。", "expected": "120", "answer": "112", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#51", "kind": "word", "prompt": "一个仓库每天入库 38 箱货物，连续 9 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "339", "answer": "115", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#52", "kind": "word", "prompt": "小红有 31 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "17", "answer": "12", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#53", "kind": "word", "prompt": "一条流水线原来每小时生产 15 件，改造后每小时少 6 件，运行 8 小时共生产多少件？只输出数字。", "expected": "72", "answer": "60", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#54", "kind": "word", "prompt": "一个仓库每天入库 15 箱货物，连续 7 天，期间出库了 4 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "101", "answer": "4", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#55", "kind": "word", "prompt": "小红有 27 元，她买了 4 本笔记本，每本 3 元。还剩多少元？只输出数字。", "expected": "15", "answer": "9", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#56", "kind": "word", "prompt": "一条流水线原来每小时生产 40 件，改造后每小时少 2 件，运行 3 小时共生产多少件？只输出数字。", "expected": "114", "answer": "124", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#57", "kind": "word", "prompt": "一个仓库每天入库 18 箱货物，连续 4 天，期间出库了 6 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "66", "answer": "24", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#58", "kind": "word", "prompt": "小红有 25 元，她买了 3 本笔记本，每本 4 元。还剩多少元？只输出数字。", "expected": "13", "answer": "5", "ok": false}
+{"model": "1.5B", "quant": "q8_0", "iid": "word#59", "kind": "word", "prompt": "一条流水线原来每小时生产 37 件，改造后每小时少 3 件，运行 7 小时共生产多少件？只输出数字。", "expected": "238", "answer": "268", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#0", "kind": "format", "prompt": "计算 31 + 20。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "51", "answer": "{\"n\": 51}", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#1", "kind": "format", "prompt": "用不超过 8 个汉字回答：40 和 21 哪个大？只给答案。", "expected": "8", "answer": "40 大", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#2", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#3", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 训练深度学习模型\n- 进行图像和视频处理\n- 进行科学计算模拟", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#4", "kind": "format", "prompt": "87 乘以 27 等于多少？只输出数字，一个字都不要多说。", "expected": "2349", "answer": "2349", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#5", "kind": "format", "prompt": "计算 87 + 58。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "145", "answer": "{\"n\": 145}", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#6", "kind": "format", "prompt": "用不超过 8 个汉字回答：85 和 18 哪个大？只给答案。", "expected": "8", "answer": "85 大", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#7", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#8", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 训练深度学习模型\n- 进行图像和视频处理\n- 进行科学计算模拟", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#9", "kind": "format", "prompt": "84 乘以 22 等于多少？只输出数字，一个字都不要多说。", "expected": "1848", "answer": "1848", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#10", "kind": "format", "prompt": "计算 60 + 31。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "91", "answer": "{\"n\": 91}", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#11", "kind": "format", "prompt": "用不超过 8 个汉字回答：78 和 58 哪个大？只给答案。", "expected": "8", "answer": "78 大", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#12", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#13", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 训练深度学习模型\n- 进行图像和视频处理\n- 进行科学计算模拟", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#14", "kind": "format", "prompt": "87 乘以 18 等于多少？只输出数字，一个字都不要多说。", "expected": "1566", "answer": "1566", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#15", "kind": "format", "prompt": "计算 23 + 15。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "38", "answer": "{\"n\": 38}", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#16", "kind": "format", "prompt": "用不超过 8 个汉字回答：59 和 24 哪个大？只给答案。", "expected": "8", "answer": "59 大", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#17", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#18", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 训练深度学习模型\n- 进行图像和视频处理\n- 进行科学计算模拟", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#19", "kind": "format", "prompt": "70 乘以 34 等于多少？只输出数字，一个字都不要多说。", "expected": "2380", "answer": "2380", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#20", "kind": "format", "prompt": "计算 25 + 16。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "41", "answer": "{\"n\": 41}", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#21", "kind": "format", "prompt": "用不超过 8 个汉字回答：82 和 19 哪个大？只给答案。", "expected": "8", "answer": "82 大", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#22", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#23", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 训练深度学习模型\n- 进行图像和视频处理\n- 进行科学计算模拟", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#24", "kind": "format", "prompt": "25 乘以 47 等于多少？只输出数字，一个字都不要多说。", "expected": "1175", "answer": "1175", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#25", "kind": "format", "prompt": "计算 33 + 32。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "65", "answer": "{\"n\": 65}", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#26", "kind": "format", "prompt": "用不超过 8 个汉字回答：46 和 38 哪个大？只给答案。", "expected": "8", "answer": "46 大", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#27", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#28", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 训练深度学习模型\n- 进行图像和视频处理\n- 进行科学计算模拟", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "format#29", "kind": "format", "prompt": "83 乘以 21 等于多少？只输出数字，一个字都不要多说。", "expected": "1743", "answer": "1743", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#30", "kind": "word", "prompt": "一个仓库每天入库 14 箱货物，连续 4 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "53", "answer": "28", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#31", "kind": "word", "prompt": "小红有 33 元，她买了 4 本笔记本，每本 6 元。还剩多少元？只输出数字。", "expected": "9", "answer": "15", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#32", "kind": "word", "prompt": "一条流水线原来每小时生产 13 件，改造后每小时少 4 件，运行 7 小时共生产多少件？只输出数字。", "expected": "63", "answer": "77", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#33", "kind": "word", "prompt": "一个仓库每天入库 28 箱货物，连续 8 天，期间出库了 7 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "217", "answer": "209", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#34", "kind": "word", "prompt": "小红有 24 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "10", "answer": "4", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#35", "kind": "word", "prompt": "一条流水线原来每小时生产 26 件，改造后每小时少 3 件，运行 9 小时共生产多少件？只输出数字。", "expected": "207", "answer": "243", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#36", "kind": "word", "prompt": "一个仓库每天入库 22 箱货物，连续 8 天，期间出库了 6 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "170", "answer": "166", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#37", "kind": "word", "prompt": "小红有 39 元，她买了 5 本笔记本，每本 4 元。还剩多少元？只输出数字。", "expected": "19", "answer": "14", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#38", "kind": "word", "prompt": "一条流水线原来每小时生产 35 件，改造后每小时少 4 件，运行 9 小时共生产多少件？只输出数字。", "expected": "279", "answer": "285", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#39", "kind": "word", "prompt": "一个仓库每天入库 26 箱货物，连续 4 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "101", "answer": "100", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#40", "kind": "word", "prompt": "小红有 13 元，她买了 3 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "7", "answer": "4", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#41", "kind": "word", "prompt": "一条流水线原来每小时生产 21 件，改造后每小时少 6 件，运行 4 小时共生产多少件？只输出数字。", "expected": "60", "answer": "48", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#42", "kind": "word", "prompt": "一个仓库每天入库 27 箱货物，连续 4 天，期间出库了 2 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "106", "answer": "104", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#43", "kind": "word", "prompt": "小红有 17 元，她买了 5 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "7", "answer": "7", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#44", "kind": "word", "prompt": "一条流水线原来每小时生产 27 件，改造后每小时少 3 件，运行 4 小时共生产多少件？只输出数字。", "expected": "96", "answer": "108", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#45", "kind": "word", "prompt": "一个仓库每天入库 30 箱货物，连续 5 天，期间出库了 4 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "146", "answer": "40", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#46", "kind": "word", "prompt": "小红有 29 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "15", "answer": "10", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#47", "kind": "word", "prompt": "一条流水线原来每小时生产 18 件，改造后每小时少 3 件，运行 6 小时共生产多少件？只输出数字。", "expected": "90", "answer": "93", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#48", "kind": "word", "prompt": "一个仓库每天入库 36 箱货物，连续 6 天，期间出库了 2 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "214", "answer": "102", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#49", "kind": "word", "prompt": "小红有 74 元，她买了 9 本笔记本，每本 6 元。还剩多少元？只输出数字。", "expected": "20", "answer": "40", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#50", "kind": "word", "prompt": "一条流水线原来每小时生产 17 件，改造后每小时少 2 件，运行 8 小时共生产多少件？只输出数字。", "expected": "120", "answer": "128", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#51", "kind": "word", "prompt": "一个仓库每天入库 38 箱货物，连续 9 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "339", "answer": "342", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#52", "kind": "word", "prompt": "小红有 31 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "17", "answer": "10", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#53", "kind": "word", "prompt": "一条流水线原来每小时生产 15 件，改造后每小时少 6 件，运行 8 小时共生产多少件？只输出数字。", "expected": "72", "answer": "92", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#54", "kind": "word", "prompt": "一个仓库每天入库 15 箱货物，连续 7 天，期间出库了 4 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "101", "answer": "89", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#55", "kind": "word", "prompt": "小红有 27 元，她买了 4 本笔记本，每本 3 元。还剩多少元？只输出数字。", "expected": "15", "answer": "9", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#56", "kind": "word", "prompt": "一条流水线原来每小时生产 40 件，改造后每小时少 2 件，运行 3 小时共生产多少件？只输出数字。", "expected": "114", "answer": "114", "ok": true}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#57", "kind": "word", "prompt": "一个仓库每天入库 18 箱货物，连续 4 天，期间出库了 6 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "66", "answer": "30", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#58", "kind": "word", "prompt": "小红有 25 元，她买了 3 本笔记本，每本 4 元。还剩多少元？只输出数字。", "expected": "13", "answer": "11", "ok": false}
+{"model": "3B", "quant": "q4_k_m", "iid": "word#59", "kind": "word", "prompt": "一条流水线原来每小时生产 37 件，改造后每小时少 3 件，运行 7 小时共生产多少件？只输出数字。", "expected": "238", "answer": "214", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "format#0", "kind": "format", "prompt": "计算 31 + 20。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "51", "answer": "{\"n\": 51}", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#1", "kind": "format", "prompt": "用不超过 8 个汉字回答：40 和 21 哪个大？只给答案。", "expected": "8", "answer": "40 大于 21", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#2", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#3", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 数据训练和模型优化\n- 图像和视频处理\n- 机器学习和深度学习算法", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#4", "kind": "format", "prompt": "87 乘以 27 等于多少？只输出数字，一个字都不要多说。", "expected": "2349", "answer": "2349", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#5", "kind": "format", "prompt": "计算 87 + 58。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "145", "answer": "{\"n\": 145}", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#6", "kind": "format", "prompt": "用不超过 8 个汉字回答：85 和 18 哪个大？只给答案。", "expected": "8", "answer": "18 大", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#7", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#8", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 数据训练和模型优化\n- 图像和视频处理\n- 机器学习和深度学习算法", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#9", "kind": "format", "prompt": "84 乘以 22 等于多少？只输出数字，一个字都不要多说。", "expected": "1848", "answer": "1848", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#10", "kind": "format", "prompt": "计算 60 + 31。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "91", "answer": "{\"n\": 91}", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#11", "kind": "format", "prompt": "用不超过 8 个汉字回答：78 和 58 哪个大？只给答案。", "expected": "8", "answer": "78 大", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#12", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#13", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 数据训练和模型优化\n- 图像和视频处理\n- 机器学习和深度学习算法", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#14", "kind": "format", "prompt": "87 乘以 18 等于多少？只输出数字，一个字都不要多说。", "expected": "1566", "answer": "1566", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#15", "kind": "format", "prompt": "计算 23 + 15。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "38", "answer": "{\"n\": 38}", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#16", "kind": "format", "prompt": "用不超过 8 个汉字回答：59 和 24 哪个大？只给答案。", "expected": "8", "answer": "59 大于 24", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#17", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#18", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 数据训练和模型优化\n- 图像和视频处理\n- 机器学习和深度学习算法", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#19", "kind": "format", "prompt": "70 乘以 34 等于多少？只输出数字，一个字都不要多说。", "expected": "2380", "answer": "2420", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "format#20", "kind": "format", "prompt": "计算 25 + 16。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "41", "answer": "{\"n\": 41}", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#21", "kind": "format", "prompt": "用不超过 8 个汉字回答：82 和 19 哪个大？只给答案。", "expected": "8", "answer": "82 大于 19", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#22", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#23", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 数据训练和模型优化\n- 图像和视频处理\n- 机器学习和深度学习算法", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#24", "kind": "format", "prompt": "25 乘以 47 等于多少？只输出数字，一个字都不要多说。", "expected": "1175", "answer": "1175", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#25", "kind": "format", "prompt": "计算 33 + 32。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "65", "answer": "{\"n\": 65}", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#26", "kind": "format", "prompt": "用不超过 8 个汉字回答：46 和 38 哪个大？只给答案。", "expected": "8", "answer": "46 大于 38", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#27", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#28", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 数据训练和模型优化\n- 图像和视频处理\n- 机器学习和深度学习算法", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "format#29", "kind": "format", "prompt": "83 乘以 21 等于多少？只输出数字，一个字都不要多说。", "expected": "1743", "answer": "1743", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "word#30", "kind": "word", "prompt": "一个仓库每天入库 14 箱货物，连续 4 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "53", "answer": "28", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#31", "kind": "word", "prompt": "小红有 33 元，她买了 4 本笔记本，每本 6 元。还剩多少元？只输出数字。", "expected": "9", "answer": "15", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#32", "kind": "word", "prompt": "一条流水线原来每小时生产 13 件，改造后每小时少 4 件，运行 7 小时共生产多少件？只输出数字。", "expected": "63", "answer": "77", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#33", "kind": "word", "prompt": "一个仓库每天入库 28 箱货物，连续 8 天，期间出库了 7 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "217", "answer": "189", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#34", "kind": "word", "prompt": "小红有 24 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "10", "answer": "7", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#35", "kind": "word", "prompt": "一条流水线原来每小时生产 26 件，改造后每小时少 3 件，运行 9 小时共生产多少件？只输出数字。", "expected": "207", "answer": "213", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#36", "kind": "word", "prompt": "一个仓库每天入库 22 箱货物，连续 8 天，期间出库了 6 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "170", "answer": "166", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#37", "kind": "word", "prompt": "小红有 39 元，她买了 5 本笔记本，每本 4 元。还剩多少元？只输出数字。", "expected": "19", "answer": "14", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#38", "kind": "word", "prompt": "一条流水线原来每小时生产 35 件，改造后每小时少 4 件，运行 9 小时共生产多少件？只输出数字。", "expected": "279", "answer": "285", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#39", "kind": "word", "prompt": "一个仓库每天入库 26 箱货物，连续 4 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "101", "answer": "100", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#40", "kind": "word", "prompt": "小红有 13 元，她买了 3 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "7", "answer": "6", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#41", "kind": "word", "prompt": "一条流水线原来每小时生产 21 件，改造后每小时少 6 件，运行 4 小时共生产多少件？只输出数字。", "expected": "60", "answer": "48", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#42", "kind": "word", "prompt": "一个仓库每天入库 27 箱货物，连续 4 天，期间出库了 2 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "106", "answer": "106", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "word#43", "kind": "word", "prompt": "小红有 17 元，她买了 5 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "7", "answer": "7", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "word#44", "kind": "word", "prompt": "一条流水线原来每小时生产 27 件，改造后每小时少 3 件，运行 4 小时共生产多少件？只输出数字。", "expected": "96", "answer": "96", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "word#45", "kind": "word", "prompt": "一个仓库每天入库 30 箱货物，连续 5 天，期间出库了 4 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "146", "answer": "150", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#46", "kind": "word", "prompt": "小红有 29 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "15", "answer": "10", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#47", "kind": "word", "prompt": "一条流水线原来每小时生产 18 件，改造后每小时少 3 件，运行 6 小时共生产多少件？只输出数字。", "expected": "90", "answer": "93", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#48", "kind": "word", "prompt": "一个仓库每天入库 36 箱货物，连续 6 天，期间出库了 2 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "214", "answer": "106", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#49", "kind": "word", "prompt": "小红有 74 元，她买了 9 本笔记本，每本 6 元。还剩多少元？只输出数字。", "expected": "20", "answer": "47", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#50", "kind": "word", "prompt": "一条流水线原来每小时生产 17 件，改造后每小时少 2 件，运行 8 小时共生产多少件？只输出数字。", "expected": "120", "answer": "128", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#51", "kind": "word", "prompt": "一个仓库每天入库 38 箱货物，连续 9 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "339", "answer": "345", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#52", "kind": "word", "prompt": "小红有 31 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "17", "answer": "16", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#53", "kind": "word", "prompt": "一条流水线原来每小时生产 15 件，改造后每小时少 6 件，运行 8 小时共生产多少件？只输出数字。", "expected": "72", "answer": "92", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#54", "kind": "word", "prompt": "一个仓库每天入库 15 箱货物，连续 7 天，期间出库了 4 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "101", "answer": "103", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#55", "kind": "word", "prompt": "小红有 27 元，她买了 4 本笔记本，每本 3 元。还剩多少元？只输出数字。", "expected": "15", "answer": "15", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "word#56", "kind": "word", "prompt": "一条流水线原来每小时生产 40 件，改造后每小时少 2 件，运行 3 小时共生产多少件？只输出数字。", "expected": "114", "answer": "108", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#57", "kind": "word", "prompt": "一个仓库每天入库 18 箱货物，连续 4 天，期间出库了 6 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "66", "answer": "102", "ok": false}
+{"model": "3B", "quant": "q8_0", "iid": "word#58", "kind": "word", "prompt": "小红有 25 元，她买了 3 本笔记本，每本 4 元。还剩多少元？只输出数字。", "expected": "13", "answer": "13", "ok": true}
+{"model": "3B", "quant": "q8_0", "iid": "word#59", "kind": "word", "prompt": "一条流水线原来每小时生产 37 件，改造后每小时少 3 件，运行 7 小时共生产多少件？只输出数字。", "expected": "238", "answer": "215", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#0", "kind": "format", "prompt": "计算 31 + 20。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "51", "answer": "{\"n\": 51}", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#1", "kind": "format", "prompt": "用不超过 8 个汉字回答：40 和 21 哪个大？只给答案。", "expected": "8", "answer": "40 大于 21。", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#2", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#3", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 开启大模型训练\n- 开启深度学习的图像处理\n- 开启大规模数据的并行计算", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#4", "kind": "format", "prompt": "87 乘以 27 等于多少？只输出数字，一个字都不要多说。", "expected": "2349", "answer": "2278", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#5", "kind": "format", "prompt": "计算 87 + 58。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "145", "answer": "{\"n\":145}", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#6", "kind": "format", "prompt": "用不超过 8 个汉字回答：85 和 18 哪个大？只给答案。", "expected": "8", "answer": "85 大", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#7", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#8", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 开启大模型训练\n- 开启深度学习的图像处理\n- 开启大规模数据的并行计算", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#9", "kind": "format", "prompt": "84 乘以 22 等于多少？只输出数字，一个字都不要多说。", "expected": "1848", "answer": "1932", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#10", "kind": "format", "prompt": "计算 60 + 31。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "91", "answer": "{\"n\":91}", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#11", "kind": "format", "prompt": "用不超过 8 个汉字回答：78 和 58 哪个大？只给答案。", "expected": "8", "answer": "78 大", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#12", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#13", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 开启大模型训练\n- 开启深度学习的图像处理\n- 开启大规模数据的并行计算", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#14", "kind": "format", "prompt": "87 乘以 18 等于多少？只输出数字，一个字都不要多说。", "expected": "1566", "answer": "159", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#15", "kind": "format", "prompt": "计算 23 + 15。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "38", "answer": "{\"n\":38}", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#16", "kind": "format", "prompt": "用不超过 8 个汉字回答：59 和 24 哪个大？只给答案。", "expected": "8", "answer": "59 大于 24。", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#17", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#18", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 开启大模型训练\n- 开启深度学习的图像处理\n- 开启大规模数据的并行计算", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#19", "kind": "format", "prompt": "70 乘以 34 等于多少？只输出数字，一个字都不要多说。", "expected": "2380", "answer": "2800", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#20", "kind": "format", "prompt": "计算 25 + 16。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "41", "answer": "{\"n\":41}", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#21", "kind": "format", "prompt": "用不超过 8 个汉字回答：82 和 19 哪个大？只给答案。", "expected": "8", "answer": "82 大于 19。", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#22", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#23", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 开启大模型训练\n- 开启深度学习的图像处理\n- 开启大规模数据的并行计算", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#24", "kind": "format", "prompt": "25 乘以 47 等于多少？只输出数字，一个字都不要多说。", "expected": "1175", "answer": "2375", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#25", "kind": "format", "prompt": "计算 33 + 32。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "65", "answer": "{\"n\": 35}", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#26", "kind": "format", "prompt": "用不超过 8 个汉字回答：46 和 38 哪个大？只给答案。", "expected": "8", "answer": "46大", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#27", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#28", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 开启大模型训练\n- 开启深度学习的图像处理\n- 开启大规模数据的并行计算", "ok": true}
+{"model": "1.5B", "quant": "q2_k", "iid": "format#29", "kind": "format", "prompt": "83 乘以 21 等于多少？只输出数字，一个字都不要多说。", "expected": "1743", "answer": "171", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#30", "kind": "word", "prompt": "一个仓库每天入库 14 箱货物，连续 4 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "53", "answer": "13", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#31", "kind": "word", "prompt": "小红有 33 元，她买了 4 本笔记本，每本 6 元。还剩多少元？只输出数字。", "expected": "9", "answer": "8", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#32", "kind": "word", "prompt": "一条流水线原来每小时生产 13 件，改造后每小时少 4 件，运行 7 小时共生产多少件？只输出数字。", "expected": "63", "answer": "179", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#33", "kind": "word", "prompt": "一个仓库每天入库 28 箱货物，连续 8 天，期间出库了 7 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "217", "answer": "17", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#34", "kind": "word", "prompt": "小红有 24 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "10", "answer": "16", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#35", "kind": "word", "prompt": "一条流水线原来每小时生产 26 件，改造后每小时少 3 件，运行 9 小时共生产多少件？只输出数字。", "expected": "207", "answer": "1170", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#36", "kind": "word", "prompt": "一个仓库每天入库 22 箱货物，连续 8 天，期间出库了 6 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "170", "answer": "18", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#37", "kind": "word", "prompt": "小红有 39 元，她买了 5 本笔记本，每本 4 元。还剩多少元？只输出数字。", "expected": "19", "answer": "10", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#38", "kind": "word", "prompt": "一条流水线原来每小时生产 35 件，改造后每小时少 4 件，运行 9 小时共生产多少件？只输出数字。", "expected": "279", "answer": "1050", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#39", "kind": "word", "prompt": "一个仓库每天入库 26 箱货物，连续 4 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "101", "answer": "53", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#40", "kind": "word", "prompt": "小红有 13 元，她买了 3 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "7", "answer": "10", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#41", "kind": "word", "prompt": "一条流水线原来每小时生产 21 件，改造后每小时少 6 件，运行 4 小时共生产多少件？只输出数字。", "expected": "60", "answer": "134", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#42", "kind": "word", "prompt": "一个仓库每天入库 27 箱货物，连续 4 天，期间出库了 2 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "106", "answer": "50", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#43", "kind": "word", "prompt": "小红有 17 元，她买了 5 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "7", "answer": "10", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#44", "kind": "word", "prompt": "一条流水线原来每小时生产 27 件，改造后每小时少 3 件，运行 4 小时共生产多少件？只输出数字。", "expected": "96", "answer": "108", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#45", "kind": "word", "prompt": "一个仓库每天入库 30 箱货物，连续 5 天，期间出库了 4 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "146", "answer": "15", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#46", "kind": "word", "prompt": "小红有 29 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "15", "answer": "10", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#47", "kind": "word", "prompt": "一条流水线原来每小时生产 18 件，改造后每小时少 3 件，运行 6 小时共生产多少件？只输出数字。", "expected": "90", "answer": "108", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#48", "kind": "word", "prompt": "一个仓库每天入库 36 箱货物，连续 6 天，期间出库了 2 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "214", "answer": "18", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#49", "kind": "word", "prompt": "小红有 74 元，她买了 9 本笔记本，每本 6 元。还剩多少元？只输出数字。", "expected": "20", "answer": "11", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#50", "kind": "word", "prompt": "一条流水线原来每小时生产 17 件，改造后每小时少 2 件，运行 8 小时共生产多少件？只输出数字。", "expected": "120", "answer": "112", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#51", "kind": "word", "prompt": "一个仓库每天入库 38 箱货物，连续 9 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "339", "answer": "11", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#52", "kind": "word", "prompt": "小红有 31 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "17", "answer": "16", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#53", "kind": "word", "prompt": "一条流水线原来每小时生产 15 件，改造后每小时少 6 件，运行 8 小时共生产多少件？只输出数字。", "expected": "72", "answer": "1200", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#54", "kind": "word", "prompt": "一个仓库每天入库 15 箱货物，连续 7 天，期间出库了 4 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "101", "answer": "14", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#55", "kind": "word", "prompt": "小红有 27 元，她买了 4 本笔记本，每本 3 元。还剩多少元？只输出数字。", "expected": "15", "answer": "10", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#56", "kind": "word", "prompt": "一条流水线原来每小时生产 40 件，改造后每小时少 2 件，运行 3 小时共生产多少件？只输出数字。", "expected": "114", "answer": "130", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#57", "kind": "word", "prompt": "一个仓库每天入库 18 箱货物，连续 4 天，期间出库了 6 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "66", "answer": "18", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#58", "kind": "word", "prompt": "小红有 25 元，她买了 3 本笔记本，每本 4 元。还剩多少元？只输出数字。", "expected": "13", "answer": "10", "ok": false}
+{"model": "1.5B", "quant": "q2_k", "iid": "word#59", "kind": "word", "prompt": "一条流水线原来每小时生产 37 件，改造后每小时少 3 件，运行 7 小时共生产多少件？只输出数字。", "expected": "238", "answer": "1123", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#0", "kind": "format", "prompt": "计算 31 + 20。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "51", "answer": "{\"n\":51}", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#1", "kind": "format", "prompt": "用不超过 8 个汉字回答：40 和 21 哪个大？只给答案。", "expected": "8", "answer": "21 是 40 的一半。", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#2", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#3", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 在机器学习和深度学习任务中，GPU 可以显著加速模型训练和推断过程。\n- 在科学计算和模拟中，GPU 可以加速复杂的计算任务，如分子动力学模拟、图像处理等。\n- 在图像处理和视频处理中，GPU 可以加速", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#4", "kind": "format", "prompt": "87 乘以 27 等于多少？只输出数字，一个字都不要多说。", "expected": "2349", "answer": "2381", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#5", "kind": "format", "prompt": "计算 87 + 58。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "145", "answer": "{\"n\":145}", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#6", "kind": "format", "prompt": "用不超过 8 个汉字回答：85 和 18 哪个大？只给答案。", "expected": "8", "answer": "18 大", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#7", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#8", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 在机器学习和深度学习任务中，GPU 可以显著加速模型训练和推断过程。\n- 在科学计算和模拟中，GPU 可以加速复杂的计算任务，如分子动力学模拟、图像处理等。\n- 在图像处理和视频处理中，GPU 可以加速", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#9", "kind": "format", "prompt": "84 乘以 22 等于多少？只输出数字，一个字都不要多说。", "expected": "1848", "answer": "184", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#10", "kind": "format", "prompt": "计算 60 + 31。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "91", "answer": "{\"n\":91}", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#11", "kind": "format", "prompt": "用不超过 8 个汉字回答：78 和 58 哪个大？只给答案。", "expected": "8", "answer": "78 大", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#12", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#13", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 在机器学习和深度学习任务中，GPU 可以显著加速模型训练和推断过程。\n- 在科学计算和模拟中，GPU 可以加速复杂的计算任务，如分子动力学模拟、图像处理等。\n- 在图像处理和视频处理中，GPU 可以加速", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#14", "kind": "format", "prompt": "87 乘以 18 等于多少？只输出数字，一个字都不要多说。", "expected": "1566", "answer": "156", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#15", "kind": "format", "prompt": "计算 23 + 15。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "38", "answer": "{\"n\":38}", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#16", "kind": "format", "prompt": "用不超过 8 个汉字回答：59 和 24 哪个大？只给答案。", "expected": "8", "answer": "59 > 24", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#17", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#18", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 在机器学习和深度学习任务中，GPU 可以显著加速模型训练和推断过程。\n- 在科学计算和模拟中，GPU 可以加速复杂的计算任务，如分子动力学模拟、图像处理等。\n- 在图像处理和视频处理中，GPU 可以加速", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#19", "kind": "format", "prompt": "70 乘以 34 等于多少？只输出数字，一个字都不要多说。", "expected": "2380", "answer": "2380", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#20", "kind": "format", "prompt": "计算 25 + 16。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "41", "answer": "{\"n\":41}", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#21", "kind": "format", "prompt": "用不超过 8 个汉字回答：82 和 19 哪个大？只给答案。", "expected": "8", "answer": "19 大", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#22", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#23", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 在机器学习和深度学习任务中，GPU 可以显著加速模型训练和推断过程。\n- 在科学计算和模拟中，GPU 可以加速复杂的计算任务，如分子动力学模拟、图像处理等。\n- 在图像处理和视频处理中，GPU 可以加速", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#24", "kind": "format", "prompt": "25 乘以 47 等于多少？只输出数字，一个字都不要多说。", "expected": "1175", "answer": "1170", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#25", "kind": "format", "prompt": "计算 33 + 32。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "65", "answer": "{\"n\":65}", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#26", "kind": "format", "prompt": "用不超过 8 个汉字回答：46 和 38 哪个大？只给答案。", "expected": "8", "answer": "38 小于 46", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#27", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#28", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 在机器学习和深度学习任务中，GPU 可以显著加速模型训练和推断过程。\n- 在科学计算和模拟中，GPU 可以加速复杂的计算任务，如分子动力学模拟、图像处理等。\n- 在图像处理和视频处理中，GPU 可以加速", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "format#29", "kind": "format", "prompt": "83 乘以 21 等于多少？只输出数字，一个字都不要多说。", "expected": "1743", "answer": "17 73", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#30", "kind": "word", "prompt": "一个仓库每天入库 14 箱货物，连续 4 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "53", "answer": "14 * 4 - 3 = 52", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#31", "kind": "word", "prompt": "小红有 33 元，她买了 4 本笔记本，每本 6 元。还剩多少元？只输出数字。", "expected": "9", "answer": "11", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#32", "kind": "word", "prompt": "一条流水线原来每小时生产 13 件，改造后每小时少 4 件，运行 7 小时共生产多少件？只输出数字。", "expected": "63", "answer": "47", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#33", "kind": "word", "prompt": "一个仓库每天入库 28 箱货物，连续 8 天，期间出库了 7 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "217", "answer": "28 * 8 - 7 = 216", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#34", "kind": "word", "prompt": "小红有 24 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "10", "answer": "12", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#35", "kind": "word", "prompt": "一条流水线原来每小时生产 26 件，改造后每小时少 3 件，运行 9 小时共生产多少件？只输出数字。", "expected": "207", "answer": "189", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#36", "kind": "word", "prompt": "一个仓库每天入库 22 箱货物，连续 8 天，期间出库了 6 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "170", "answer": "10", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#37", "kind": "word", "prompt": "小红有 39 元，她买了 5 本笔记本，每本 4 元。还剩多少元？只输出数字。", "expected": "19", "answer": "14", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#38", "kind": "word", "prompt": "一条流水线原来每小时生产 35 件，改造后每小时少 4 件，运行 9 小时共生产多少件？只输出数字。", "expected": "279", "answer": "246", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#39", "kind": "word", "prompt": "一个仓库每天入库 26 箱货物，连续 4 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "101", "answer": "3", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#40", "kind": "word", "prompt": "小红有 13 元，她买了 3 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "7", "answer": "5", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#41", "kind": "word", "prompt": "一条流水线原来每小时生产 21 件，改造后每小时少 6 件，运行 4 小时共生产多少件？只输出数字。", "expected": "60", "answer": "126", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#42", "kind": "word", "prompt": "一个仓库每天入库 27 箱货物，连续 4 天，期间出库了 2 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "106", "answer": "27 * 4 - 2 = 106", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#43", "kind": "word", "prompt": "小红有 17 元，她买了 5 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "7", "answer": "10", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#44", "kind": "word", "prompt": "一条流水线原来每小时生产 27 件，改造后每小时少 3 件，运行 4 小时共生产多少件？只输出数字。", "expected": "96", "answer": "210", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#45", "kind": "word", "prompt": "一个仓库每天入库 30 箱货物，连续 5 天，期间出库了 4 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "146", "answer": "22", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#46", "kind": "word", "prompt": "小红有 29 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "15", "answer": "12", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#47", "kind": "word", "prompt": "一条流水线原来每小时生产 18 件，改造后每小时少 3 件，运行 6 小时共生产多少件？只输出数字。", "expected": "90", "answer": "15", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#48", "kind": "word", "prompt": "一个仓库每天入库 36 箱货物，连续 6 天，期间出库了 2 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "214", "answer": "24", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#49", "kind": "word", "prompt": "小红有 74 元，她买了 9 本笔记本，每本 6 元。还剩多少元？只输出数字。", "expected": "20", "answer": "10", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#50", "kind": "word", "prompt": "一条流水线原来每小时生产 17 件，改造后每小时少 2 件，运行 8 小时共生产多少件？只输出数字。", "expected": "120", "answer": "120", "ok": true}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#51", "kind": "word", "prompt": "一个仓库每天入库 38 箱货物，连续 9 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "339", "answer": "25", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#52", "kind": "word", "prompt": "小红有 31 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "17", "answer": "12", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#53", "kind": "word", "prompt": "一条流水线原来每小时生产 15 件，改造后每小时少 6 件，运行 8 小时共生产多少件？只输出数字。", "expected": "72", "answer": "120", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#54", "kind": "word", "prompt": "一个仓库每天入库 15 箱货物，连续 7 天，期间出库了 4 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "101", "answer": "7箱", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#55", "kind": "word", "prompt": "小红有 27 元，她买了 4 本笔记本，每本 3 元。还剩多少元？只输出数字。", "expected": "15", "answer": "9", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#56", "kind": "word", "prompt": "一条流水线原来每小时生产 40 件，改造后每小时少 2 件，运行 3 小时共生产多少件？只输出数字。", "expected": "114", "answer": "240", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#57", "kind": "word", "prompt": "一个仓库每天入库 18 箱货物，连续 4 天，期间出库了 6 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "66", "answer": "6", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#58", "kind": "word", "prompt": "小红有 25 元，她买了 3 本笔记本，每本 4 元。还剩多少元？只输出数字。", "expected": "13", "answer": "5", "ok": false}
+{"model": "1.5B", "quant": "q3_k_m", "iid": "word#59", "kind": "word", "prompt": "一条流水线原来每小时生产 37 件，改造后每小时少 3 件，运行 7 小时共生产多少件？只输出数字。", "expected": "238", "answer": "284", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "format#0", "kind": "format", "prompt": "计算 31 + 20。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "51", "answer": "{\"n\": 51}", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#1", "kind": "format", "prompt": "用不超过 8 个汉字回答：40 和 21 哪个大？只给答案。", "expected": "8", "answer": "40 大于 21", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#2", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#3", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 数据密集型计算任务，如机器学习模型训练和模拟。\n- 强大的图形处理能力用于实时渲染和复杂图形计算。\n- 大规模的并行计算任务，如视频处理和图像处理。", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#4", "kind": "format", "prompt": "87 乘以 27 等于多少？只输出数字，一个字都不要多说。", "expected": "2349", "answer": "23大呵。", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "format#5", "kind": "format", "prompt": "计算 87 + 58。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "145", "answer": "{\"n\": 145}", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#6", "kind": "format", "prompt": "用不超过 8 个汉字回答：85 和 18 哪个大？只给答案。", "expected": "8", "answer": "18大于85", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#7", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#8", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 数据密集型计算任务，如机器学习模型训练和模拟。\n- 强大的图形处理能力用于实时渲染和复杂图形计算。\n- 大规模的并行计算任务，如视频处理和图像处理。", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#9", "kind": "format", "prompt": "84 乘以 22 等于多少？只输出数字，一个字都不要多说。", "expected": "1848", "answer": "1832", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "format#10", "kind": "format", "prompt": "计算 60 + 31。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "91", "answer": "{\"n\": 91}", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#11", "kind": "format", "prompt": "用不超过 8 个汉字回答：78 和 58 哪个大？只给答案。", "expected": "8", "answer": "58 大于 78", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#12", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#13", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 数据密集型计算任务，如机器学习模型训练和模拟。\n- 强大的图形处理能力用于实时渲染和复杂图形计算。\n- 大规模的并行计算任务，如视频处理和图像处理。", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#14", "kind": "format", "prompt": "87 乘以 18 等于多少？只输出数字，一个字都不要多说。", "expected": "1566", "answer": "1584", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "format#15", "kind": "format", "prompt": "计算 23 + 15。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "38", "answer": "{\"n\": 38}", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#16", "kind": "format", "prompt": "用不超过 8 个汉字回答：59 和 24 哪个大？只给答案。", "expected": "8", "answer": "24更大", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#17", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#18", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 数据密集型计算任务，如机器学习模型训练和模拟。\n- 强大的图形处理能力用于实时渲染和复杂图形计算。\n- 大规模的并行计算任务，如视频处理和图像处理。", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#19", "kind": "format", "prompt": "70 乘以 34 等于多少？只输出数字，一个字都不要多说。", "expected": "2380", "answer": "2480", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "format#20", "kind": "format", "prompt": "计算 25 + 16。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "41", "answer": "{\"n\": 41}", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#21", "kind": "format", "prompt": "用不超过 8 个汉字回答：82 和 19 哪个大？只给答案。", "expected": "8", "answer": "19大于82", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#22", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#23", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 数据密集型计算任务，如机器学习模型训练和模拟。\n- 强大的图形处理能力用于实时渲染和复杂图形计算。\n- 大规模的并行计算任务，如视频处理和图像处理。", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#24", "kind": "format", "prompt": "25 乘以 47 等于多少？只输出数字，一个字都不要多说。", "expected": "1175", "answer": "1105", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "format#25", "kind": "format", "prompt": "计算 33 + 32。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "65", "answer": "{\"n\": 65}", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#26", "kind": "format", "prompt": "用不超过 8 个汉字回答：46 和 38 哪个大？只给答案。", "expected": "8", "answer": "38 大于 46", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#27", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#28", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 数据密集型计算任务，如机器学习模型训练和模拟。\n- 强大的图形处理能力用于实时渲染和复杂图形计算。\n- 大规模的并行计算任务，如视频处理和图像处理。", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "format#29", "kind": "format", "prompt": "83 乘以 21 等于多少？只输出数字，一个字都不要多说。", "expected": "1743", "answer": "1768", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#30", "kind": "word", "prompt": "一个仓库每天入库 14 箱货物，连续 4 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "53", "answer": "14", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#31", "kind": "word", "prompt": "小红有 33 元，她买了 4 本笔记本，每本 6 元。还剩多少元？只输出数字。", "expected": "9", "answer": "11", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#32", "kind": "word", "prompt": "一条流水线原来每小时生产 13 件，改造后每小时少 4 件，运行 7 小时共生产多少件？只输出数字。", "expected": "63", "answer": "149", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#33", "kind": "word", "prompt": "一个仓库每天入库 28 箱货物，连续 8 天，期间出库了 7 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "217", "answer": "147", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#34", "kind": "word", "prompt": "小红有 24 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "10", "answer": "11", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#35", "kind": "word", "prompt": "一条流水线原来每小时生产 26 件，改造后每小时少 3 件，运行 9 小时共生产多少件？只输出数字。", "expected": "207", "answer": "213", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#36", "kind": "word", "prompt": "一个仓库每天入库 22 箱货物，连续 8 天，期间出库了 6 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "170", "answer": "110", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#37", "kind": "word", "prompt": "小红有 39 元，她买了 5 本笔记本，每本 4 元。还剩多少元？只输出数字。", "expected": "19", "answer": "14", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#38", "kind": "word", "prompt": "一条流水线原来每小时生产 35 件，改造后每小时少 4 件，运行 9 小时共生产多少件？只输出数字。", "expected": "279", "answer": "285", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#39", "kind": "word", "prompt": "一个仓库每天入库 26 箱货物，连续 4 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "101", "answer": "25", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#40", "kind": "word", "prompt": "小红有 13 元，她买了 3 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "7", "answer": "4", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#41", "kind": "word", "prompt": "一条流水线原来每小时生产 21 件，改造后每小时少 6 件，运行 4 小时共生产多少件？只输出数字。", "expected": "60", "answer": "288", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#42", "kind": "word", "prompt": "一个仓库每天入库 27 箱货物，连续 4 天，期间出库了 2 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "106", "answer": "120", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#43", "kind": "word", "prompt": "小红有 17 元，她买了 5 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "7", "answer": "12", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#44", "kind": "word", "prompt": "一条流水线原来每小时生产 27 件，改造后每小时少 3 件，运行 4 小时共生产多少件？只输出数字。", "expected": "96", "answer": "148", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#45", "kind": "word", "prompt": "一个仓库每天入库 30 箱货物，连续 5 天，期间出库了 4 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "146", "answer": "156", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#46", "kind": "word", "prompt": "小红有 29 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "15", "answer": "8", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#47", "kind": "word", "prompt": "一条流水线原来每小时生产 18 件，改造后每小时少 3 件，运行 6 小时共生产多少件？只输出数字。", "expected": "90", "answer": "108", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#48", "kind": "word", "prompt": "一个仓库每天入库 36 箱货物，连续 6 天，期间出库了 2 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "214", "answer": "302", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#49", "kind": "word", "prompt": "小红有 74 元，她买了 9 本笔记本，每本 6 元。还剩多少元？只输出数字。", "expected": "20", "answer": "10", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#50", "kind": "word", "prompt": "一条流水线原来每小时生产 17 件，改造后每小时少 2 件，运行 8 小时共生产多少件？只输出数字。", "expected": "120", "answer": "144", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#51", "kind": "word", "prompt": "一个仓库每天入库 38 箱货物，连续 9 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "339", "answer": "279", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#52", "kind": "word", "prompt": "小红有 31 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "17", "answer": "10", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#53", "kind": "word", "prompt": "一条流水线原来每小时生产 15 件，改造后每小时少 6 件，运行 8 小时共生产多少件？只输出数字。", "expected": "72", "answer": "1440", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#54", "kind": "word", "prompt": "一个仓库每天入库 15 箱货物，连续 7 天，期间出库了 4 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "101", "answer": "117", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#55", "kind": "word", "prompt": "小红有 27 元，她买了 4 本笔记本，每本 3 元。还剩多少元？只输出数字。", "expected": "15", "answer": "11", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#56", "kind": "word", "prompt": "一条流水线原来每小时生产 40 件，改造后每小时少 2 件，运行 3 小时共生产多少件？只输出数字。", "expected": "114", "answer": "420", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#57", "kind": "word", "prompt": "一个仓库每天入库 18 箱货物，连续 4 天，期间出库了 6 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "66", "answer": "168", "ok": false}
+{"model": "3B", "quant": "q2_k", "iid": "word#58", "kind": "word", "prompt": "小红有 25 元，她买了 3 本笔记本，每本 4 元。还剩多少元？只输出数字。", "expected": "13", "answer": "13", "ok": true}
+{"model": "3B", "quant": "q2_k", "iid": "word#59", "kind": "word", "prompt": "一条流水线原来每小时生产 37 件，改造后每小时少 3 件，运行 7 小时共生产多少件？只输出数字。", "expected": "238", "answer": "112", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#0", "kind": "format", "prompt": "计算 31 + 20。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "51", "answer": "{\"n\": 51}", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#1", "kind": "format", "prompt": "用不超过 8 个汉字回答：40 和 21 哪个大？只给答案。", "expected": "8", "answer": "40 大于 21", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#2", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#3", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 训练和运行深度学习模型\n- 进行大规模的科学计算和模拟，如分子动力学、天气预报等\n- 图像和视频处理，包括图像识别、视频编码和解码等任务", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#4", "kind": "format", "prompt": "87 乘以 27 等于多少？只输出数字，一个字都不要多说。", "expected": "2349", "answer": "2349", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#5", "kind": "format", "prompt": "计算 87 + 58。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "145", "answer": "{\"n\": 145}", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#6", "kind": "format", "prompt": "用不超过 8 个汉字回答：85 和 18 哪个大？只给答案。", "expected": "8", "answer": "18 大", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#7", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#8", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 训练和运行深度学习模型\n- 进行大规模的科学计算和模拟，如分子动力学、天气预报等\n- 图像和视频处理，包括图像识别、视频编码和解码等任务", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#9", "kind": "format", "prompt": "84 乘以 22 等于多少？只输出数字，一个字都不要多说。", "expected": "1848", "answer": "1848", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#10", "kind": "format", "prompt": "计算 60 + 31。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "91", "answer": "{\"n\": 91}", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#11", "kind": "format", "prompt": "用不超过 8 个汉字回答：78 和 58 哪个大？只给答案。", "expected": "8", "answer": "78大", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#12", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#13", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 训练和运行深度学习模型\n- 进行大规模的科学计算和模拟，如分子动力学、天气预报等\n- 图像和视频处理，包括图像识别、视频编码和解码等任务", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#14", "kind": "format", "prompt": "87 乘以 18 等于多少？只输出数字，一个字都不要多说。", "expected": "1566", "answer": "1566", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#15", "kind": "format", "prompt": "计算 23 + 15。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "38", "answer": "{\"n\": 38}", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#16", "kind": "format", "prompt": "用不超过 8 个汉字回答：59 和 24 哪个大？只给答案。", "expected": "8", "answer": "59 大于 24", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#17", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#18", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 训练和运行深度学习模型\n- 进行大规模的科学计算和模拟，如分子动力学、天气预报等\n- 图像和视频处理，包括图像识别、视频编码和解码等任务", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#19", "kind": "format", "prompt": "70 乘以 34 等于多少？只输出数字，一个字都不要多说。", "expected": "2380", "answer": "2420", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#20", "kind": "format", "prompt": "计算 25 + 16。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "41", "answer": "{\"n\": 41}", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#21", "kind": "format", "prompt": "用不超过 8 个汉字回答：82 和 19 哪个大？只给答案。", "expected": "8", "answer": "82 大于 19", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#22", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#23", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 训练和运行深度学习模型\n- 进行大规模的科学计算和模拟，如分子动力学、天气预报等\n- 图像和视频处理，包括图像识别、视频编码和解码等任务", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#24", "kind": "format", "prompt": "25 乘以 47 等于多少？只输出数字，一个字都不要多说。", "expected": "1175", "answer": "1175", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#25", "kind": "format", "prompt": "计算 33 + 32。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "65", "answer": "{\"n\": 65}", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#26", "kind": "format", "prompt": "用不超过 8 个汉字回答：46 和 38 哪个大？只给答案。", "expected": "8", "answer": "46 大于 38", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#27", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#28", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 训练和运行深度学习模型\n- 进行大规模的科学计算和模拟，如分子动力学、天气预报等\n- 图像和视频处理，包括图像识别、视频编码和解码等任务", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "format#29", "kind": "format", "prompt": "83 乘以 21 等于多少？只输出数字，一个字都不要多说。", "expected": "1743", "answer": "1743", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#30", "kind": "word", "prompt": "一个仓库每天入库 14 箱货物，连续 4 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "53", "answer": "58", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#31", "kind": "word", "prompt": "小红有 33 元，她买了 4 本笔记本，每本 6 元。还剩多少元？只输出数字。", "expected": "9", "answer": "15", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#32", "kind": "word", "prompt": "一条流水线原来每小时生产 13 件，改造后每小时少 4 件，运行 7 小时共生产多少件？只输出数字。", "expected": "63", "answer": "45", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#33", "kind": "word", "prompt": "一个仓库每天入库 28 箱货物，连续 8 天，期间出库了 7 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "217", "answer": "227", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#34", "kind": "word", "prompt": "小红有 24 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "10", "answer": "13", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#35", "kind": "word", "prompt": "一条流水线原来每小时生产 26 件，改造后每小时少 3 件，运行 9 小时共生产多少件？只输出数字。", "expected": "207", "answer": "213", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#36", "kind": "word", "prompt": "一个仓库每天入库 22 箱货物，连续 8 天，期间出库了 6 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "170", "answer": "180", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#37", "kind": "word", "prompt": "小红有 39 元，她买了 5 本笔记本，每本 4 元。还剩多少元？只输出数字。", "expected": "19", "answer": "24", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#38", "kind": "word", "prompt": "一条流水线原来每小时生产 35 件，改造后每小时少 4 件，运行 9 小时共生产多少件？只输出数字。", "expected": "279", "answer": "285", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#39", "kind": "word", "prompt": "一个仓库每天入库 26 箱货物，连续 4 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "101", "answer": "26×4=104（箱）", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#40", "kind": "word", "prompt": "小红有 13 元，她买了 3 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "7", "answer": "7", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#41", "kind": "word", "prompt": "一条流水线原来每小时生产 21 件，改造后每小时少 6 件，运行 4 小时共生产多少件？只输出数字。", "expected": "60", "answer": "46", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#42", "kind": "word", "prompt": "一个仓库每天入库 27 箱货物，连续 4 天，期间出库了 2 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "106", "answer": "26", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#43", "kind": "word", "prompt": "小红有 17 元，她买了 5 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "7", "answer": "7", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#44", "kind": "word", "prompt": "一条流水线原来每小时生产 27 件，改造后每小时少 3 件，运行 4 小时共生产多少件？只输出数字。", "expected": "96", "answer": "105", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#45", "kind": "word", "prompt": "一个仓库每天入库 30 箱货物，连续 5 天，期间出库了 4 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "146", "answer": "154", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#46", "kind": "word", "prompt": "小红有 29 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "15", "answer": "14", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#47", "kind": "word", "prompt": "一条流水线原来每小时生产 18 件，改造后每小时少 3 件，运行 6 小时共生产多少件？只输出数字。", "expected": "90", "answer": "93", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#48", "kind": "word", "prompt": "一个仓库每天入库 36 箱货物，连续 6 天，期间出库了 2 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "214", "answer": "218", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#49", "kind": "word", "prompt": "小红有 74 元，她买了 9 本笔记本，每本 6 元。还剩多少元？只输出数字。", "expected": "20", "answer": "55", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#50", "kind": "word", "prompt": "一条流水线原来每小时生产 17 件，改造后每小时少 2 件，运行 8 小时共生产多少件？只输出数字。", "expected": "120", "answer": "136", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#51", "kind": "word", "prompt": "一个仓库每天入库 38 箱货物，连续 9 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "339", "answer": "348", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#52", "kind": "word", "prompt": "小红有 31 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "17", "answer": "16", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#53", "kind": "word", "prompt": "一条流水线原来每小时生产 15 件，改造后每小时少 6 件，运行 8 小时共生产多少件？只输出数字。", "expected": "72", "answer": "96", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#54", "kind": "word", "prompt": "一个仓库每天入库 15 箱货物，连续 7 天，期间出库了 4 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "101", "answer": "107", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#55", "kind": "word", "prompt": "小红有 27 元，她买了 4 本笔记本，每本 3 元。还剩多少元？只输出数字。", "expected": "15", "answer": "15", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#56", "kind": "word", "prompt": "一条流水线原来每小时生产 40 件，改造后每小时少 2 件，运行 3 小时共生产多少件？只输出数字。", "expected": "114", "answer": "114", "ok": true}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#57", "kind": "word", "prompt": "一个仓库每天入库 18 箱货物，连续 4 天，期间出库了 6 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "66", "answer": "72", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#58", "kind": "word", "prompt": "小红有 25 元，她买了 3 本笔记本，每本 4 元。还剩多少元？只输出数字。", "expected": "13", "answer": "23", "ok": false}
+{"model": "3B", "quant": "q3_k_m", "iid": "word#59", "kind": "word", "prompt": "一条流水线原来每小时生产 37 件，改造后每小时少 3 件，运行 7 小时共生产多少件？只输出数字。", "expected": "238", "answer": "214", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#0", "kind": "format", "prompt": "计算 31 + 20。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "51", "answer": "{\"n\": 51}", "ok": true}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#1", "kind": "format", "prompt": "用不超过 8 个汉字回答：40 和 21 哪个大？只给答案。", "expected": "8", "answer": "40 大。", "ok": true}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#2", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#3", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "1. 大型科学计算任务：如天体物理学、化学、材料科学等，这些任务通常需要大量的计算资源，而 GPU 可以加速这些任务的计算速度，从而提高计算效率。\n\n2. 机器学习和深度学习：在这些领域，大量的数据和计算资源是", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#4", "kind": "format", "prompt": "87 乘以 27 等于多少？只输出数字，一个字都不要多说。", "expected": "2349", "answer": "1927", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#5", "kind": "format", "prompt": "计算 87 + 58。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "145", "answer": "{\"n\": 145}", "ok": true}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#6", "kind": "format", "prompt": "用不超过 8 个汉字回答：85 和 18 哪个大？只给答案。", "expected": "8", "answer": "18", "ok": true}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#7", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#8", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "1. 大型科学计算任务：如天体物理学、化学、材料科学等，这些任务通常需要大量的计算资源，而 GPU 可以加速这些任务的计算速度，从而提高计算效率。\n\n2. 机器学习和深度学习：在这些领域，大量的数据和计算资源是", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#9", "kind": "format", "prompt": "84 乘以 22 等于多少？只输出数字，一个字都不要多说。", "expected": "1848", "answer": "184", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#10", "kind": "format", "prompt": "计算 60 + 31。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "91", "answer": "{\"n\": 91}", "ok": true}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#11", "kind": "format", "prompt": "用不超过 8 个汉字回答：78 和 58 哪个大？只给答案。", "expected": "8", "answer": "78 大。", "ok": true}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#12", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#13", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "1. 大型科学计算任务：如天体物理学、化学、材料科学等，这些任务通常需要大量的计算资源，而 GPU 可以加速这些任务的计算速度，从而提高计算效率。\n\n2. 机器学习和深度学习：在这些领域，大量的数据和计算资源是", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#14", "kind": "format", "prompt": "87 乘以 18 等于多少？只输出数字，一个字都不要多说。", "expected": "1566", "answer": "1428", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#15", "kind": "format", "prompt": "计算 23 + 15。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "38", "answer": "{\"n\": 38}", "ok": true}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#16", "kind": "format", "prompt": "用不超过 8 个汉字回答：59 和 24 哪个大？只给答案。", "expected": "8", "answer": "59 大。", "ok": true}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#17", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#18", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "1. 大型科学计算任务：如天体物理学、化学、材料科学等，这些任务通常需要大量的计算资源，而 GPU 可以加速这些任务的计算速度，从而提高计算效率。\n\n2. 机器学习和深度学习：在这些领域，大量的数据和计算资源是", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#19", "kind": "format", "prompt": "70 乘以 34 等于多少？只输出数字，一个字都不要多说。", "expected": "2380", "answer": "2200", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#20", "kind": "format", "prompt": "计算 25 + 16。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "41", "answer": "{\"n\": 41}", "ok": true}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#21", "kind": "format", "prompt": "用不超过 8 个汉字回答：82 和 19 哪个大？只给答案。", "expected": "8", "answer": "19", "ok": true}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#22", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#23", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "1. 大型科学计算任务：如天体物理学、化学、材料科学等，这些任务通常需要大量的计算资源，而 GPU 可以加速这些任务的计算速度，从而提高计算效率。\n\n2. 机器学习和深度学习：在这些领域，大量的数据和计算资源是", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#24", "kind": "format", "prompt": "25 乘以 47 等于多少？只输出数字，一个字都不要多说。", "expected": "1175", "answer": "1125", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#25", "kind": "format", "prompt": "计算 33 + 32。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "65", "answer": "{\"n\": 65}", "ok": true}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#26", "kind": "format", "prompt": "用不超过 8 个汉字回答：46 和 38 哪个大？只给答案。", "expected": "8", "answer": "46 大。", "ok": true}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#27", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#28", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "1. 大型科学计算任务：如天体物理学、化学、材料科学等，这些任务通常需要大量的计算资源，而 GPU 可以加速这些任务的计算速度，从而提高计算效率。\n\n2. 机器学习和深度学习：在这些领域，大量的数据和计算资源是", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "format#29", "kind": "format", "prompt": "83 乘以 21 等于多少？只输出数字，一个字都不要多说。", "expected": "1743", "answer": "162", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#30", "kind": "word", "prompt": "一个仓库每天入库 14 箱货物，连续 4 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "53", "answer": "11", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#31", "kind": "word", "prompt": "小红有 33 元，她买了 4 本笔记本，每本 6 元。还剩多少元？只输出数字。", "expected": "9", "answer": "27", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#32", "kind": "word", "prompt": "一条流水线原来每小时生产 13 件，改造后每小时少 4 件，运行 7 小时共生产多少件？只输出数字。", "expected": "63", "answer": "13 - 4 * 7 = 13 - 28 = -15（负数表示生产减少）\n\n所以，改造后，流水线运行 7 小时共生产 0 件。", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#33", "kind": "word", "prompt": "一个仓库每天入库 28 箱货物，连续 8 天，期间出库了 7 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "217", "answer": "21", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#34", "kind": "word", "prompt": "小红有 24 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "10", "answer": "小红还剩 17 元。", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#35", "kind": "word", "prompt": "一条流水线原来每小时生产 26 件，改造后每小时少 3 件，运行 9 小时共生产多少件？只输出数字。", "expected": "207", "answer": "159", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#36", "kind": "word", "prompt": "一个仓库每天入库 22 箱货物，连续 8 天，期间出库了 6 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "170", "answer": "16", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#37", "kind": "word", "prompt": "小红有 39 元，她买了 5 本笔记本，每本 4 元。还剩多少元？只输出数字。", "expected": "19", "answer": "21", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#38", "kind": "word", "prompt": "一条流水线原来每小时生产 35 件，改造后每小时少 4 件，运行 9 小时共生产多少件？只输出数字。", "expected": "279", "answer": "35 - 4 × 9 = 11（件）", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#39", "kind": "word", "prompt": "一个仓库每天入库 26 箱货物，连续 4 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "101", "answer": "26 - 3 = 23", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#40", "kind": "word", "prompt": "小红有 13 元，她买了 3 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "7", "answer": "小红还剩 1元。", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#41", "kind": "word", "prompt": "一条流水线原来每小时生产 21 件，改造后每小时少 6 件，运行 4 小时共生产多少件？只输出数字。", "expected": "60", "answer": "240", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#42", "kind": "word", "prompt": "一个仓库每天入库 27 箱货物，连续 4 天，期间出库了 2 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "106", "answer": "25", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#43", "kind": "word", "prompt": "小红有 17 元，她买了 5 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "7", "answer": "小红还剩 3 元。", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#44", "kind": "word", "prompt": "一条流水线原来每小时生产 27 件，改造后每小时少 3 件，运行 4 小时共生产多少件？只输出数字。", "expected": "96", "answer": "150", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#45", "kind": "word", "prompt": "一个仓库每天入库 30 箱货物，连续 5 天，期间出库了 4 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "146", "answer": "26", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#46", "kind": "word", "prompt": "小红有 29 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "15", "answer": "11", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#47", "kind": "word", "prompt": "一条流水线原来每小时生产 18 件，改造后每小时少 3 件，运行 6 小时共生产多少件？只输出数字。", "expected": "90", "answer": "153", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#48", "kind": "word", "prompt": "一个仓库每天入库 36 箱货物，连续 6 天，期间出库了 2 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "214", "answer": "34箱", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#49", "kind": "word", "prompt": "小红有 74 元，她买了 9 本笔记本，每本 6 元。还剩多少元？只输出数字。", "expected": "20", "answer": "小红还剩 2 元。", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#50", "kind": "word", "prompt": "一条流水线原来每小时生产 17 件，改造后每小时少 2 件，运行 8 小时共生产多少件？只输出数字。", "expected": "120", "answer": "120", "ok": true}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#51", "kind": "word", "prompt": "一个仓库每天入库 38 箱货物，连续 9 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "339", "answer": "35箱", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#52", "kind": "word", "prompt": "小红有 31 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "17", "answer": "14", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#53", "kind": "word", "prompt": "一条流水线原来每小时生产 15 件，改造后每小时少 6 件，运行 8 小时共生产多少件？只输出数字。", "expected": "72", "answer": "120", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#54", "kind": "word", "prompt": "一个仓库每天入库 15 箱货物，连续 7 天，期间出库了 4 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "101", "answer": "11", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#55", "kind": "word", "prompt": "小红有 27 元，她买了 4 本笔记本，每本 3 元。还剩多少元？只输出数字。", "expected": "15", "answer": "小红还剩 27 - 4 * 3 = 27 - 12 = 15 元。", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#56", "kind": "word", "prompt": "一条流水线原来每小时生产 40 件，改造后每小时少 2 件，运行 3 小时共生产多少件？只输出数字。", "expected": "114", "answer": "120", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#57", "kind": "word", "prompt": "一个仓库每天入库 18 箱货物，连续 4 天，期间出库了 6 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "66", "answer": "12", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#58", "kind": "word", "prompt": "小红有 25 元，她买了 3 本笔记本，每本 4 元。还剩多少元？只输出数字。", "expected": "13", "answer": "11", "ok": false}
+{"model": "0.5B", "quant": "q4_k_m", "iid": "word#59", "kind": "word", "prompt": "一条流水线原来每小时生产 37 件，改造后每小时少 3 件，运行 7 小时共生产多少件？只输出数字。", "expected": "238", "answer": "28", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#0", "kind": "format", "prompt": "计算 31 + 20。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "51", "answer": "{\"n\": 51}", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#1", "kind": "format", "prompt": "用不超过 8 个汉字回答：40 和 21 哪个大？只给答案。", "expected": "8", "answer": "40较大。", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#2", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#3", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 图像和视频处理\n- 机器学习和深度学习训练\n- 游戏渲染和模拟", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#4", "kind": "format", "prompt": "87 乘以 27 等于多少？只输出数字，一个字都不要多说。", "expected": "2349", "answer": "2349", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#5", "kind": "format", "prompt": "计算 87 + 58。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "145", "answer": "{\"n\": 145}", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#6", "kind": "format", "prompt": "用不超过 8 个汉字回答：85 和 18 哪个大？只给答案。", "expected": "8", "answer": "85较大。", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#7", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#8", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 图像和视频处理\n- 机器学习和深度学习训练\n- 游戏渲染和模拟", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#9", "kind": "format", "prompt": "84 乘以 22 等于多少？只输出数字，一个字都不要多说。", "expected": "1848", "answer": "1848", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#10", "kind": "format", "prompt": "计算 60 + 31。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "91", "answer": "{\"n\": 91}", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#11", "kind": "format", "prompt": "用不超过 8 个汉字回答：78 和 58 哪个大？只给答案。", "expected": "8", "answer": "78更大。", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#12", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#13", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 图像和视频处理\n- 机器学习和深度学习训练\n- 游戏渲染和模拟", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#14", "kind": "format", "prompt": "87 乘以 18 等于多少？只输出数字，一个字都不要多说。", "expected": "1566", "answer": "1566", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#15", "kind": "format", "prompt": "计算 23 + 15。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "38", "answer": "{\"n\": 38}", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#16", "kind": "format", "prompt": "用不超过 8 个汉字回答：59 和 24 哪个大？只给答案。", "expected": "8", "answer": "59较大。", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#17", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#18", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 图像和视频处理\n- 机器学习和深度学习训练\n- 游戏渲染和模拟", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#19", "kind": "format", "prompt": "70 乘以 34 等于多少？只输出数字，一个字都不要多说。", "expected": "2380", "answer": "2380", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#20", "kind": "format", "prompt": "计算 25 + 16。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "41", "answer": "{\"n\": 41}", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#21", "kind": "format", "prompt": "用不超过 8 个汉字回答：82 和 19 哪个大？只给答案。", "expected": "8", "answer": "82大于19", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#22", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#23", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 图像和视频处理\n- 机器学习和深度学习训练\n- 游戏渲染和模拟", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#24", "kind": "format", "prompt": "25 乘以 47 等于多少？只输出数字，一个字都不要多说。", "expected": "1175", "answer": "1175", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#25", "kind": "format", "prompt": "计算 33 + 32。只输出 JSON，形如 {\"n\": 数字}，不要任何解释。", "expected": "65", "answer": "{\"n\": 65}", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#26", "kind": "format", "prompt": "用不超过 8 个汉字回答：46 和 38 哪个大？只给答案。", "expected": "8", "answer": "46较大", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#27", "kind": "format", "prompt": "把单词 token 全部大写输出，不要标点。", "expected": "TOKEN", "answer": "TOKEN", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#28", "kind": "format", "prompt": "列出 3 个可以用 GPU 加速的场景，每条以 - 开头，一行一条。", "expected": "3", "answer": "- 图像和视频处理\n- 机器学习和深度学习训练\n- 游戏渲染和模拟", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "format#29", "kind": "format", "prompt": "83 乘以 21 等于多少？只输出数字，一个字都不要多说。", "expected": "1743", "answer": "1743", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#30", "kind": "word", "prompt": "一个仓库每天入库 14 箱货物，连续 4 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "53", "answer": "5", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#31", "kind": "word", "prompt": "小红有 33 元，她买了 4 本笔记本，每本 6 元。还剩多少元？只输出数字。", "expected": "9", "answer": "21", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#32", "kind": "word", "prompt": "一条流水线原来每小时生产 13 件，改造后每小时少 4 件，运行 7 小时共生产多少件？只输出数字。", "expected": "63", "answer": "81", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#33", "kind": "word", "prompt": "一个仓库每天入库 28 箱货物，连续 8 天，期间出库了 7 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "217", "answer": "19", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#34", "kind": "word", "prompt": "小红有 24 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "10", "answer": "10", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#35", "kind": "word", "prompt": "一条流水线原来每小时生产 26 件，改造后每小时少 3 件，运行 9 小时共生产多少件？只输出数字。", "expected": "207", "answer": "201", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#36", "kind": "word", "prompt": "一个仓库每天入库 22 箱货物，连续 8 天，期间出库了 6 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "170", "answer": "16", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#37", "kind": "word", "prompt": "小红有 39 元，她买了 5 本笔记本，每本 4 元。还剩多少元？只输出数字。", "expected": "19", "answer": "29", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#38", "kind": "word", "prompt": "一条流水线原来每小时生产 35 件，改造后每小时少 4 件，运行 9 小时共生产多少件？只输出数字。", "expected": "279", "answer": "297", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#39", "kind": "word", "prompt": "一个仓库每天入库 26 箱货物，连续 4 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "101", "answer": "104", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#40", "kind": "word", "prompt": "小红有 13 元，她买了 3 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "7", "answer": "7", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#41", "kind": "word", "prompt": "一条流水线原来每小时生产 21 件，改造后每小时少 6 件，运行 4 小时共生产多少件？只输出数字。", "expected": "60", "answer": "108", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#42", "kind": "word", "prompt": "一个仓库每天入库 27 箱货物，连续 4 天，期间出库了 2 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "106", "answer": "108", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#43", "kind": "word", "prompt": "小红有 17 元，她买了 5 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "7", "answer": "7", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#44", "kind": "word", "prompt": "一条流水线原来每小时生产 27 件，改造后每小时少 3 件，运行 4 小时共生产多少件？只输出数字。", "expected": "96", "answer": "108", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#45", "kind": "word", "prompt": "一个仓库每天入库 30 箱货物，连续 5 天，期间出库了 4 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "146", "answer": "135", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#46", "kind": "word", "prompt": "小红有 29 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "15", "answer": "15", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#47", "kind": "word", "prompt": "一条流水线原来每小时生产 18 件，改造后每小时少 3 件，运行 6 小时共生产多少件？只输出数字。", "expected": "90", "answer": "108", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#48", "kind": "word", "prompt": "一个仓库每天入库 36 箱货物，连续 6 天，期间出库了 2 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "214", "answer": "204", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#49", "kind": "word", "prompt": "小红有 74 元，她买了 9 本笔记本，每本 6 元。还剩多少元？只输出数字。", "expected": "20", "answer": "40", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#50", "kind": "word", "prompt": "一条流水线原来每小时生产 17 件，改造后每小时少 2 件，运行 8 小时共生产多少件？只输出数字。", "expected": "120", "answer": "104", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#51", "kind": "word", "prompt": "一个仓库每天入库 38 箱货物，连续 9 天，期间出库了 3 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "339", "answer": "34", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#52", "kind": "word", "prompt": "小红有 31 元，她买了 7 本笔记本，每本 2 元。还剩多少元？只输出数字。", "expected": "17", "answer": "27", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#53", "kind": "word", "prompt": "一条流水线原来每小时生产 15 件，改造后每小时少 6 件，运行 8 小时共生产多少件？只输出数字。", "expected": "72", "answer": "96", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#54", "kind": "word", "prompt": "一个仓库每天入库 15 箱货物，连续 7 天，期间出库了 4 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "101", "answer": "85", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#55", "kind": "word", "prompt": "小红有 27 元，她买了 4 本笔记本，每本 3 元。还剩多少元？只输出数字。", "expected": "15", "answer": "9", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#56", "kind": "word", "prompt": "一条流水线原来每小时生产 40 件，改造后每小时少 2 件，运行 3 小时共生产多少件？只输出数字。", "expected": "114", "answer": "106", "ok": false}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#57", "kind": "word", "prompt": "一个仓库每天入库 18 箱货物，连续 4 天，期间出库了 6 箱。现在仓库里增加了多少箱？只输出数字。", "expected": "66", "answer": "66", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#58", "kind": "word", "prompt": "小红有 25 元，她买了 3 本笔记本，每本 4 元。还剩多少元？只输出数字。", "expected": "13", "answer": "13", "ok": true}
+{"model": "7B", "quant": "q4_k_m", "iid": "word#59", "kind": "word", "prompt": "一条流水线原来每小时生产 37 件，改造后每小时少 3 件，运行 7 小时共生产多少件？只输出数字。", "expected": "238", "answer": "259", "ok": false}

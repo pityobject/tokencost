@@ -54,6 +54,13 @@ def load():
         key = (f"{r['model']}-{r['quant']}", fam)
         agg[key][1] += 1
         agg[key][0] += 1 if r.get("ok") else 0
+    # 算术族来自主基准 quality.csv（400 题），不能从第二任务族的明细里找
+    main = cfg.DATA_DIR / "quality.csv"
+    if main.exists():
+        q = pd.read_csv(main).dropna(subset=["acc"])
+        for _, r in q.iterrows():
+            agg[(f"{r['model']}-{r['quant']}", "arith")] = [
+                int(round(float(r["acc"]) * int(r["n"]))), int(r["n"])]
     combos = sorted({k[0] for k in agg})
     return agg, combos
 
@@ -127,4 +134,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
