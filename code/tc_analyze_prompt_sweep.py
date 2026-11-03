@@ -101,18 +101,31 @@ def main():
               f"{r['err_ttft']*100:>7.0f}%{r['tpot']:>9.2f}ms{r['pred_tpot']:>9.2f}ms"
               f"{r['err_tpot']*100:>7.0f}%")
 
+    per_model = {f"{m}-{q}": float(np.mean(np.abs(sub["err_ttft"])) * 100)
+                 for (m, q), sub in d.groupby(["model", "quant"])}
     mape_ttft = float(np.mean(np.abs(d["err_ttft"])) * 100)
     max_ttft = float(np.max(np.abs(d["err_ttft"])) * 100)
     print(f"\n  TTFT：MAPE {mape_ttft:.1f}%，最大误差 {max_ttft:.1f}%"
           f"（L 跨度 {d['L'].min():.0f}–{d['L'].max():.0f} token，"
           f"{d['L'].max()/d['L'].min():.1f} 倍）")
 
-    # ---- 斜率对比：实测 vs 模型 ----
-    if len(d) >= 3:
-        k_meas, b_meas = np.polyfit(d["L"], d["ttft"], 1)
-        k_pred, b_pred = np.polyfit(d["L"], d["pred_ttft"], 1)
-        print(f"\n  实测斜率 {k_meas:.4f} ms/token   模型斜率 {k_pred:.4f} ms/token"
-              f"   比值 {k_meas / k_pred:.2f}")
+    # ---- 斜率对比：**必须按模型分别拟合** ----
+    # 不同模型的斜率不同（权重项 W/BW 不同、参数量不同），混在一起拟合没有意义。
+    slopes = {}
+    print()
+    for (m, q), sub in d.groupby(["model", "quant"]):
+        sub = sub.sort_values("L")
+        if len(sub) >= 2:
+            k_meas = float(np.polyfit(sub["L"], sub["ttft"], 1)[0])
+            k_pred = float(np.polyfit(sub["L"], sub["pred_ttft"], 1)[0])
+            slopes[f"{m}-{q}"] = dict(k_meas=k_meas, k_pred=k_pred,
+                                      ratio=k_meas / k_pred, n=len(sub))
+            print(f"  {m}-{q:<8} {len(sub)} 点  实测斜率 {k_meas:.4f}  "
+                  f"模型斜率 {k_pred:.4f}  ms/token  比值 {k_meas/k_pred:.2f}")
+        else:
+            print(f"  {m}-{q:<8} 只有 {len(sub)} 点，**不足以拟合斜率**"
+                  f"（只能看幅值误差）")
+    if slopes:
         print("  说明：斜率 = 2·P·min(b,B_SAT)/PEAK_pre 的等效值，"
               "是 prefill 算力项的直接检验。")
 
@@ -136,14 +149,16 @@ def main():
     print(f"\n已保存 {out}")
 
     d.to_csv(cfg.RESULTS_DIR / "prompt_sweep.csv", index=False, encoding="utf-8-sig")
-    (cfg.RESULTS_DIR / "prompt_sweep_summary.json").write_text(json.dumps(dict(
-        n_cells=len(d), mape_ttft=mape_ttft, max_err_ttft=max_ttft,
-        slope_meas=float(k_meas) if len(d) >= 3 else None,
-        slope_pred=float(k_pred) if len(d) >= 3 else None,
-        L_range=[float(d["L"].min()), float(d["L"].max())],
-    ), ensure_ascii=False, indent=2), encoding="utf-8")
+    (cfg.RESULTS_DIR / "prompt_sweep_summary.json").write_text(
+        json.dumps(dict(
+            n_cells=len(d), mape_ttft=mape_ttft, max_err_ttft=max_ttft,
+            L_range=[float(d["L"].min()), float(d["L"].max())],
+            slopes=slopes,                  # 只含 ≥2 个长度点的模型
+            per_model_mape=per_model,      # 单模型口径的 TTFT MAPE
+        ), ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"已写入 {cfg.RESULTS_DIR / 'prompt_sweep_summary.json'}")
 
 
 if __name__ == "__main__":
     main()
+

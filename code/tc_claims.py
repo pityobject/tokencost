@@ -44,12 +44,16 @@ def _sweep(key, unit, nd=1):
 
 
 def _sweep_ratio():
+    """斜率比值：只报**有 ≥2 个长度点**的模型（单点无法拟合斜率）。"""
     p = RESULTS / "prompt_sweep_summary.json"
     if not p.exists():
         return "无数据"
     d = json.loads(p.read_text(encoding="utf-8"))
-    a, b = d.get("slope_meas"), d.get("slope_pred")
-    return f"{a/b:.2f}×" if a and b else "无数据"
+    sl = d.get("slopes") or {}
+    if not sl:
+        return "无数据"
+    k = sorted(sl)[0]
+    return f"{sl[k]['ratio']:.2f}×（{k}）"
 
 
 def _sweep_range():
@@ -413,6 +417,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 

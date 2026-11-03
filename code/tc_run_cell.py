@@ -79,6 +79,11 @@ def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
     rows = []
     try:
         t_start = time.time()
+        # 首次加载要把权重读进显存：3B 约 5–15 秒，7B 常要 30–60 秒。
+        # 不加这句提示很容易被误判成卡死、然后被手动中断——中断就白跑了（无日志、无落盘）。
+        if verbose:
+            est = "30–60 秒" if model in ("7B", "Llama1B") else "5–15 秒"
+            print(f"    正在启动 llama-server（{model} 首次加载约 {est}，请勿中断）...", flush=True)
         proc, log_path = srv.start(key, ctx, conc, tag=cid)
         if verbose:
             print(f"    服务就绪 {time.time()-t_start:.1f}s  日志 {log_path.name}")
