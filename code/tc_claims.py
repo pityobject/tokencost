@@ -35,6 +35,18 @@ DOCS = [ROOT / "README.md",
 
 
 
+def _fam(name):
+    """读 results/quality_profile.csv，取某任务族的跨组合均值。"""
+    p = RESULTS / "quality_profile.csv"
+    if not p.exists():
+        return "无数据"
+    import pandas as _pd
+    d = _pd.read_csv(p)
+    if name not in d.columns:
+        return "无数据"
+    return f"{d[name].mean():.1f}%"
+
+
 def _sweep(key, unit, nd=1):
     p = RESULTS / "prompt_sweep_summary.json"
     if not p.exists():
@@ -223,6 +235,10 @@ def build_claims(d):
         "首字固定开销": f"{fit['ovh_ttft']:.2f} ms",
         # 泊松/排队相关（第四轮复核：这些数字以前只写在散文里，没有唯一来源）
         # TTFT 随 prompt 长度的斜率验证（tc_analyze_prompt_sweep.py）
+        # 质量轴三族（tc_analyze_quality2.py）
+        "质量族均值：算术/字符串": _fam("arith"),
+        "质量族均值：格式遵循": _fam("format"),
+        "质量族均值：多步应用题": _fam("word"),
         "TTFT 长度斜率验证（MAPE）": _sweep("mape_ttft", "%", 1),
         "TTFT 长度斜率（实测/模型）": _sweep_ratio(),
         "长度验证覆盖范围（token）": _sweep_range(),
