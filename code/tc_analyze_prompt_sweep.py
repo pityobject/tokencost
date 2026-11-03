@@ -128,6 +128,24 @@ def main():
     if slopes:
         print("  说明：斜率 = 2·P·min(b,B_SAT)/PEAK_pre 的等效值，"
               "是 prefill 算力项的直接检验。")
+        # ---- 从实测斜率反推 PEAK_pre，看它是不是"硬件常数" ----
+        print("\n  从实测斜率反推 prefill 有效算力（b=1，PEAK_pre = 2·P / slope）：")
+        peak_implied = {}
+        for (m, q), sub in d.groupby(["model", "quant"]):
+            if len(sub) < 2:
+                continue
+            k = float(np.polyfit(sub["L"], sub["ttft"], 1)[0])   # ms/token
+            P = float(sub["n_params"].iloc[0])
+            peak = 2.0 * P / (k * 1e-3) / 1e12                    # TFLOP/s
+            peak_implied[f"{m}-{q}"] = peak
+            print(f"    {m}-{q:<10} 参数量 {P/1e9:.2f}B  反推 PEAK_pre = {peak:.1f} TFLOP/s")
+        if len(peak_implied) >= 2:
+            vals = list(peak_implied.values())
+            spread = (max(vals) - min(vals)) / (sum(vals) / len(vals)) * 100
+            print(f"    → 两个模型的差 {spread:.0f}%，模型里用的是同一个 "
+                  f"{fit.get('peak_prefill', float('nan')):.1f} TFLOP/s")
+            print("      结论：PEAK_pre 近似是**硬件属性**（跨模型差 {:.0f}%，同一量级），"
+                  "但 n_params 不足以完全刻画架构差异（注意力/MLP 配比不同）。".format(spread))
 
     # ---- 出图 ----
     fig, ax = plt.subplots(figsize=(7.6, 4.8))
@@ -161,4 +179,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
 
