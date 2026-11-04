@@ -34,3 +34,7 @@ raw_cells_备份_*.jsonl
 #   data/        原始测量数据（raw_cells.jsonl 300 行）
 #   results/     fit.json 与预测结果
 #   figures/     fig1–fig5
+
+# 自标定产物（每人每机不同，不应提交）
+results/calib_*.json
+
