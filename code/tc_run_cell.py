@@ -62,8 +62,9 @@ def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
         suffix = f"_p{prompt_tokens}"        # 自动加后缀，避免覆盖已有格
     cid = cfg.cell_id(model, quant, ctx, conc, suffix)
 
-    # 【防呆（已纠正）】本 build 的日志是 `n_ctx_slot = ctx`：
-    # **每个槽位都拿完整 ctx**，不按并发切分，所以不存在"ctx/并发"截断。
+    # 【防呆（已纠正）】llama.cpp 的 --ctx-size 会按 --parallel 平分；
+    # 而本项目的启动脚本传的是 `ctx × 并发`，所以每槽恰好 = ctx（日志里的 n_ctx_slot 就是它）。
+    # 于是：每槽够不够看 `prompt+生成 <= ctx`；总显存看 `ctx × 并发`。
     # 真正的风险是 KV 总量 = ctx × 并发，超显存就会静默降级（本项目的"性能悬崖"）：
     # ctx 24576 × 8 槽 = 7.25 GB KV → 整体慢 5 倍且不报错。
     need = prompt_tokens + cfg.GEN_TOKENS

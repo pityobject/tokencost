@@ -227,6 +227,30 @@ def cmd_measure(args):
     print(f"  测量计划 {len(plan)} 格：{plan}")
     print(f"  每格 {args.requests} 个请求，生成长度 {args.gen}\n")
 
+    # 【服务端配置校验】llama.cpp 的 --ctx-size 是按 --parallel 平分的，
+    # 所以"每槽够用"要求：--ctx-size >= per_slot_ctx × slots。
+    max_conc = max(c for c, _ in plan)
+    max_L = max(L for _, L in plan)
+    need_per_slot = max_L + args.gen
+    problems = []
+    if max_conc > args.slots:
+        problems.append(f"计划里有并发 {max_conc}，但服务端 --parallel 只有 {args.slots}")
+    if need_per_slot > args.per_slot_ctx:
+        problems.append(f"最长 prompt {max_L}+生成 {args.gen} = {need_per_slot} token，"
+                        f"超过每槽 {args.per_slot_ctx}")
+    if problems:
+        print("  ⚠️ 服务端配置与测量计划不匹配：")
+        for x in problems:
+            print(f"     · {x}")
+        print(f"     推荐启动命令：python tc_server.py <model> <quant> "
+              f"{need_per_slot} {max_conc}")
+        print(f"     （该命令会传 --ctx-size {need_per_slot * max_conc}、--parallel {max_conc}）")
+        print(f"      总 KV ≈ {need_per_slot * max_conc * 36.9e3 / 1e9:.1f} GB（3B 量级），"
+              f"8 GB 卡需留意是否进悬崖）\n")
+    else:
+        print(f"  ✅ 服务端配置匹配：每槽 {args.per_slot_ctx} ≥ 需要 {need_per_slot}，"
+              f"槽位 {args.slots} ≥ 最大并发 {max_conc}\n")
+
     async def run():
         async with httpx.AsyncClient(timeout=300) as client:
             # 探测服务：先确认连得上，再（可选）问模型名。
@@ -355,7 +379,11 @@ def main():
     ap.add_argument("--lengths", default=None, help="自定义 prompt 长度，如 512,2048")
     ap.add_argument("--requests", type=int, default=16, help="每格请求数")
     ap.add_argument("--gen", type=int, default=64, help="每请求生成长度")
-    ap.add_argument("--ctx", type=int, default=8192, help="服务端 ctx（仅记录用）")
+    ap.add_argument("--ctx", type=int, default=8192, help="每槽上下文（记录用）")
+    ap.add_argument("--slots", type=int, default=16,
+                    help="服务端 --parallel（必须 >= 计划里的最大并发）")
+    ap.add_argument("--per-slot-ctx", type=int, default=2304,
+                    help="服务端每槽上下文（必须 >= 最大 prompt + 生成长度）")
     ap.add_argument("--hardware", default="（未填）")
     ap.add_argument("--out", default=None)
     ap.add_argument("--selftest", action="store_true", help="不连服务器，验证链路")
@@ -374,4 +402,5 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+
 
