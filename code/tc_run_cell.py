@@ -104,8 +104,9 @@ def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
         # 记录进每一行，事后可以筛出被污染的格。
         try:
             bg = gpu.idle_baseline()
-        except Exception:
-            bg = dict(bg_level="unknown", bg_notes="采样失败",
+        except Exception as _e:
+            bg = dict(bg_level="unknown",
+                      bg_notes=f"采样异常：{type(_e).__name__}: {str(_e)[:120]}",
                       bg_mem_mb=None, bg_util_p95=None, bg_clock_mhz=None)
         if bg.get("bg_level") in ("warn", "bad"):
             print(f"    ⚠️ 背景占用（{bg.get('bg_level')}）：{bg.get('bg_notes')}", flush=True)

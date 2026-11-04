@@ -14,6 +14,8 @@ import threading
 import time
 
 
+LAST_ERROR = [None]   # 最近一次采样失败的原因（供日志用）
+
 QUERY = ("temperature.gpu,clocks.sm,clocks.mem,power.draw,"
          "utilization.gpu,memory.used")
 
@@ -24,14 +26,19 @@ def _sample_once():
             ["nvidia-smi", f"--query-gpu={QUERY}", "--format=csv,noheader,nounits"],
             capture_output=True, text=True, timeout=10,
         )
+        if out.returncode != 0:
+            LAST_ERROR[0] = f"nvidia-smi 退出码 {out.returncode}: {(out.stderr or '').strip()[:120]}"
+            return None
         parts = [p.strip() for p in out.stdout.strip().split(",")]
         if len(parts) < 6:
+            LAST_ERROR[0] = f"nvidia-smi 输出异常: {out.stdout.strip()[:120]!r}"
             return None
         return dict(
             temp_c=float(parts[0]), clock_sm=float(parts[1]), clock_mem=float(parts[2]),
             power_w=float(parts[3]), util_pct=float(parts[4]), mem_used_mb=float(parts[5]),
         )
-    except Exception:
+    except Exception as e:      # 记下真实原因，别让调用方只能写"采样失败"
+        LAST_ERROR[0] = f"{type(e).__name__}: {e}"
         return None
 
 
@@ -108,15 +115,22 @@ def idle_baseline(seconds=1.5, interval_s=0.3):
         bg_notes    人话说明
     """
     samples = []
-    end = time.time() + seconds
-    while time.time() < end:
-        s = _sample_once()
-        if s:
-            samples.append(s)
-        time.sleep(interval_s)
+    # nvidia-smi 偶发失败（驱动忙、被安全软件拦、PATH 抖动），重试 3 次
+    for attempt in range(3):
+        end = time.time() + seconds
+        while time.time() < end:
+            s = _sample_once()
+            if s:
+                samples.append(s)
+            time.sleep(interval_s)
+        if samples:
+            break
+        time.sleep(0.5)
     if not samples:
+        why = LAST_ERROR[0] or "nvidia-smi 无输出"
+        print(f"    （背景采样失败，原因：{why}）", flush=True)
         return dict(bg_mem_mb=None, bg_util_p95=None, bg_clock_mhz=None,
-                    bg_level="unknown", bg_notes="nvidia-smi 采样失败")
+                    bg_level="unknown", bg_notes=f"采样失败：{why}")
 
     mem = sorted(x["mem_used_mb"] for x in samples)
     util = sorted(x["util_pct"] for x in samples)
