@@ -109,9 +109,12 @@ async def one_request(client, base_url, model, prompt, max_tokens, timeout=180):
         "stream_options": {"include_usage": True},
         # 必须显式关闭：否则同一槽位复用前缀时 TTFT 会变成缓存命中时间
         "cache_prompt": False,
+        # 强制生成满 max_tokens：不同格生成长度不一致时 TPOT 无法横向比较
+        "ignore_eos": True,
     }
-    t0 = time.perf_counter()
+    t_send = time.perf_counter()
     first = None
+    last = None          # 【关键】最后一个内容块的时刻，TPOT 要用它
     n_out = 0
     usage = {}
     async with client.stream("POST", f"{base_url}/chat/completions",
@@ -132,15 +135,24 @@ async def one_request(client, base_url, model, prompt, max_tokens, timeout=180):
             for ch in obj.get("choices", []):
                 txt = (ch.get("delta") or {}).get("content")
                 if txt:
+                    now = time.perf_counter()
                     if first is None:
-                        first = time.perf_counter()
+                        first = now
+                    last = now
                     n_out += 1
     t_end = time.perf_counter()
     if first is None:
         first = t_end
+    if last is None:
+        last = first
     n_out = int(usage.get("completion_tokens") or n_out or 1)
-    return dict(ttft_ms=(first - t0) * 1e3,
-                total_ms=(t_end - t0) * 1e3,
+    # 【必须用 last 而不是 t_end】t_end 含 HTTP 收尾与 usage 块，
+    # 高并发下这段尾巴更大，会把 TPOT 算高（实测偏 2–3 倍）。
+    tpot = ((last - first) / (n_out - 1) * 1e3) if n_out > 1 else float("nan")
+    return dict(ttft_ms=(first - t_send) * 1e3,
+                total_ms=(last - t_send) * 1e3,      # 与仓库口径一致：到最后一个 token
+                wall_ms=(t_end - t_send) * 1e3,      # 另存墙钟，供参考
+                tpot_ms=tpot,
                 n_out=n_out,
                 prompt_tokens=int(usage.get("prompt_tokens") or 0))
 
@@ -172,7 +184,8 @@ async def measure_cell(client, base_url, model, conc, target_L, n_requests, gen,
     if not results:
         raise SystemExit(f"并发 {conc} 的所有请求都失败：{out[0].get('error')}")
     ttfts = [r["ttft_ms"] for r in results]
-    tpots = [(r["total_ms"] - r["ttft_ms"]) / max(r["n_out"] - 1, 1) for r in results]
+    # 直接用单请求里算好的 TPOT（基于 t_last），不要再从 total_ms 反推
+    tpots = [r["tpot_ms"] for r in results if r.get("tpot_ms") == r.get("tpot_ms")]
     Ls = [r["prompt_tokens"] for r in results if r["prompt_tokens"] > 0]
     return dict(conc=conc, target_L=target_L,
                 L=float(np.median(Ls)) if Ls else float(target_L),
