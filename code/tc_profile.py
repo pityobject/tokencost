@@ -280,8 +280,12 @@ def cmd_measure(args):
             cells = []
             for conc, L in plan:
                 t0 = time.time()
+                # 【必须随并发增加】仓库的 requests_per_repeat 是 c1=16…c32=64。
+                # 固定 16 个请求时，高并发下只有 1–2 波，测到的是"爬坡期争用"
+                # 而不是稳态——TPOT 会系统性偏高（实测 c8 偏 1.4–3.2 倍）。
+                n_req = args.requests or cfg.requests_per_repeat(conc)
                 c = await measure_cell(client, args.base_url, wire_model, conc, L,
-                                       args.requests, args.gen)
+                                       n_req, args.gen)
                 c["ctx"] = c.get("ctx", args.ctx)
                 cells.append(c)
                 print(f"  c{conc:<3} L目标{L:<5} → 实测 L={c['L']:.0f}  "
@@ -384,7 +388,8 @@ def main():
     ap.add_argument("--wire-model", default=None, help="请求里带的模型名（默认取 /models 第一个）")
     ap.add_argument("--concs", default=None, help="自定义并发，如 1,4,16,32")
     ap.add_argument("--lengths", default=None, help="自定义 prompt 长度，如 512,2048")
-    ap.add_argument("--requests", type=int, default=16, help="每格请求数")
+    ap.add_argument("--requests", type=int, default=None,
+                    help="每格请求数（默认按并发自适应：c1=16…c32=64，与仓库一致）")
     ap.add_argument("--gen", type=int, default=64, help="每请求生成长度")
     ap.add_argument("--ctx", type=int, default=8192, help="每槽上下文（记录用）")
     ap.add_argument("--slots", type=int, default=16,
