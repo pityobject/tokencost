@@ -50,6 +50,21 @@ def record(area, name, ok, detail=""):
     print(line)
 
 
+
+def _tracked_names():
+    """已跟踪文件集合；取不到（非 git 环境）时返回 None。"""
+    try:
+        out = subprocess.run(
+            ["git", "-c", "core.quotepath=false", "ls-files"],
+            cwd=ROOT, capture_output=True, text=True,
+            encoding="utf-8", errors="replace", timeout=60)
+        if out.returncode == 0:
+            return {ln.strip() for ln in out.stdout.splitlines() if ln.strip()}
+    except Exception:
+        pass
+    return None
+
+
 def tracked_files():
     """用 git 列出已跟踪文件（没装 git 就退回 rglob）。"""
     try:
@@ -217,6 +232,7 @@ def audit_contract(files):
         r"`((?:\.\./)+(?:[^`\s]+\.(?:py|csv|json|jsonl|md|png|ps1|yml))"   # 仓外
         r"|(?:code|data|results|figures|tests|scripts|报告|手册)/[^`\s]+?\.(?:py|csv|json|jsonl|md|png|ps1|yml))`")
     missing = set()
+    tracked_set = _tracked_names()   # None = 非 git 环境，跳过该检查
     for f in files:
         if f.suffix != ".md" or not f.exists():
             continue
