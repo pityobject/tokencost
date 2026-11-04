@@ -51,6 +51,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import tc_config as cfg
+import tc_loadgen as lg
 import tc_model as tm
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -86,14 +87,15 @@ def resolve_spec(spec_key=None, spec_json=None):
 
 
 # ---------------------------------------------------------------- 测一格的并发请求
-def make_prompt(target_tokens):
-    """构造约 target_tokens 个 token 的提示（真实 token 数由服务端 usage 回填）。"""
-    unit = "请仔细阅读下面这段材料，记住其中的细节。"
-    # 中文约 1 字 ≈ 1 token，留一点余量
-    n = max(1, int(target_tokens * 0.95 / max(len(unit) * 0.9, 1)))
-    body = unit * n
-    return (f"{body}\n\n以上材料的最后一句是「记住其中的细节」。"
-            f"请只回复 4 个字：我已阅读。")
+def make_prompt(target_tokens, nonce):
+    """直接复用 tc_loadgen 的实现。
+
+    【为什么必须这样】两个新手必踩的坑，仓库里都已经踩过了：
+      1. 每次 prompt 必须不同（带 nonce）——否则 llama-server 的 prompt cache 命中，
+         prefill 时间变成 0，TTFT 测出来是"读缓存"而不是"算提示词"；
+      2. 长度换算要用 0.65 token/字（中文实测），用 0.95 会短一大截。
+    """
+    return lg.make_prompt(int(target_tokens), int(nonce))
 
 
 async def one_request(client, base_url, model, prompt, max_tokens, timeout=180):
@@ -105,6 +107,8 @@ async def one_request(client, base_url, model, prompt, max_tokens, timeout=180):
         "temperature": 0.0,
         "stream": True,
         "stream_options": {"include_usage": True},
+        # 必须显式关闭：否则同一槽位复用前缀时 TTFT 会变成缓存命中时间
+        "cache_prompt": False,
     }
     t0 = time.perf_counter()
     first = None
@@ -144,23 +148,26 @@ async def one_request(client, base_url, model, prompt, max_tokens, timeout=180):
 async def measure_cell(client, base_url, model, conc, target_L, n_requests, gen,
                        warmup=2):
     """在并发 conc 下打 n_requests 个请求（信号量限流，保持 b 路在飞）。"""
-    prompt = make_prompt(target_L)
-    for _ in range(warmup):
+    # 每个请求用不同 nonce：既防缓存命中，也保证 16 个请求不是同一份前缀
+    base_nonce = abs(hash((conc, target_L))) % 10_000_000
+    for k in range(warmup):
         try:
-            await one_request(client, base_url, model, prompt, min(gen, 16))
+            await one_request(client, base_url, model,
+                              make_prompt(target_L, base_nonce + 900_000 + k),
+                              min(gen, 16))
         except Exception:
             pass
     sem = asyncio.Semaphore(conc)
-    results = []
 
-    async def task():
+    async def task(i):
         async with sem:
             try:
+                prompt = make_prompt(target_L, base_nonce + i)
                 return await one_request(client, base_url, model, prompt, gen)
             except Exception as e:
                 return dict(error=str(e)[:120])
 
-    out = await asyncio.gather(*[task() for _ in range(n_requests)])
+    out = await asyncio.gather(*[task(i) for i in range(n_requests)])
     results = [r for r in out if "error" not in r]
     if not results:
         raise SystemExit(f"并发 {conc} 的所有请求都失败：{out[0].get('error')}")
