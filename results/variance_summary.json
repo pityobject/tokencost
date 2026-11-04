@@ -1,0 +1,8 @@
+{
+  "n_cells_with_repeats": 108,
+  "ttft_cv_median": 0.00769,
+  "tpot_cv_median": 0.00219,
+  "mape_cost_reported": 8.7047,
+  "mape_cost_se_est": 0.0211,
+  "note": "se 用 TPOT 的重复 CV 与格数做误差传播，是量级估计而非严格区间"
+}
