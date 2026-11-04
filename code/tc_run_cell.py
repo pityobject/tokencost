@@ -22,7 +22,7 @@ import time
 import traceback
 
 import tc_config as cfg
-import tc_gpu as gpu
+import tc_gpu as tc_gpu_mod
 import tc_loadgen as lg
 import tc_server as srv
 from tc_gpu import GpuMonitor
@@ -103,7 +103,7 @@ def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
         #（它们可能自己起了 llama-server —— 那是显存 + SM + CPU 三重争用）。
         # 记录进每一行，事后可以筛出被污染的格。
         try:
-            bg = gpu.idle_baseline()
+            bg = tc_gpu_mod.idle_baseline()
         except Exception as _e:
             bg = dict(bg_level="unknown",
                       bg_notes=f"采样异常：{type(_e).__name__}: {str(_e)[:120]}",
@@ -218,5 +218,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
