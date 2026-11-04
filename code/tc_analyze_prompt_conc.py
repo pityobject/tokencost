@@ -28,11 +28,13 @@ rows = [json.loads(l) for l in (cfg.DATA_DIR / "raw_cells.jsonl").open(encoding=
         if l.strip()]
 p = pd.DataFrame([r for r in rows
                   if "_p" in str(r.get("cell_id", "")) and r.get("status") == "ok"])
-# 【有效性过滤】ctx 是全部槽位共享的，每槽 = ctx/conc。
-# prompt+生成长度超过每槽容量时服务端会截断，TTFT 不再随 L 变化——
-# 那不是模型失效，是测量无效。
-p = p[(p["prompt_tokens_median"] + cfg.GEN_TOKENS) <= (p["ctx"] // p["conc"])].copy()
-print(f"  （已剔除被截断的格：剩余 {len(p)} 个有效点）")
+# 【有效性过滤（已纠正）】
+# 本 build 的日志显示 `n_ctx_slot = ctx`：**每个槽位都拿完整 ctx，不按并发切分**，
+# 所以 ctx=8192 时 L=1973 并不会被截断（服务端返回的 prompt_tokens=1973 可证）。
+# 真正无效的是 ctx 开得过大：ctx 24576 × 8 槽 → KV 总量翻 8 倍、
+# VRAM 到 7554 MB，掉进"性能悬崖"（同类格慢 5 倍），那是配置效应不是模型效应。
+p = p[p["ctx"] <= 16384].copy()
+print(f"  （已剔除 KV regime 异常的格：剩余 {len(p)} 个有效点）")
 agg = p.groupby("cell_id").agg(
     model=("model", "first"), quant=("quant", "first"), conc=("conc", "first"),
     L=("prompt_tokens_median", "median"),

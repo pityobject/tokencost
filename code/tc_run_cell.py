@@ -62,17 +62,22 @@ def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
         suffix = f"_p{prompt_tokens}"        # 自动加后缀，避免覆盖已有格
     cid = cfg.cell_id(model, quant, ctx, conc, suffix)
 
-    # 【防呆】llama.cpp 的 --ctx-size 是**全部槽位共享**的：
-    # 每槽可用上下文 = ctx / conc。prompt 超过它就会被服务端截断，
-    # 于是"TTFT 不再随 prompt 变长"——看起来像模型失效，其实是测量无效。
-    per_slot = int(ctx) // max(int(conc), 1)
+    # 【防呆（已纠正）】本 build 的日志是 `n_ctx_slot = ctx`：
+    # **每个槽位都拿完整 ctx**，不按并发切分，所以不存在"ctx/并发"截断。
+    # 真正的风险是 KV 总量 = ctx × 并发，超显存就会静默降级（本项目的"性能悬崖"）：
+    # ctx 24576 × 8 槽 = 7.25 GB KV → 整体慢 5 倍且不报错。
     need = prompt_tokens + cfg.GEN_TOKENS
-    if need > per_slot:
+    if need > int(ctx):
         raise SystemExit(
             f"[无效实验] prompt {prompt_tokens} + 生成 {cfg.GEN_TOKENS} = {need} token，"
-            f"但 ctx={ctx} / 并发 {conc} → 每槽只有 {per_slot} token。"
-            f"服务端会截断，结果不可用。\n"
-            f"  请把 ctx 提到至少 {conc * need}（例如 --ctx-size {conc * need}）。")
+            f"超过 ctx={ctx}，服务端会截断。")
+    spec_kv = cfg.kv_bytes_per_token(cfg.MODEL_SPECS[key])
+    kv_gb = spec_kv * int(ctx) * max(int(conc), 1) / 1e9
+    w_gb = cfg.MODEL_SPECS[key]["weight_bytes"] / 1e9
+    if kv_gb + w_gb > 6.5:
+        print(f"    ⚠️ 显存预警：KV≈{kv_gb:.1f} GB + 权重≈{w_gb:.1f} GB，"
+              f"在 8 GB 卡上很可能触发静默降级（吞吐掉数倍且不报错）。"
+              f"建议减小 ctx 或并发。", flush=True)
 
     spec = cfg.MODEL_SPECS[key]
     # decode 阶段平均要读多长的 KV cache：提示长度 + 生成到一半
