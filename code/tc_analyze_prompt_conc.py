@@ -13,6 +13,7 @@ r"""A：验证 prompt 长度 × 并发的**乘积形式**（模型里唯一还�
 """
 import json
 import sys
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -109,6 +110,7 @@ summary = dict(mape_by_conc={
 (cfg.RESULTS_DIR / "prompt_conc_summary.json").write_text(
     json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
 print(f"\n已写入 {cfg.RESULTS_DIR / 'prompt_conc_interaction.csv'}")
+
 
 
 
