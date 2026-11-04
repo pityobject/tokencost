@@ -47,6 +47,10 @@ def main():
                 rows.append(json.loads(line))
     df = pd.DataFrame(rows)
     df = df[(df["status"] == "ok") & (df["repeat"] >= 0)]
+    # 【与 tc_analyze 保持一致】同一格被多次运行时，repeat 编号会从 0 重新开始，
+    # 出现 (cell_id, repeat) 重复。tc_analyze 用 .last() 去重，这里必须同样处理，
+    # 否则会把同一轮算两次，CV 被低估。
+    df = df.groupby(["cell_id", "repeat"], as_index=False).last()
     if df.empty:
         print("没有可用数据")
         return
@@ -109,3 +113,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
