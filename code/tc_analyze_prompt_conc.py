@@ -17,7 +17,7 @@ import sys
 import numpy as np
 import pandas as pd
 
-sys.path.insert(0, r"C:\Users\王钟垚\Desktop\find_career\tokencost\code")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import tc_config as cfg
 import tc_model as tm
@@ -109,5 +109,6 @@ summary = dict(mape_by_conc={
 (cfg.RESULTS_DIR / "prompt_conc_summary.json").write_text(
     json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
 print(f"\n已写入 {cfg.RESULTS_DIR / 'prompt_conc_interaction.csv'}")
+
 
 
