@@ -175,6 +175,21 @@ async def measure_cell(client, base_url, model, conc, target_L, n_requests, gen,
     """在并发 conc 下打 n_requests 个请求（信号量限流，保持 b 路在飞）。"""
     # 每个请求用不同 nonce：既防缓存命中，也保证 16 个请求不是同一份前缀
     base_nonce = abs(hash((conc, target_L))) % 10_000_000
+
+    # 【长度自动校准】make_prompt 按 0.65 token/字估算，实测会偏 10–20%。
+    # 先发一个探针，用服务端返回的真实 prompt_tokens 反推系数，再按系数重建提示词。
+    try:
+        probe = await one_request(client, base_url, model,
+                                  make_prompt(target_L, base_nonce + 800_000),
+                                  min(gen, 16))
+        real = int(probe.get("prompt_tokens") or 0)
+        if real > 0 and target_L > 0:
+            scale = real / float(target_L)
+            if abs(scale - 1.0) > 0.05:
+                target_L = max(16, int(round(target_L / scale)))
+    except Exception:
+        pass
+
     for k in range(warmup):
         try:
             await one_request(client, base_url, model,
@@ -429,7 +444,10 @@ def main():
     ap.add_argument("--lengths", default=None, help="自定义 prompt 长度，如 512,2048")
     ap.add_argument("--requests", type=int, default=None,
                     help="每格请求数（默认按并发自适应：c1=16…c32=64，与仓库一致）")
-    ap.add_argument("--gen", type=int, default=64, help="每请求生成长度")
+    ap.add_argument("--gen", type=int, default=128,
+                    help="每请求生成长度（默认 128 = 模型设计点）。"
+                         "**不要随便改小**：实测 gen=64 会让 TPOT 偏高约 25%，"
+                         "因为 prefill 打断的影响被更少的解码步摊薄")
     ap.add_argument("--ctx", type=int, default=8192, help="每槽上下文（记录用）")
     ap.add_argument("--calib-l", type=int, default=297,
                     help="并发维度用的 prompt 长度（默认 297 = 本模型的设计点）") if False else None
