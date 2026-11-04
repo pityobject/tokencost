@@ -205,8 +205,36 @@ def load_inputs():
         pois = json.loads(_pp.read_text(encoding="utf-8"))
     ver = pd.read_csv(RESULTS / "verify_recommendation.csv")
     codes = sorted((ROOT / "code").glob("tc_*.py"))
+
+    # ---- 四项本机分析（2026-11-04）----
+    var, tails, byq = {}, {}, {}
+    _p = RESULTS / "variance_summary.json"
+    if _p.exists():
+        var = json.loads(_p.read_text(encoding="utf-8"))
+    _p = RESULTS / "quantile_tails.json"
+    if _p.exists():
+        tails = json.loads(_p.read_text(encoding="utf-8"))
+    _p = RESULTS / "params_by_quant.csv"
+    if _p.exists():
+        byq = pd.read_csv(_p)
+
+    # ---- 三套数据口径（复核第 12 轮提的第 4 条）----
+    # 原始行 / 去重行 / 对外口径，三者不同，必须在一处讲清。
+    _df = pd.DataFrame(rows)
+    _okdf = _df[_df["status"] == "ok"]
+    _dedup = _okdf.groupby(["cell_id", "repeat"], as_index=False).last()
+    counts = dict(
+        raw_rows=len(rows),
+        raw_ok_rows=int(len(_okdf)),
+        raw_failed_rows=int(len(rows) - len(_okdf)),
+        raw_cells_all=int(_df["cell_id"].nunique()),
+        raw_cells_ok=int(_okdf["cell_id"].nunique()),
+        dedup_rows=int(len(_dedup)),
+        dedup_cells=int(_dedup["cell_id"].nunique()),
+    )
     return dict(rows=rows, ok=ok, n_cells=n_cells, n_rows=len(ok),
-                fit=fit, verify=ver, n_scripts=len(codes), pois=pois)
+                fit=fit, verify=ver, n_scripts=len(codes), pois=pois,
+                var=var, tails=tails, byq=byq, counts=counts)
 
 
 def build_claims(d):
@@ -273,6 +301,40 @@ def build_claims(d):
         "决策后悔值（最大）": f"{regret.max():.1f}%" if len(regret) else "—",
         "相对默认配置降幅": (f"{drop.min():.0f}%–{drop.max():.0f}%" if len(drop) else "—"),
     }
+
+    # ---- 四项本机分析（2026-11-04）----
+    # 【为什么必须进来】否则它们只是"作者电脑上的 CSV"，
+    # 对外文档里没有任何对应数字——复核第 12 轮正是这么指出的。
+    var = d.get("var") or {}
+    if var:
+        claims["重复测量：TTFT 的 CV（中位）"] = f"{var.get('ttft_cv_median', float('nan')) * 100:.2f}%"
+        claims["重复测量：TPOT 的 CV（中位）"] = f"{var.get('tpot_cv_median', float('nan')) * 100:.2f}%"
+        claims["MAPE 的重复性标准误"] = f"±{var.get('mape_cost_se_est', float('nan')):.2f} pp"
+
+    tails = d.get("tails") or {}
+    if tails:
+        pc = tails.get("per_conc", {})
+        for c in ("32", "64"):
+            if c in pc:
+                claims[f"TTFT 的 p90/p50（并发 {c}）"] = f"{pc[c]['measured_p90_over_p50']:.2f}×"
+        claims["TTFT 尾部假设（对数正态 1.645σ）"] = f"{tails.get('cvar90_implied_from_sigma', float('nan')):.2f}×"
+        claims["尾部适用范围"] = tails.get("verdict", "—")
+
+    byq = d.get("byq")
+    if byq is not None and len(byq) > 0:
+        for _, r in byq.iterrows():
+            claims[f"分量化重拟合：BW @ {r['quant']}"] = f"{r['bw']:.1f} GB/s"
+            claims[f"分量化重拟合：c_srv @ {r['quant']}"] = f"{r['c_srv']:.3f} ms"
+        if len(byq) >= 2:
+            bws = byq["bw"]
+            claims["分量化 BW 极差（最大/最小）"] = f"{bws.max() / max(bws.min(), 1e-9):.2f}×"
+
+    cnt = d.get("counts") or {}
+    if cnt:
+        claims["数据口径：原始行数（含失败）"] = f"{cnt['raw_rows']} 行"
+        claims["数据口径：去重后行数"] = f"{cnt['dedup_rows']} 行 / {cnt['dedup_cells']} 格"
+        claims["数据口径：失败行数（端口占用）"] = f"{cnt['raw_failed_rows']} 行"
+
     return claims
 
 
