@@ -56,9 +56,17 @@ import tc_model as tm
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+# 【默认计划必须落在模型的适用域内】
+# 已知失效：长 prompt（>1000）× 高并发（≥4）下 TTFT/TPOT 都偏离模型
+#（见 报告/适用域矩阵_一页纸.md 与 附录 K.5）。
+# 所以：并发维度用**中短 prompt**，长度维度只用**低并发**。
 DEFAULT_PLAN = [
-    (1, 512), (4, 512), (16, 512), (32, 512),
-    (1, 2048), (4, 2048), (1, 128), (8, 512),
+    (1, 128),     # 定首字固定开销 ovh
+    (1, "L"),     # 基准点（L = --calib-l，默认 297 = 模型设计点）
+    (2, "L"),     # 并发维度
+    (4, "L"),     # 并发维度（定 c_srv）
+    (8, "L"),     # 并发维度（靠近 B_SAT）
+    (1, 2048),    # 长度维度（定 PEAK_pre），只在 c1
 ]
 
 
@@ -235,7 +243,7 @@ def identifiability(params, df, model_name, quant):
 # ---------------------------------------------------------------- 主流程
 def cmd_measure(args):
     model_name, quant, spec = resolve_spec(args.spec, args.spec_json)
-    plan = DEFAULT_PLAN
+    plan = [(c, (args.calib_l if L == "L" else L)) for c, L in DEFAULT_PLAN]
     if args.concs and args.lengths:
         concs = [int(x) for x in args.concs.split(",")]
         lens = [int(x) for x in args.lengths.split(",")]
@@ -251,6 +259,16 @@ def cmd_measure(args):
     # 所以"每槽够用"要求：--ctx-size >= per_slot_ctx × slots。
     max_conc = max(c for c, _ in plan)
     max_L = max(L for _, L in plan)
+
+    # 【适用域警告】长 prompt × 高并发是模型的已知失效区，
+    # 放进标定集会为了妥协这些点而扭曲全部参数。
+    out_of_domain = [(c, L) for c, L in plan if L > 1000 and c > 2]
+    if out_of_domain:
+        print("  ⚠️ 计划里有格子落在**模型已知失效区**（长 prompt × 高并发）：")
+        print(f"     {out_of_domain}")
+        print("     这些点的实测 TPOT 会比模型高 2–4 倍（原因见 附录 K.5）。")
+        print("     把它们放进标定集会让 c_srv / BW 被系统性拉偏。")
+        print("     建议：长度维度只用 c1，并发维度用 L≤512。\n")
     need_per_slot = max_L + args.gen
     problems = []
     if max_conc > args.slots:
@@ -399,12 +417,19 @@ def main():
     ap.add_argument("--spec", default=None, help="复用仓库规格，如 3B:q4_k_m")
     ap.add_argument("--spec-json", default=None, help="自定义规格 JSON")
     ap.add_argument("--wire-model", default=None, help="请求里带的模型名（默认取 /models 第一个）")
-    ap.add_argument("--concs", default=None, help="自定义并发，如 1,4,16,32")
+    ap.add_argument("--concs", default=None,
+                    help="自定义并发。**建议用 1,4,16,32**（模型的拟合网格）——"
+                         "用 2/8 这类中间档会让 c_srv 估成约 2 倍（c8 正好在台阶上）")
     ap.add_argument("--lengths", default=None, help="自定义 prompt 长度，如 512,2048")
     ap.add_argument("--requests", type=int, default=None,
                     help="每格请求数（默认按并发自适应：c1=16…c32=64，与仓库一致）")
     ap.add_argument("--gen", type=int, default=64, help="每请求生成长度")
     ap.add_argument("--ctx", type=int, default=8192, help="每槽上下文（记录用）")
+    ap.add_argument("--calib-l", type=int, default=297,
+                    help="并发维度用的 prompt 长度（默认 297 = 本模型的设计点）") if False else None
+    ap.add_argument("--calib-l", type=int, default=297,
+                    help="并发维度用的 prompt 长度（默认 297 = 本模型的设计点）；"
+                         "必须接近你实际服务的长度，否则 c_srv 会偏")
     ap.add_argument("--slots", type=int, default=16,
                     help="服务端 --parallel（必须 >= 计划里的最大并发）")
     ap.add_argument("--per-slot-ctx", type=int, default=2304,
@@ -427,5 +452,7 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+
+
 
 
