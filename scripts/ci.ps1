@@ -36,21 +36,21 @@ Write-Host ""
 
 $fail = 0
 
-Write-Host "[CI] 1/5 regenerate claims table ..."
+Write-Host "[CI] 1/6 regenerate claims table ..."
 & $py "code\tc_claims.py" | Out-Null
 if ($LASTEXITCODE -ne 0) { $fail = 1 }
 
-Write-Host "[CI] 2/5 verify docs match artifacts ..."
+Write-Host "[CI] 2/6 verify docs match artifacts ..."
 & $py "code\tc_claims.py" --check
 if ($LASTEXITCODE -ne 0) { $fail = 1 }
 
 Write-Host ""
-Write-Host "[CI] 3/5 unit tests ..."
+Write-Host "[CI] 3/6 unit tests ..."
 & $py "tests\test_core.py"
 if ($LASTEXITCODE -ne 0) { $fail = 1 }
 
 Write-Host ""
-Write-Host "[CI] 4/5 doc number lint (warning only) ..."
+Write-Host "[CI] 4/6 doc number lint (warning only) ..."
 & $py "code\tc_lint_docs.py"
 $lintExit = $LASTEXITCODE
 if ($lintExit -ne 0) {
@@ -58,8 +58,13 @@ if ($lintExit -ne 0) {
 }
 
 Write-Host ""
-Write-Host "[CI] 5/5 project audit (hygiene / self-contained / data chain / contract) ..."
+Write-Host "[CI] 5/6 project audit (hygiene / self-contained / data chain / contract) ..."
 & $py "code\tc_audit.py" --fast
+if ($LASTEXITCODE -ne 0) { $fail = 1 }
+
+Write-Host ""
+Write-Host "[CI] 6/6 self-calibration pipeline selftest (synthetic data, no server) ..."
+& $py "code\tc_profile.py" --selftest
 if ($LASTEXITCODE -ne 0) { $fail = 1 }
 
 Write-Host ""
@@ -70,3 +75,4 @@ if ($fail -eq 0) {
     Write-Host "[CI] CI FAIL - see messages above" -ForegroundColor Red
     exit 1
 }
+

@@ -170,6 +170,10 @@ KV 量化（`--cache-type-k/v q8_0`）能救回一部分：1.5B 上吞吐 +238%�
 ## 在你自己的机器上用（自标定）
 
 ```bash
+python code/tc_profile.py --base-url http://127.0.0.1:8080/v1 --spec 3B:q4_k_m
+#   ↑ 一条命令：自动发 8 组请求 → 测 TTFT/TPOT → 拟合 → 出标定文件
+
+# 或手工准备测量点（格式见报告/自标定指南）：
 python code/tc_calibrate.py my_measurements.json        # 8 个实测点 → 你的 6 个参数
 python code/tc_recommend.py --calib results/calib_mymachine.json --ttft 600 --tpot 60
 ```
@@ -223,7 +227,7 @@ python code/tc_decompose_csrv.py   # c_srv 三向分解
 ## 目录
 
 ```
-code/          40 个脚本（采集 / 分析 / 拟合 / 推荐 / 探针 / 对账）
+code/          41 个脚本（采集 / 分析 / 拟合 / 推荐 / 探针 / 对账）
 data/          原始数据（raw_cells.jsonl 300 行、raw_requests.jsonl 逐请求明细）
 results/       fit.json（6 参数）、predictions.csv、recommendation.csv
 figures/       fig1–fig5（吞吐、成本、带宽、预测vs实测、Pareto）

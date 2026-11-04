@@ -65,6 +65,7 @@ COMMANDS = {
     "queue":         ("tc_queue.py", []),
     "lint":          ("tc_lint_docs.py", []),
     "calibrate":     ("tc_calibrate.py", []),
+    "profile":       ("tc_profile.py", []),
     "audit":         ("tc_audit.py", []),
     "ci":            ("../scripts/ci.ps1", []),
     "reset":         ("tc_reset_data.py", []),
