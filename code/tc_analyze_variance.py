@@ -55,11 +55,37 @@ def main():
         print("没有可用数据")
         return
 
+    # 原始顺序很重要：同一批的 repeat 从 0 递增，换批会重新从 0 开始
+    raw = [json.loads(l) for l in (cfg.DATA_DIR / "raw_cells.jsonl").open(encoding="utf-8")
+           if l.strip()]
+    order = {id(r): i for i, r in enumerate(raw)}   # 仅用于排序（不依赖对象相等）
+
     multi = df.groupby("cell_id").filter(lambda g: len(g) >= 2)
     if multi.empty:
         print("⚠️ 没有任何格有 ≥2 次重复。先跑：")
         print("   python tc_run_cell.py 3B q4_k_m 8192 1 --repeats 5")
         return
+
+    # 【必须用未去重的原始行】前面的 (cell_id, repeat) 去重会把不同批次的编号合并，
+    # 批次信息就没了。所以批次划分必须在 raw 上做。
+    raw_by_cell = {}
+    for r in raw:
+        if r.get("status") == "ok" and int(r.get("repeat", -1)) >= 0:
+            raw_by_cell.setdefault(r["cell_id"], []).append(r)
+
+    def split_sessions(rows_of_cell):
+        """按 repeat 是否回退切批；输入是原始 dict 列表（文件顺序）。"""
+        sessions, cur, prev = [], [], None
+        for r in rows_of_cell:
+            rep = int(r["repeat"])
+            if prev is not None and rep <= prev and cur:
+                sessions.append(pd.DataFrame(cur))
+                cur = []
+            cur.append(r)
+            prev = rep
+        if cur:
+            sessions.append(pd.DataFrame(cur))
+        return sessions
 
     out = []
     for cid, g in multi.groupby("cell_id"):
@@ -71,6 +97,30 @@ def main():
                    tpot_mean=float(tpot.mean()), tpot_sd=float(tpot.std(ddof=1)))
         rec["ttft_cv"] = rec["ttft_sd"] / rec["ttft_mean"] if rec["ttft_mean"] else np.nan
         rec["tpot_cv"] = rec["tpot_sd"] / rec["tpot_mean"] if rec["tpot_mean"] else np.nan
+
+        # ---- 同批次 vs 跨批次 ----
+        sess = split_sessions(raw_by_cell.get(cid, []))
+        rec["n_sessions"] = len(sess)
+        within_t, within_p = [], []
+        for one in sess:
+            if len(one) < 2:
+                continue
+            t = one["ttft_p50_ms"].astype(float).to_numpy()
+            pp = one["tpot_p50_ms"].astype(float).to_numpy()
+            if t.mean():
+                within_t.append(float(t.std(ddof=1) / t.mean()))
+            if pp.mean():
+                within_p.append(float(pp.std(ddof=1) / pp.mean()))
+        rec["ttft_cv_within"] = float(np.median(within_t)) if within_t else np.nan
+        rec["tpot_cv_within"] = float(np.median(within_p)) if within_p else np.nan
+        if len(sess) >= 2:
+            med_t = [float(one["ttft_p50_ms"].median()) for one in sess]
+            med_p = [float(one["tpot_p50_ms"].median()) for one in sess]
+            rec["ttft_cv_between"] = float(np.std(med_t, ddof=1) / np.mean(med_t)) if np.mean(med_t) else np.nan
+            rec["tpot_cv_between"] = float(np.std(med_p, ddof=1) / np.mean(med_p)) if np.mean(med_p) else np.nan
+        else:
+            rec["ttft_cv_between"] = np.nan
+            rec["tpot_cv_between"] = np.nan
         rec["conc"] = int(g["conc"].iloc[0])
         rec["model"] = g["model"].iloc[0]
         out.append(rec)
@@ -98,8 +148,29 @@ def main():
         base = float(fj["mape_cost"])
     except Exception:
         base = float("nan")
+    # 跨批次：只统计真正有 ≥2 批的格
+    b = v[v["n_sessions"] >= 2]
+    tpot_between_max = float(b["tpot_cv_between"].max()) if len(b) else float("nan")
+    tpot_between_med = float(b["tpot_cv_between"].median()) if len(b) else float("nan")
+    ttft_between_max = float(b["ttft_cv_between"].max()) if len(b) else float("nan")
+    within_p = float(v["tpot_cv_within"].median())
+    se_between = (tpot_between_max / np.sqrt(max(n_cells, 1)) * 100
+                  if np.isfinite(tpot_between_max) else float("nan"))
+
+    print(f"\n  同批次 TPOT CV 中位 = {within_p*100:.2f}%")
+    if len(b):
+        print(f"  跨批次（{len(b)} 格有两批以上）：TPOT CV 中位 {tpot_between_med*100:.2f}%、"
+              f"最大 {tpot_between_max*100:.2f}%")
+        print(f"  跨批次最坏的格：{b.loc[b['tpot_cv_between'].idxmax(), 'cell_id']}")
+
     summ = dict(n_cells_with_repeats=n_cells,
                 ttft_cv_median=round(cv_t, 5), tpot_cv_median=round(cv_p, 5),
+                n_cells_multi_session=int(len(b)) if 'b' in dir() else 0,
+                tpot_cv_within_median=round(within_p if 'within_p' in dir() else cv_p, 5),
+                tpot_cv_between_median=round(tpot_between_med if 'tpot_between_med' in dir() else float('nan'), 5),
+                tpot_cv_between_max=round(tpot_between_max if 'tpot_between_max' in dir() else float('nan'), 5),
+                ttft_cv_between_max=round(ttft_between_max if 'ttft_between_max' in dir() else float('nan'), 5),
+                mape_cost_se_between_est=round(se_between if 'se_between' in dir() else float('nan'), 4),
                 mape_cost_reported=round(base, 4),
                 mape_cost_se_est=round(se, 4),
                 note="se 用 TPOT 的重复 CV 与格数做误差传播，是量级估计而非严格区间")
@@ -113,4 +184,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
 

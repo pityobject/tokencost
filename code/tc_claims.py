@@ -310,6 +310,11 @@ def build_claims(d):
         claims["重复测量：TTFT 的 CV（中位）"] = f"{var.get('ttft_cv_median', float('nan')) * 100:.2f}%"
         claims["重复测量：TPOT 的 CV（中位）"] = f"{var.get('tpot_cv_median', float('nan')) * 100:.2f}%"
         claims["MAPE 的重复性标准误"] = f"±{var.get('mape_cost_se_est', float('nan')):.2f} pp"
+        _bm = var.get("tpot_cv_between_max")
+        if _bm is not None:
+            claims["跨批次：TPOT 的 CV（中位）"] = f"{var.get('tpot_cv_between_median', float('nan')) * 100:.2f}%"
+            claims["跨批次：TPOT 的 CV（最大，c16）"] = f"{_bm * 100:.2f}%"
+            claims["跨批次：MATPE 的标准误（上界估计）"] = f"±{var.get('mape_cost_se_between_est', float('nan')):.2f} pp"
 
     tails = d.get("tails") or {}
     if tails:

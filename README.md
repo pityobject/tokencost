@@ -171,7 +171,7 @@ KV 量化（`--cache-type-k/v q8_0`）能救回一部分：1.5B 上吞吐 +238%�
 
 | 分析 | 结论 | 产物 |
 |---|---|---|
-| **重复性** | TTFT 的重复 CV **0.78%**、TPOT **0.22%** → `8.61%` 的标准误约 **±0.02 pp** | `results/variance_summary.json` |
+| **重复性** | **同批次** TPOT CV **0.23%**（连续重复）；**跨批次**中位 0.50%、最大 **6.36%**（c16，分两批跑）→ 聚合 MAPE 的标准误 **±0.02 pp（同批）/ ±0.6 pp（跨批上界）** | `results/variance_summary.json` |
 | **延迟尾部** | 实测 `p90/p50` 从并发 1 的 **1.01** 升到并发 64 的 **3.75**；而模型用的尾部假设恒定 **1.08×** → **并发 ≥10 时 SLA 判定偏乐观 1.3–3.5 倍** | `figures/fig11_tail_ratio.png`、`results/quantile_tails.csv` |
 | **按量化重拟合** | `c_srv` 在 Q4/Q8 上几乎相同（**0.680 vs 0.697**，差 2%）→ 每步开销确实对精度不敏感；但 `BW` 差 **1.22×**（214 vs 261）→ 见下方"BW 的口径" | `results/params_by_quant.csv` |
 | **参数可辨识性** | profile likelihood 给出 **4 个可辨识 + 2 个弱约束**（`peak_tflops`、`ovh`），与第一轮复核的 Hessian 结论一致 | `figures/fig12_profile_likelihood.png` |
