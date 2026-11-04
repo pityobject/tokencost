@@ -1,0 +1,201 @@
+#!/usr/bin/env bash
+# =============================================================================
+# A10 一条龙：在同一张 A10 上跑 llama.cpp 与 vLLM 两条标定（口径严格对齐）
+#
+# 用途：证明「每步服务开销 c_srv 是部署栈属性」——同一张卡、同一个模型、
+#       同一精度、同一组并发与长度，只换后端。
+#
+# 环境：PAI-DSW 免费试用 ecs.gn7i-c8g1.2xlarge（1×A10 24GB, 8 vCPU）
+# 用法：
+#   bash a10_run.sh              # 全流程
+#   bash a10_run.sh llamacpp     # 只跑 llama.cpp
+#   bash a10_run.sh vllm         # 只跑 vLLM
+#
+# 约定（两个后端必须一致，改一处就要改另一处）：
+#   每槽上下文 PER_SLOT=2112   （够 2048 prompt + 128 生成）
+#   槽位上限   SLOTS=32        （llama.cpp --parallel / vLLM --max-num-seqs）
+#   生成长度   GEN=128         （模型的设计点，见 失败与修复记录 F10）
+# =============================================================================
+set -euo pipefail
+
+WORKDIR="${WORKDIR:-$HOME/tc_a10}"
+export WORKDIR
+MODEL_GGUF_FILE="qwen2.5-3b-instruct-f16.gguf"
+
+PER_SLOT=2112
+SLOTS=32
+GEN=128
+REPO_URL="https://gitee.com/pityobject/tokencost.git"
+
+PHASE="${1:-all}"
+mkdir -p "$WORKDIR"/{models,logs,results}
+cd "$WORKDIR"
+
+# root 还是 sudo？DSW 里通常是 root，但别假设
+SUDO=""
+if [ "$(id -u)" -ne 0 ]; then SUDO="sudo"; fi
+
+log() { echo -e "\n\033[1;36m=== $* ===\033[0m"; }
+
+die() { echo -e "\n\033[1;31m❌ $*\033[0m"; exit 1; }
+
+# ---------------------------------------------------------------- 0. 依赖
+log "0. 检查环境与依赖"
+nvidia-smi --query-gpu=name,memory.total --format=csv,noheader \
+  || die "看不到 GPU。确认实例规格是 gn7i（A10）"
+
+if [ ! -d "$WORKDIR/tokencost" ]; then
+  git clone "$REPO_URL" "$WORKDIR/tokencost"
+fi
+( cd "$WORKDIR/tokencost" && git pull --ff-only ) || echo "（git pull 跳过）"
+
+command -v cmake >/dev/null || {
+  $SUDO apt-get update -qq && $SUDO apt-get install -y -qq cmake build-essential
+}
+pip3 config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple >/dev/null 2>&1 || true
+python3 -m pip install -q --upgrade pip
+python3 -m pip install -q modelscope
+
+# ---------------------------------------------------------------- 1. 下模型
+log "1. 下载模型（HF fp16 与 GGUF F16 各一份，精度相同）"
+python3 - <<'PY'
+import os
+from modelscope import snapshot_download
+base = os.path.join(os.environ["WORKDIR"], "models")
+snapshot_download('Qwen/Qwen2.5-3B-Instruct', local_dir=os.path.join(base, 'hf'))
+snapshot_download('Qwen/Qwen2.5-3B-Instruct-GGUF',
+                  allow_patterns=['*f16*'], local_dir=os.path.join(base, 'gguf'))
+print("模型下载完成")
+PY
+
+GGUF_PATH="$WORKDIR/models/gguf/${MODEL_GGUF_FILE}"
+if [ ! -f "$GGUF_PATH" ]; then
+  GGUF_PATH=$(find "$WORKDIR/models/gguf" -name '*f16*.gguf' | head -1)
+fi
+[ -f "$GGUF_PATH" ] || die "没找到 F16 的 GGUF"
+WEIGHT_BYTES=$(stat -c%s "$GGUF_PATH")
+echo "GGUF: $GGUF_PATH  ($((WEIGHT_BYTES/1024/1024)) MB)"
+
+# 两个后端共用同一份 spec（同模型同精度 → weight_bytes 相同）
+cat > "$WORKDIR/spec_fp16.json" <<JSON
+{
+  "model": {
+    "name": "Qwen3B", "quant": "fp16",
+    "weight_bytes": ${WEIGHT_BYTES},
+    "n_params": 3080000000,
+    "n_layers": 36, "n_kv_heads": 2, "head_dim": 128
+  }
+}
+JSON
+echo "spec: $WORKDIR/spec_fp16.json"
+
+# 跑一条标定：失败就打印日志尾部并退出（不要静默通过）
+run_profile() {
+  local url="$1" out="$2" logf="$3"; shift 3
+  ( cd "$WORKDIR/tokencost/code" && \
+    python3 tc_profile.py --base-url "$url" \
+      --spec-json "$WORKDIR/spec_fp16.json" \
+      --slots "$SLOTS" --per-slot-ctx "$PER_SLOT" --gen "$GEN" \
+      --out "$out" "$@" > "$logf" 2>&1 ) || {
+    echo "❌ 标定失败，日志尾部："; tail -40 "$logf"; exit 1; }
+  tail -25 "$logf"
+}
+
+# ---------------------------------------------------------------- 2. llama.cpp
+if [ "$PHASE" = "all" ] || [ "$PHASE" = "llamacpp" ]; then
+  log "2. 编译 llama.cpp（CUDA；8 vCPU 约 8–15 分钟）"
+  if [ ! -d "$WORKDIR/llama.cpp" ]; then
+    git clone --depth 1 https://github.com/ggerganov/llama.cpp "$WORKDIR/llama.cpp"
+  fi
+  ( cd "$WORKDIR/llama.cpp" \
+    && cmake -B build -DGGML_CUDA=ON -DLLAMA_CURL=OFF >/dev/null \
+    && cmake --build build -j"$(nproc)" >/dev/null )
+
+  log "3. 起 llama.cpp（--ctx-size = $PER_SLOT × $SLOTS = $((PER_SLOT*SLOTS))）"
+  "$WORKDIR/llama.cpp/build/bin/llama-server" \
+    -m "$GGUF_PATH" \
+    --ctx-size $((PER_SLOT*SLOTS)) --parallel "$SLOTS" \
+    --host 127.0.0.1 --port 8090 \
+    > "$WORKDIR/logs/llamacpp.log" 2>&1 &
+  SRV=$!
+  ok=0
+  for _ in $(seq 1 120); do
+    curl -sf http://127.0.0.1:8090/health >/dev/null && { ok=1; break; }
+    sleep 2
+  done
+  [ "$ok" = 1 ] || { kill $SRV 2>/dev/null || true; tail -30 "$WORKDIR/logs/llamacpp.log"; die "llama.cpp 没起来"; }
+
+  log "4. 标定 llama.cpp（约 5–10 分钟）"
+  run_profile "http://127.0.0.1:8090/v1" \
+              "$WORKDIR/results/calib_a10_llamacpp.json" \
+              "$WORKDIR/logs/profile_llamacpp.log" \
+              --hardware "A10 24GB / llama.cpp"
+
+  kill $SRV 2>/dev/null || true
+  sleep 5
+fi
+
+# ---------------------------------------------------------------- 3. vLLM
+if [ "$PHASE" = "all" ] || [ "$PHASE" = "vllm" ]; then
+  log "5. 检查 vLLM（PAI 镜像常已预装）"
+  if ! python3 -c "import vllm" 2>/dev/null; then
+    python3 -m pip install -q vllm
+  fi
+  python3 -c "import vllm, torch; print('vllm', vllm.__version__, '| torch', torch.__version__, '| cuda', torch.cuda.is_available())"
+
+  log "6. 起 vLLM（--max-model-len=$PER_SLOT --max-num-seqs=$SLOTS，关前缀缓存）"
+  python3 -m vllm.entrypoints.openai.api_server \
+    --model "$WORKDIR/models/hf" \
+    --served-model-name qwen3b \
+    --max-model-len "$PER_SLOT" \
+    --max-num-seqs "$SLOTS" \
+    --gpu-memory-utilization 0.9 \
+    --no-enable-prefix-caching \
+    --host 127.0.0.1 --port 8081 \
+    > "$WORKDIR/logs/vllm.log" 2>&1 &
+  SRV=$!
+  ok=0
+  for _ in $(seq 1 180); do
+    curl -sf http://127.0.0.1:8081/v1/models >/dev/null && { ok=1; break; }
+    sleep 2
+  done
+  [ "$ok" = 1 ] || { kill $SRV 2>/dev/null || true; tail -40 "$WORKDIR/logs/vllm.log"; die "vLLM 没起来"; }
+
+  log "7. 标定 vLLM（约 5–10 分钟）"
+  run_profile "http://127.0.0.1:8081/v1" \
+              "$WORKDIR/results/calib_a10_vllm.json" \
+              "$WORKDIR/logs/profile_vllm.log" \
+              --wire-model qwen3b --hardware "A10 24GB / vLLM"
+
+  kill $SRV 2>/dev/null || true
+fi
+
+# ---------------------------------------------------------------- 4. 汇总
+log "8. 汇总对比"
+python3 - <<'PY'
+import json, os, pathlib
+d = pathlib.Path(os.environ["WORKDIR"]) / "results"
+rows = []
+for name, tag in (("calib_a10_llamacpp.json", "llama.cpp"),
+                  ("calib_a10_vllm.json", "vLLM")):
+    p = d / name
+    if p.exists():
+        rows.append((tag, json.loads(p.read_text(encoding="utf-8"))))
+if len(rows) < 2:
+    print("（只有一个后端的结果，先补齐另一个）")
+if rows:
+    keys = ["bw", "peak", "peak_prefill", "c_srv", "b_sat", "ovh_ttft"]
+    print(f"{'参数':<14}" + "".join(f"{n:>13}" for n, _ in rows) + f"{'比值':>9}")
+    for k in keys:
+        vals = [j.get(k) for _, j in rows]
+        line = f"{k:<14}" + "".join(
+            f"{v:>13.3f}" if isinstance(v, (int, float)) else f"{'—':>13}" for v in vals)
+        if len(vals) == 2 and all(isinstance(v, (int, float)) and v for v in vals):
+            line += f"{vals[0]/vals[1]:>9.2f}"
+        print(line)
+    print("\n判读：bw / peak 应接近（同一张卡）；")
+    print("      c_srv 若差 >30% → 证明『每步服务开销是部署栈属性』。")
+PY
+
+echo -e "\n全部完成。结果在 $WORKDIR/results/，日志在 $WORKDIR/logs/"
+echo "把上面这张表贴回来即可。"
