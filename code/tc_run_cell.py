@@ -62,6 +62,18 @@ def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
         suffix = f"_p{prompt_tokens}"        # 自动加后缀，避免覆盖已有格
     cid = cfg.cell_id(model, quant, ctx, conc, suffix)
 
+    # 【防呆】llama.cpp 的 --ctx-size 是**全部槽位共享**的：
+    # 每槽可用上下文 = ctx / conc。prompt 超过它就会被服务端截断，
+    # 于是"TTFT 不再随 prompt 变长"——看起来像模型失效，其实是测量无效。
+    per_slot = int(ctx) // max(int(conc), 1)
+    need = prompt_tokens + cfg.GEN_TOKENS
+    if need > per_slot:
+        raise SystemExit(
+            f"[无效实验] prompt {prompt_tokens} + 生成 {cfg.GEN_TOKENS} = {need} token，"
+            f"但 ctx={ctx} / 并发 {conc} → 每槽只有 {per_slot} token。"
+            f"服务端会截断，结果不可用。\n"
+            f"  请把 ctx 提到至少 {conc * need}（例如 --ctx-size {conc * need}）。")
+
     spec = cfg.MODEL_SPECS[key]
     # decode 阶段平均要读多长的 KV cache：提示长度 + 生成到一半
     ctx_avg = prompt_tokens + cfg.GEN_TOKENS / 2.0
@@ -184,3 +196,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

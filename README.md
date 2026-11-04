@@ -209,7 +209,7 @@ python code/tc_decompose_csrv.py   # c_srv 三向分解
 ## 目录
 
 ```
-code/          39 个脚本（采集 / 分析 / 拟合 / 推荐 / 探针 / 对账）
+code/          40 个脚本（采集 / 分析 / 拟合 / 推荐 / 探针 / 对账）
 data/          原始数据（raw_cells.jsonl 300 行、raw_requests.jsonl 逐请求明细）
 results/       fit.json（6 参数）、predictions.csv、recommendation.csv
 figures/       fig1–fig5（吞吐、成本、带宽、预测vs实测、Pareto）
@@ -290,6 +290,7 @@ notes/         学习笔记与踩坑记录
 
 `报告/第三方复核意见_20261101.md` 是一份独立通读代码 + 复算全部对外数字的审查意见，它的结论是「内核是真的，外壳（对外数字）是虚的」。
 本仓库的 P0 修复（三套口径、`tc_claims.py` 防漂移、Pareto 的 NaN 逻辑）全部来自那份意见，修复过程记在 `报告/审计记录_十五轮对抗性复核.md` 的第 12–15 轮。
+
 
 
 

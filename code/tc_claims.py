@@ -35,6 +35,18 @@ DOCS = [ROOT / "README.md",
 
 
 
+def _pc(conc, key):
+    """读 results/prompt_conc_summary.json，取某并发档的 MAPE。"""
+    p = RESULTS / "prompt_conc_summary.json"
+    if not p.exists():
+        return "无数据"
+    d = json.loads(p.read_text(encoding="utf-8")).get("mape_by_conc", {})
+    row = d.get(conc)
+    if not row:
+        return "无数据"
+    return f"{row[key]:.1f}%（{row['n']} 点）"
+
+
 def _fam(name):
     """读 results/quality_profile.csv，取某任务族的跨组合均值。"""
     p = RESULTS / "quality_profile.csv"
@@ -239,6 +251,9 @@ def build_claims(d):
         "质量族均值：算术/字符串": _fam("arith"),
         "质量族均值：格式遵循": _fam("format"),
         "质量族均值：多步应用题": _fam("word"),
+        # prompt × 并发交互（tc_analyze_prompt_conc.py）
+        "长度×并发交互：TTFT MAPE（c8）": _pc("8", "ttft"),
+        "长度×并发交互：TPOT MAPE（c8）": _pc("8", "tpot"),
         "TTFT 长度斜率验证（MAPE）": _sweep("mape_ttft", "%", 1),
         "TTFT 长度斜率（实测/模型）": _sweep_ratio(),
         "长度验证覆盖范围（token）": _sweep_range(),
