@@ -385,6 +385,7 @@ def cmd_selftest(args):
     rng = np.random.default_rng(20261105)
     cells = []
     for conc, L in DEFAULT_PLAN:
+        L = int(args.calib_l if L == "L" else L)     # 展开模板里的 "L"
         row = dict(model=model_name, quant=quant, ctx=8192, conc=conc,
                    prompt_tokens=float(L), ctx_avg_tokens=L + cfg.GEN_TOKENS / 2)
         pr = tm.predict(truth, row)
