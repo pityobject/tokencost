@@ -9,6 +9,7 @@ tc_gpu.py —— 在实验过程中持续记录 GPU 温度和频率。
 
 import statistics
 import subprocess
+import time
 import threading
 import time
 
@@ -81,3 +82,59 @@ if __name__ == "__main__":
         time.sleep(5)
     for k, v in mon.summary().items():
         print(f"  {k:<22} {v:.2f}")
+
+
+# ---------------------------------------------------------------- 外来占用归因
+# 背景程序（壁纸引擎、浏览器硬件加速、QQ 音乐、游戏启动器、**别的 DSH 会话**）
+# 对测量有三重污染：
+#   ① 显存 → 把格子推过悬崖阈值，llama.cpp 静默 KV offload（慢 2.6–4.3 倍，不报错）
+#   ② 显存带宽 → 直接压低我们拟合的"有效带宽 BW"
+#   ③ SM 抢占 + 帧节奏 → 抬高尾部延迟（p90/p99）
+# 服务未启动时采样，能干净地看到"本进程之外的占用"。
+
+BG_MEM_WARN_MB = 500      # Windows 桌面本身约 200–400 MB，超过就说明有别的程序在吃显存
+BG_MEM_BAD_MB = 1200      # 浏览器/游戏/别的推理进程
+BG_UTIL_WARN_PCT = 5.0    # 空载时 GPU 利用率应当接近 0
+
+
+def idle_baseline(seconds=1.5, interval_s=0.3):
+    """在没有我们自己的服务时采样，返回外来占用的统计。
+
+    返回 dict：
+        bg_mem_mb   显存已用（中位）— 含 Windows 桌面
+        bg_util_p95 利用率 p95
+        bg_clock_mhz  SM 时钟中位
+        bg_level    'ok' / 'warn' / 'bad'
+        bg_notes    人话说明
+    """
+    samples = []
+    end = time.time() + seconds
+    while time.time() < end:
+        s = _sample_once()
+        if s:
+            samples.append(s)
+        time.sleep(interval_s)
+    if not samples:
+        return dict(bg_mem_mb=None, bg_util_p95=None, bg_clock_mhz=None,
+                    bg_level="unknown", bg_notes="nvidia-smi 采样失败")
+
+    mem = sorted(x["mem_used_mb"] for x in samples)
+    util = sorted(x["util_pct"] for x in samples)
+    clk = sorted(x["clock_sm"] for x in samples)
+    p95 = util[max(0, int(round(0.95 * (len(util) - 1))))]
+    notes, level = [], "ok"
+    if mem[len(mem) // 2] >= BG_MEM_BAD_MB:
+        level = "bad"
+        notes.append(f"显存被占 {mem[len(mem)//2]:.0f} MB（≥{BG_MEM_BAD_MB}）——很可能有浏览器/游戏/别的推理进程")
+    elif mem[len(mem) // 2] >= BG_MEM_WARN_MB:
+        level = "warn"
+        notes.append(f"显存被占 {mem[len(mem)//2]:.0f} MB（≥{BG_MEM_WARN_MB}）——建议关掉壁纸/浏览器硬件加速")
+    if p95 >= BG_UTIL_WARN_PCT:
+        level = "bad" if level == "bad" else "warn"
+        notes.append(f"空载利用率 p95={p95:.0f}%（≥{BG_UTIL_WARN_PCT:.0f}%）——有程序在持续用 GPU")
+    if not notes:
+        notes.append("背景干净")
+    return dict(bg_mem_mb=float(mem[len(mem) // 2]), bg_util_p95=float(p95),
+                bg_clock_mhz=float(clk[len(clk) // 2]), bg_level=level,
+                bg_notes="；".join(notes))
+

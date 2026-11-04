@@ -22,6 +22,7 @@ import time
 import traceback
 
 import tc_config as cfg
+import tc_gpu as gpu
 import tc_loadgen as lg
 import tc_server as srv
 from tc_gpu import GpuMonitor
@@ -97,6 +98,20 @@ def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
     rows = []
     try:
         t_start = time.time()
+        # 【背景噪声闸门】此刻服务还没起，GPU 上的占用全部来自"别的程序"：
+        # 壁纸引擎、浏览器硬件加速、QQ 音乐、游戏启动器、甚至**别的 DSH 会话**
+        #（它们可能自己起了 llama-server —— 那是显存 + SM + CPU 三重争用）。
+        # 记录进每一行，事后可以筛出被污染的格。
+        try:
+            bg = gpu.idle_baseline()
+        except Exception:
+            bg = dict(bg_level="unknown", bg_notes="采样失败",
+                      bg_mem_mb=None, bg_util_p95=None, bg_clock_mhz=None)
+        if bg.get("bg_level") in ("warn", "bad"):
+            print(f"    ⚠️ 背景占用（{bg.get('bg_level')}）：{bg.get('bg_notes')}", flush=True)
+            if bg.get("bg_level") == "bad":
+                print("       建议先关掉：别的 DSH 会话 / 浏览器 / 游戏 / 壁纸引擎，再重跑这一格。",
+                      flush=True)
         # 首次加载要把权重读进显存：3B 约 5–15 秒，7B 常要 30–60 秒。
         # 不加这句提示很容易被误判成卡死、然后被手动中断——中断就白跑了（无日志、无落盘）。
         if verbose:
@@ -127,7 +142,7 @@ def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
                 # 说明测出来的是"我的 Python 脚本能跑多快"，而不是"显卡能跑多快"。
                 client_cpu_pct = ((cpu1 - cpu0) / dur * 100.0) if cpu0 is not None else None
                 agg = lg.aggregate(req_rows, conc)
-                row = dict(base, repeat=r, status="ok",
+                row = dict(base, repeat=r, status="ok", **bg,
                            # 注意：这里的 wall_s 是"含客户端开销的整轮耗时"，
                            # 与 agg 里的 measure_span_s（纯测量窗口）含义不同，故意分开命名
                            wall_s=round(dur, 2), client_cpu_pct=client_cpu_pct, **agg)
@@ -202,4 +217,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
