@@ -70,6 +70,7 @@ COMMANDS = {
     "proflik":       ("tc_param_profile.py", []),
     "byquant":       ("tc_analyze_by_quant.py", []),
     "decompose-all": ("tc_decompose_cells.py", []),
+    "stop":          ("tc_killsrv.py", []),
     "audit":         ("tc_audit.py", []),
     "ci":            ("../scripts/ci.ps1", []),
     "reset":         ("tc_reset_data.py", []),
@@ -111,4 +112,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
