@@ -1,0 +1,24 @@
+{
+  "hardware": "RTX 4060 Laptop 8GB（演示：从仓库数据反推）",
+  "backend": "llama.cpp",
+  "model": {
+    "name": "3B",
+    "quant": "q4_k_m",
+    "weight_bytes": 2104932768,
+    "n_params": 3090000000.0,
+    "n_layers": 36,
+    "n_kv_heads": 2,
+    "head_dim": 128
+  },
+  "n_points": 4,
+  "bw": 238.96013070995267,
+  "peak": 163.1066284258882,
+  "peak_prefill": 28.377362873600408,
+  "c_srv": 0.9036036333013621,
+  "b_sat": 12.934687070920146,
+  "ovh_ttft": 12.513707519038839,
+  "residual": {
+    "ttft_mape": 6.547789187305534,
+    "tpot_mape": 1.0471332127946376
+  }
+}

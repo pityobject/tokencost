@@ -16,6 +16,8 @@ tc_recommend.py —— 项目的最终产物：一台"配置推荐器"。
 import argparse
 import json
 
+from pathlib import Path
+
 import numpy as np
 
 import tc_config as cfg
@@ -75,6 +77,8 @@ def main():
     ap = argparse.ArgumentParser(description="给定 SLA，推荐成本最低的推理配置")
     ap.add_argument("--ttft", type=float, default=600.0, help="首字延迟上限（毫秒，按 CVaR90 判定）")
     ap.add_argument("--tpot", type=float, default=45.0, help="出字间隔上限（毫秒，按 CVaR90 判定）")
+    ap.add_argument("--calib", default=None,
+                    help="用自己的标定结果（tc_calibrate.py 的产物）代替 fit.json")
     ap.add_argument("--prompt-mean", type=float, default=cfg.PROMPT_TOKENS, help="平均提示长度（token）")
     ap.add_argument("--prompt-sigma", type=float, default=0.5, help="提示长度的对数标准差（0.5 ≈ 长度差异较大）")
     ap.add_argument("--sigma-log", type=float, default=None,
@@ -113,10 +117,14 @@ def main():
         print("[提示] 没找到 data/quality.csv，本次不做质量约束。建议先跑 tc_eval.py。")
     best_acc = max(quality.values()) if quality else None
 
-    fit_path = cfg.RESULTS_DIR / "fit.json"
-    if not fit_path.exists():
-        raise SystemExit(f"没有 {fit_path}，先跑 tc_model.py 拿到标定参数。")
-    fit = json.loads(fit_path.read_text(encoding="utf-8"))
+    # --calib：用用户自标定的参数（tc_calibrate.py 产物，键名与 fit.json 一致）
+    fit_path = Path(args.calib) if args.calib else (cfg.RESULTS_DIR / "fit.json")
+    if not Path(fit_path).exists():
+        raise SystemExit(f"没有 {fit_path}；仓库标定先跑 tc_model.py，"
+                         f"自标定先跑 tc_calibrate.py")
+    if args.calib:
+        print(f"[标定] 使用 {fit_path}（自标定），不是仓库的 fit.json")
+    fit = json.loads(Path(fit_path).read_text(encoding="utf-8"))
     # 与 tc_model.fit() 的输出对齐（5 参数）
     params = dict(bw_gbs=fit["bw"], peak_tflops=fit["peak"],
                   c_srv_ms=fit["c_srv"], b_sat=fit["b_sat"],
