@@ -5,10 +5,10 @@
   "n_cells_multi_session": 5,
   "tpot_cv_within_median": 0.00227,
   "tpot_cv_between_median": 0.00503,
-  "tpot_cv_between_max": 0.06358,
+  "tpot_cv_between_max": 0.03899,
   "ttft_cv_between_max": 0.03092,
-  "mape_cost_se_between_est": 0.6089,
-  "mape_cost_reported": 8.6126,
+  "mape_cost_se_between_est": 0.3735,
+  "mape_cost_reported": 8.5944,
   "mape_cost_se_est": 0.0218,
   "note": "se 用 TPOT 的重复 CV 与格数做误差传播，是量级估计而非严格区间"
 }

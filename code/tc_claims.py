@@ -221,6 +221,10 @@ def load_inputs():
     _p = RESULTS / "clock_audit.json"
     if _p.exists():
         clock = json.loads(_p.read_text(encoding="utf-8"))
+    bim = {}
+    _p = RESULTS / "bimodal_3B_q4_k_m_ctx512_c16.json"
+    if _p.exists():
+        bim = json.loads(_p.read_text(encoding="utf-8"))
 
     # ---- 三套数据口径（复核第 12 轮提的第 4 条）----
     # 原始行 / 去重行 / 对外口径，三者不同，必须在一处讲清。
@@ -238,7 +242,8 @@ def load_inputs():
     )
     return dict(rows=rows, ok=ok, n_cells=n_cells, n_rows=len(ok),
                 fit=fit, verify=ver, n_scripts=len(codes), pois=pois,
-                var=var, tails=tails, byq=byq, counts=counts, clock=clock)
+                var=var, tails=tails, byq=byq, counts=counts,
+                clock=clock, bim=bim)
 
 
 def build_claims(d):
@@ -344,6 +349,17 @@ def build_claims(d):
         claims["时钟闸门（相对可达参考）：ok / warn / bad"] = (
             f"{dist.get('ok', 0)} / {dist.get('warn', 0)} / {dist.get('bad', 0)} 格")
         claims["时钟对 TPOT 的弹性（实测）"] = f"{clk.get('elasticity_est', float('nan')):.2f}"
+
+    bim = d.get("bim") or {}
+    if bim:
+        bs = bim.get("batches", [])
+        claims["批次数（c16 溯源实验）"] = f"{bim.get('n_batches')} 批 / {bim.get('n_rows')} 行"
+        claims["跨批 TPOT 极差（c16）"] = f"{bim.get('batch_spread_pct', float('nan')):.2f}%"
+        if len(bs) >= 3:
+            last3 = [b["tpot_mean"] for b in bs[-3:]]
+            sp3 = (max(last3) / min(last3) - 1) * 100
+            claims["同一天三批的 TPOT 极差（c16）"] = f"{sp3:.2f}%"
+        claims["批次溯源判定"] = bim.get("verdict", "—")
 
     cnt = d.get("counts") or {}
     if cnt:
