@@ -1,0 +1,7 @@
+{
+  "n_cells": 2,
+  "n_turns": 12,
+  "tpot_mape": 5.23,
+  "ttft_mape": 6.27,
+  "note": "多轮下 TPOT 随前缀增长；模型用 KV 线性项近似"
+}

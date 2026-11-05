@@ -229,6 +229,10 @@ def load_inputs():
     _p = RESULTS / "mixed_lengths.json"
     if _p.exists():
         mixed = json.loads(_p.read_text(encoding="utf-8"))
+    mt = {}
+    _p = RESULTS / "multiturn.json"
+    if _p.exists():
+        mt = json.loads(_p.read_text(encoding="utf-8"))
 
     # ---- 三套数据口径（复核第 12 轮提的第 4 条）----
     # 原始行 / 去重行 / 对外口径，三者不同，必须在一处讲清。
@@ -247,7 +251,7 @@ def load_inputs():
     return dict(rows=rows, ok=ok, n_cells=n_cells, n_rows=len(ok),
                 fit=fit, verify=ver, n_scripts=len(codes), pois=pois,
                 var=var, tails=tails, byq=byq, counts=counts,
-                clock=clock, bim=bim, mixed=mixed)
+                clock=clock, bim=bim, mixed=mixed, mt=mt)
 
 
 def build_claims(d):
@@ -383,6 +387,12 @@ def build_claims(d):
         claims["混合长度：TTFT 误差（均值口径）"] = f"{mixed.get('ttft_mape_mean_approx', float('nan')):.1f}%"
         claims["混合长度：TTFT 误差（逐请求口径）"] = f"{mixed.get('ttft_mape_per_request', float('nan')):.1f}%"
         claims["混合长度：TPOT 误差"] = f"{mixed.get('tpot_mape', float('nan')):.1f}%"
+
+    mt = d.get("mt") or {}
+    if mt:
+        claims["多轮对话：TPOT MAPE（≤6 轮）"] = f"{mt.get('tpot_mape', float('nan')):.1f}%"
+        claims["多轮对话：TTFT MAPE（≤6 轮）"] = f"{mt.get('ttft_mape', float('nan')):.1f}%"
+        claims["多轮对话：观测轮数"] = f"{mt.get('n_turns', 0)} 轮 / {mt.get('n_cells', 0)} 格"
 
     cnt = d.get("counts") or {}
     if cnt:
