@@ -361,6 +361,19 @@ def build_claims(d):
             claims["同一天三批的 TPOT 极差（c16）"] = f"{sp3:.2f}%"
         claims["批次溯源判定"] = bim.get("verdict", "—")
 
+    # ---- 钱：同一份 GPU·秒，两个价格口径（W2）----
+    # 模型只给 GPU·秒（硬件无关）；换成钱必须说清价格，所以两条都带价格说明。
+    try:
+        import importlib as _il
+        _rc = _il.import_module("tc_recommend")
+        _pred = pd.read_csv(RESULTS / "predictions.csv")
+        _row = _pred[_pred["cell_id"] == "7B_q4_k_m_ctx2048_c1"]
+        _cost = float(_row["pred_cost_gpu_s_per_1m"].iloc[0])
+        claims["成本（本地电费 0.06 元/时）"] = f"{_rc.to_cny(_cost, 0.06):.2f} 元 / 百万 token"
+        claims["成本（A10 按量 10.5 元/时）"] = f"{_rc.to_cny(_cost, 10.5):.2f} 元 / 百万 token"
+    except Exception as _e:
+        print(f"  （钱换算跳过：{type(_e).__name__}: {_e}）", flush=True)
+
     cnt = d.get("counts") or {}
     if cnt:
         claims["数据口径：原始行数（含失败）"] = f"{cnt['raw_rows']} 行"

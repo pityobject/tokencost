@@ -26,6 +26,42 @@ from tc_model import predict
 Z_90 = 1.645
 
 
+# ---------------------------------------------------------------- 钱（W2）
+# 成本单位一直是「GPU 秒 / 百万 token」——工程上准确，但对业务方不直观。
+# 这里把 GPU·秒折成「元 / 百万 token」。
+#
+# **不设默认价格**：价格是外部假设，默认塞进去会让数字看起来比实际更确定。
+# 观察到的现实差距：本地电费口径约 0.06 元/小时，云端 A10 按量约 10.5 元/小时，
+# 同一份 GPU·秒换算成钱会差 175 倍——所以"多少钱"必须和"什么价"一起说。
+PRICE_CNY_PER_HOUR = {
+    "laptop": 0.06,      # 95 W × 0.6 元/度（不含机器折旧）
+    "a10": 10.5,         # 云端按量参考价（会变，仅作量级参考）
+    "4090": 3.0,
+    "a100_40g": 18.0,
+}
+
+
+def resolve_price(spec):
+    """--gpu-price 接受数字或预设名，返回 (元/小时, 说明)。"""
+    if spec is None:
+        return None, ""
+    key = str(spec).strip().lower()
+    if key in PRICE_CNY_PER_HOUR:
+        return PRICE_CNY_PER_HOUR[key], f"预设 {key}"
+    try:
+        return float(key), "自定义"
+    except ValueError:
+        raise SystemExit(
+            f"--gpu-price 需要数字（元/小时）或预设名：{sorted(PRICE_CNY_PER_HOUR)}")
+
+
+def to_cny(cost_gpu_s_per_1m, price_per_hour):
+    """GPU·秒/百万token → 元/百万token。"""
+    if price_per_hour is None:
+        return float("nan")
+    return cost_gpu_s_per_1m / 3600.0 * price_per_hour
+
+
 def cvar(x, q=0.9):
     xs = np.sort(np.asarray(x))[::-1]
     k = max(1, int(round(len(xs) * (1 - q))))
@@ -92,6 +128,9 @@ def main():
                     help="质量约束用点估计(point)还是 Wilson 下界(lcb，默认，更保守)")
     ap.add_argument("--min-acc-drop", type=float, default=6.0,
                     help="允许比最高准确率低几个百分点（质量下限）。默认 6 ≈ 一个 CI 半宽")
+    ap.add_argument("--gpu-price", default=None,
+                    help="GPU 价格（元/小时），接受数字或预设：laptop / a10 / 4090 / a100_40g。"
+                         "不给则只报 GPU·秒——价格是外部假设，不设默认值")
     ap.add_argument("--top", type=int, default=12)
     args = ap.parse_args()
 
@@ -134,6 +173,7 @@ def main():
         half_log = Z_90 * args.sigma_log
     else:
         half_log = fit.get("half_width_log", Z_90 * fit.get("sigma_log", 0.1))
+    price, price_src = resolve_price(args.gpu_price)
     print("=" * 78)
     print(f"输入：首字延迟 ≤ {args.ttft:.0f} ms，出字间隔 ≤ {args.tpot:.0f} ms（均按 CVaR90 判定）")
     print(f"请求长度：均值 {args.prompt_mean:.0f} token，对数标准差 {args.prompt_sigma}")
@@ -191,13 +231,20 @@ def main():
     print(f"  预测出字间隔（90% 置信上限）  {best['tpot_hi_ms']:7.1f} ms   （上限 {args.tpot:.0f}）")
     print(f"  预测吞吐                      {best['throughput_tps']:7.1f} token/s")
     print(f"  预测成本                      {best['cost']:7.0f} GPU 秒 / 百万 token")
+    if price is not None:
+        cny = to_cny(best["cost"], price)
+        print(f"  折算成钱                      {cny:7.2f} 元 / 百万 token"
+              f"（按 {price:g} 元/小时，{price_src}）")
     print(f"\n对照：满足 SLA 的最贵配置是 {worst['cell_id']}，成本 {worst['cost']:.0f}"
           f"（是推荐的 {worst['cost']/best['cost']:.2f} 倍）")
 
     print(f"\nSLA 内成本最低的前 {args.top} 个配置：")
-    print(valid.head(args.top)[["cell_id", "vram_est_gb", "ttft_hi_ms", "tpot_hi_ms",
-                                "throughput_tps", "cost"]]
-          .to_string(index=False, float_format=lambda x: f"{x:9.1f}"))
+    show = valid.head(args.top).copy()
+    cols = ["cell_id", "vram_est_gb", "ttft_hi_ms", "tpot_hi_ms", "throughput_tps", "cost"]
+    if price is not None:
+        show["cost_cny"] = show["cost"].map(lambda c: to_cny(c, price))
+        cols.append("cost_cny")
+    print(show[cols].to_string(index=False, float_format=lambda x: f"{x:9.2f}"))
 
     print("\n被判出局的原因分布：")
     print(f"  显存装不下                {int((~df['feasible']).sum())} 格")
