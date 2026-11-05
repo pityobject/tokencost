@@ -50,7 +50,7 @@ def _client_cpu_seconds():
 
 def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
              warmup=2, settle_s=2.0, verbose=True, requests=None, suffix="",
-             prompt_tokens=None):
+             prompt_tokens=None, length_mix=None):
     """跑一格，返回这一格每一轮的指标列表。失败时返回带 status='failed' 的单行。"""
     key = (model, quant)
     repeats = repeats or cfg.REPEATS
@@ -59,6 +59,17 @@ def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
     # 提示长度可覆盖：TTFT 的 prefill 项随 L 线性增长，而原数据集只有一种长度，
     # 不做这个维度就永远在把"长文档场景"当外推。
     prompt_tokens = int(prompt_tokens or cfg.PROMPT_TOKENS)
+
+    # 【E2】混合请求长度：{长度: 权重}。每个请求独立抽样，与固定长度形成单变量对照。
+    if isinstance(length_mix, str):
+        length_mix = lg.parse_length_mix(length_mix)
+    if length_mix:
+        suffix = (suffix or "") + "_mix"
+        if verbose:
+            mean_L = sum(k * v for k, v in length_mix.items())
+            print(f"    [混合长度] {length_mix}（加权平均 {mean_L:.0f} token）", flush=True)
+            prompt_tokens = int(round(mean_L))   # 用于显存/上下文校验与记录
+
     if prompt_tokens != cfg.PROMPT_TOKENS and not suffix:
         suffix = f"_p{prompt_tokens}"        # 自动加后缀，避免覆盖已有格
     cid = cfg.cell_id(model, quant, ctx, conc, suffix)
@@ -228,7 +239,8 @@ def main():
     cfg.ensure_dirs()
     print(f"=== 单格实验：{args.model} {args.quant} ctx={args.ctx} 并发={args.conc} ===")
     rows = run_cell(args.model, args.quant, args.ctx, args.conc,
-                    repeats=args.repeats, prompt_tokens=args.prompt_tokens)
+                    repeats=args.repeats, prompt_tokens=args.prompt_tokens,
+                    length_mix=args.length_mix)
     print("\n结果：")
     for r in rows:
         for k, v in r.items():
@@ -239,6 +251,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
