@@ -127,7 +127,8 @@ def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
         # 预热（结果丢弃）
         if warmup:
             asyncio.run(lg.run_load(url, conc, max(warmup, 1) * conc,
-                                    prompt_tokens, 16, timeout_s=180))
+                                    prompt_tokens, 16, timeout_s=180,
+                                    length_mix=length_mix))
             time.sleep(1.0)
 
         # 【E1】监控粒度为"每一轮"，不是整个 cell。
@@ -141,7 +142,8 @@ def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
                 cpu0 = _client_cpu_seconds()
                 req_rows = asyncio.run(lg.run_load(
                     url, conc, n_req, prompt_tokens, cfg.GEN_TOKENS,
-                    timeout_s=max(300, 20 * n_req)))
+                    timeout_s=max(300, 20 * n_req), length_mix=length_mix,
+                    seed=r))
                 cpu1 = _client_cpu_seconds()
                 dur = max(time.perf_counter() - t0, 1e-9)
                 # 客户端占了多少 CPU（单核百分比）。高并发时如果它贴近 100%，
@@ -216,6 +218,8 @@ def main():
     ap.add_argument("ctx", type=int)
     ap.add_argument("conc", type=int)
     ap.add_argument("--repeats", type=int, default=1, help="调试时用 1 轮")
+    ap.add_argument("--length-mix", default=None,
+                    help="混合请求长度，如 '256:0.7,1024:0.2,2048:0.1'（长度:权重）")
     ap.add_argument("--prompt-tokens", type=int, default=None,
                     help="提示长度（默认 cfg.PROMPT_TOKENS=256）；"
                          "用于补 TTFT 随 prompt 长度的斜率，会自动加 _pNNN 后缀")

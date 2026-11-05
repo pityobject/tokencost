@@ -157,8 +157,40 @@ async def one_request(client, url, prompt, max_tokens, req_id, t_origin=None):
     return row
 
 
+def parse_length_mix(spec):
+    """把 "256:0.7,1024:0.2" 解析成 {256: 0.7, 1024: 0.2}；权重归一化。"""
+    if not spec:
+        return None
+    mix = {}
+    for part in str(spec).split(","):
+        part = part.strip()
+        if not part:
+            continue
+        if ":" not in part:
+            raise SystemExit(f"--length-mix 格式应为 '长度:权重,...'，收到 {part!r}")
+        k, v = part.split(":", 1)
+        mix[int(float(k))] = float(v)
+    total = sum(mix.values())
+    if total <= 0:
+        raise SystemExit("--length-mix 的权重之和必须为正")
+    return {k: v / total for k, v in mix.items()}
+
+
+def sample_length(mix, rng):
+    """按权重抽一个目标长度。"""
+    r = rng.random()
+    acc = 0.0
+    last = None
+    for k, w in mix.items():
+        acc += w
+        last = k
+        if r <= acc:
+            return int(k)
+    return int(last)
+
+
 async def run_load(url, concurrency, n_requests, prompt_tokens, max_tokens,
-                   timeout_s=300, verbose=False):
+                   timeout_s=300, verbose=False, length_mix=None, seed=0):
     """按指定并发发 n_requests 个请求，返回每个请求的指标列表。
 
     并发怎么实现：开 concurrency 个"工人"，每人循环取任务，直到任务发完。
@@ -171,10 +203,16 @@ async def run_load(url, concurrency, n_requests, prompt_tokens, max_tokens,
     t_origin = time.perf_counter()
 
     async with httpx.AsyncClient(timeout=timeout_s, limits=limits) as client:
+        import random as _random
+        rng = _random.Random(seed)
+
         async def worker(i):
             async with sem:
-                prompt = make_prompt(prompt_tokens, nonce=i)
+                # 【E2】混合长度：每个请求独立抽样，长短混在同一批里
+                tgt = sample_length(length_mix, rng) if length_mix else int(prompt_tokens)
+                prompt = make_prompt(tgt, nonce=i)
                 row = await one_request(client, url, prompt, max_tokens, i, t_origin=t_origin)
+                row["prompt_tokens_nominal"] = tgt
                 results.append(row)
                 if verbose and len(results) % 8 == 0:
                     print(f"    已完成 {len(results)}/{n_requests}")

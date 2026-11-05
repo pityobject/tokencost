@@ -77,6 +77,7 @@ COMMANDS = {
     "clockaudit":    ("tc_clock_audit.py", []),
     "bimodal":       ("tc_analyze_bimodal.py", []),
     "web":           ("tc_web.py", []),
+    "mixed":         ("tc_analyze_mixed.py", []),
     "audit":         ("tc_audit.py", []),
     "ci":            ("../scripts/ci.ps1", []),
     "reset":         ("tc_reset_data.py", []),
@@ -118,6 +119,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
