@@ -9,6 +9,7 @@ tc_gpu.py —— 在实验过程中持续记录 GPU 温度和频率。
 
 import statistics
 import subprocess
+from pathlib import Path
 import time
 import threading
 import time
@@ -152,3 +153,72 @@ def idle_baseline(seconds=1.5, interval_s=0.3):
                 bg_clock_mhz=float(clk[len(clk) // 2]), bg_level=level,
                 bg_notes="；".join(notes))
 
+
+
+# ---------------------------------------------------------------- 时钟相对判据（W1）
+# 背景程序/功耗墙会让 SM 时钟掉下来。旧的绝对闸门（<2000 且 <50W）太松：
+# 2280 MHz / 93 W 的格子照样放行，但它比 2490 MHz 的格子慢约 8%。
+#
+# 参考值不能用 clocks.max.sm（那是标称 3105 MHz，笔记本永远达不到），
+# 而要用"同一模型在历史上达到过的最高时钟"——可达参考。
+
+CLOCK_RATIO_OK = 0.95      # ≥95% 参考值：正常
+CLOCK_RATIO_WARN = 0.90    # 90–95%：偏低，标注
+# <90%：明显偏低（标注为 bad）
+
+
+def _ref_path():
+    return Path(__file__).resolve().parent.parent / "results" / "clock_ref.json"
+
+
+def clock_reference(rebuild=False):
+    """每个模型的可达参考时钟（MHz）。结果缓存在 results/clock_ref.json。
+
+    来源：data/raw_cells.jsonl 里所有成功格的 clock_sm_median 最大值。
+    这是**经验参考**，不是标称值——后者在这台机器上不可达。
+    """
+    import json
+    p = _ref_path()
+    if p.exists() and not rebuild:
+        try:
+            return json.loads(p.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    data = Path(__file__).resolve().parent.parent / "data" / "raw_cells.jsonl"
+    best = {}
+    if data.exists():
+        for line in data.open(encoding="utf-8"):
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                r = json.loads(line)
+            except Exception:
+                continue
+            if r.get("status") != "ok":
+                continue
+            c = r.get("clock_sm_median")
+            if c:
+                m = r.get("model", "?")
+                best[m] = max(best.get(m, 0.0), float(c))
+    if best:
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(json.dumps(best, ensure_ascii=False, indent=2), encoding="utf-8")
+    return best
+
+
+def clock_gate(median_clock, model, ref=None):
+    """返回 (ratio, level, note)。ref 为 None 时判定为 unknown。"""
+    ref = ref if ref is not None else clock_reference()
+    base = (ref or {}).get(model)
+    if not median_clock or not base:
+        return None, "unknown", "没有可达参考时钟（先跑任意一格即可自动建立）"
+    ratio = float(median_clock) / float(base)
+    if ratio >= CLOCK_RATIO_OK:
+        return round(ratio, 4), "ok", f"时钟 {median_clock:.0f}/{base:.0f} MHz"
+    if ratio >= CLOCK_RATIO_WARN:
+        return round(ratio, 4), "warn", (
+            f"时钟只有参考值的 {ratio*100:.0f}%（{median_clock:.0f}/{base:.0f} MHz）——标注，不作废")
+    return round(ratio, 4), "bad", (
+        f"时钟仅参考值的 {ratio*100:.0f}%（{median_clock:.0f}/{base:.0f} MHz）——"
+        f"实测弹性约 0.3，仍不作废但需在分析里标注")

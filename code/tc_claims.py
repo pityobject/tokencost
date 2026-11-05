@@ -217,6 +217,10 @@ def load_inputs():
     _p = RESULTS / "params_by_quant.csv"
     if _p.exists():
         byq = pd.read_csv(_p)
+    clock = {}
+    _p = RESULTS / "clock_audit.json"
+    if _p.exists():
+        clock = json.loads(_p.read_text(encoding="utf-8"))
 
     # ---- 三套数据口径（复核第 12 轮提的第 4 条）----
     # 原始行 / 去重行 / 对外口径，三者不同，必须在一处讲清。
@@ -234,7 +238,7 @@ def load_inputs():
     )
     return dict(rows=rows, ok=ok, n_cells=n_cells, n_rows=len(ok),
                 fit=fit, verify=ver, n_scripts=len(codes), pois=pois,
-                var=var, tails=tails, byq=byq, counts=counts)
+                var=var, tails=tails, byq=byq, counts=counts, clock=clock)
 
 
 def build_claims(d):
@@ -333,6 +337,13 @@ def build_claims(d):
         if len(byq) >= 2:
             bws = byq["bw"]
             claims["分量化 BW 极差（最大/最小）"] = f"{bws.max() / max(bws.min(), 1e-9):.2f}×"
+
+    clk = d.get("clock") or {}
+    if clk:
+        dist = clk.get("distribution", {})
+        claims["时钟闸门（相对可达参考）：ok / warn / bad"] = (
+            f"{dist.get('ok', 0)} / {dist.get('warn', 0)} / {dist.get('bad', 0)} 格")
+        claims["时钟对 TPOT 的弹性（实测）"] = f"{clk.get('elasticity_est', float('nan')):.2f}"
 
     cnt = d.get("counts") or {}
     if cnt:

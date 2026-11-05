@@ -74,6 +74,7 @@ COMMANDS = {
     "variance":      ("tc_analyze_variance.py", []),
     "gpucheck":      ("tc_gpucheck.py", []),
     "contamination": ("tc_check_contamination.py", []),
+    "clockaudit":    ("tc_clock_audit.py", []),
     "audit":         ("tc_audit.py", []),
     "ci":            ("../scripts/ci.ps1", []),
     "reset":         ("tc_reset_data.py", []),

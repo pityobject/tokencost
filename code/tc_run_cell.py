@@ -161,6 +161,19 @@ def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
                               "不是模型的上限。报告里要标注。")
 
         gpu = mon.summary()
+        # 【W1】时钟相对判据：记录可达参考值下的比值，不做静默剔除
+        try:
+            clk = gpu.get("clock_sm_median") if isinstance(gpu, dict) else None
+            ratio, gate, note = tc_gpu_mod.clock_gate(clk, model)
+            gpu["clock_ref_mhz"] = (tc_gpu_mod.clock_reference() or {}).get(model)
+            gpu["clock_ratio"] = ratio
+            gpu["clock_gate"] = gate
+            gpu["clock_note"] = note
+            if gate in ("warn", "bad"):
+                print(f"    ⚠️ 时钟偏低（{gate}）：{note}", flush=True)
+        except Exception as _e:
+            gpu["clock_gate"] = "unknown"
+            gpu["clock_note"] = f"判定失败：{type(_e).__name__}: {str(_e)[:80]}"
         for row in rows:
             row.update(gpu)
 
