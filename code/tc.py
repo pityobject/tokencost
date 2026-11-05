@@ -76,6 +76,7 @@ COMMANDS = {
     "contamination": ("tc_check_contamination.py", []),
     "clockaudit":    ("tc_clock_audit.py", []),
     "bimodal":       ("tc_analyze_bimodal.py", []),
+    "web":           ("tc_web.py", []),
     "audit":         ("tc_audit.py", []),
     "ci":            ("../scripts/ci.ps1", []),
     "reset":         ("tc_reset_data.py", []),
