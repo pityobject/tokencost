@@ -167,6 +167,14 @@ KV 量化（`--cache-type-k/v q8_0`）能救回一部分：1.5B 上吞吐 +238%�
 
 完整矩阵（含按输出分级的可信度）见 `报告/适用域矩阵_一页纸.md`。
 
+## 常见误用（照着改就行）
+
+| 症状 | 原因 | 正确做法 |
+|---|---|---|
+| `can't open file ...\code\code\tc_recommend.py` | 在 `code/` 里又加了 `code/` 前缀 | 在 `code/` 里用 `python tc_recommend.py`；在根目录用 `python code/tc.py recommend` |
+| `ModuleNotFoundError: pandas` | 用了系统 Python | 用 `D:\llm\venv\Scripts\python.exe` |
+| `端口 8090 被占用` | 之前手工起的 llama-server 还在 | `python code/tc.py stop --force` |
+
 ## 四项补充分析（2026-11）
 
 | 分析 | 结论 | 产物 |
@@ -188,6 +196,16 @@ KV 量化（`--cache-type-k/v q8_0`）能救回一部分：1.5B 上吞吐 +238%�
 > **数据口径（三个数都对，含义不同）**：原始 **370 行**（含 8 行端口占用导致的失败，如实保留）
 > → 去重 **356 行 / 132 格**（同一格多次运行时 `repeat` 会重编号，同格同轮取最后一次）
 > → 对外口径 **110 格 / 369 次**（再剔除 23 个长度/并发探针）。
+
+> ### 运行前先确认两件事
+>
+> **① 目录**：下面的命令都在**仓库根目录**执行（`cd tokencost`）。
+> 如果你在 `code/` 里，就别再写 `code/` 前缀——`python code/tc.py` 会变成 `code/code/tc.py`。
+>
+> **② 解释器**：必须用装了依赖的 venv，不要用系统 Python。
+> ```powershell
+> $py = "D:\llm\venv\Scripts\python.exe"   # 本仓库唯一支持的解释器
+> ```
 
 ## 在你自己的机器上用（自标定）
 
