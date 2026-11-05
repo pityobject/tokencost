@@ -1,4 +1,4 @@
-# CI checks (Windows PowerShell 5.1+ compatible, ASCII only)
+﻿# CI checks (Windows PowerShell 5.1+ compatible, ASCII only)
 #
 # Runs two checks; any failure returns non-zero:
 #   1. tc_claims.py --check   docs numbers must match artifacts
