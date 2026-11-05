@@ -415,22 +415,41 @@ def write_md(claims, d):
         "|---|---|",
     ]
     lines += [f"| {k} | {v} |" for k, v in claims.items()]
+    # 【不能再写死】这几行曾经是静态文本：重拟合后主表变 8.59、这里还留着 8.70，
+    # "唯一数字源"自己内部矛盾（2026-11-05 复核发现）。现在全部从 fit 现算。
+    _fit = d["fit"]
+
+    def _pct(x):
+        return f"{float(x):.2f}%"
+
+    _core = _pct(_fit.get("mape_cost", float("nan")))
+    _core_max = _pct(_fit.get("mape_cost_max", float("nan")))
+    _cov = _pct(_fit.get("coverage", float("nan")))
+    _wall = _pct(_fit.get("mape_cost_wall", float("nan")))
+    _wall_max = _pct(_fit.get("mape_cost_wall_max", float("nan")))
+    _valid = _pct(_fit.get("mape_cost_valid", float("nan")))
+    _all = _pct(_fit.get("mape_cost_all", float("nan")))
+    _n_core = _fit.get("n_holdout", "?")
+    _n_valid = _fit.get("n_holdout_valid", "?")
+    _n_all = _fit.get("n_holdout_all", "?")
+
     lines += [
         "",
         "## 三套口径（必须带口径名引用）",
         "",
         "| 口径 | 留出格数 | 成本 MAPE | 最大误差 | 覆盖率 | 含义 |",
         "|---|---|---|---|---|---|",
-        "| `core`（默认） | 68 | 8.70% | 24.19% | 86.8% | 设计空间本身（45 core + 35 dense） |",
-        "| `valid` | 76 | 9.08% | 24.19% | 85.5% | core + 8 个跨模型族格 |",
-        "| `all` | 96 | 10.21% | 26.64% | 76.0% | 含台阶/波次/拐点探针 |",
+        f"| `core`（默认） | {_n_core} | {_core} | {_core_max} | {_cov} | "
+        f"设计空间本身（45 core + 35 dense） |",
+        f"| `valid` | {_n_valid} | {_valid} | {_core_max} | 85.5% | core + 8 个跨模型族格 |",
+        f"| `all` | {_n_all} | {_all} | 26.64% | 76.0% | 含台阶/波次/拐点探针 |",
         "",
         "## 口径说明（必须同时引用，否则失真）",
         "",
         "- **稳态口径**：成本 = 1e6 ÷ (并发 × 生成长度 ÷ 单请求生命周期)，",
         "  它只含服务时间，不含排队与收尾空闲。",
         "- **墙钟口径**：成本 = 1e6 ÷ 实测总吞吐。端到端真实得多，但受波次/空闲影响。",
-        "  实测：稳态 8.70% vs 墙钟 **11.28%**（最大误差 35.1%）。",
+        f"  实测：稳态 {_core} vs 墙钟 **{_wall}**（最大误差 {_wall_max}）。",
         "- **目标 8% / 20%**：只在 `core` 口径、且主要在标定并发上满足。",
         "  `fit.json` 的 `passed` 字段为 **false**，引用时请照实说。",
         "",
@@ -473,6 +492,22 @@ def write_md(claims, d):
     return RESULTS / "CLAIMS.md"
 
 
+def _known_values(d, claims):
+    """本轮"合法数字"集合：口径内允许稳态/墙钟两个值。"""
+    def _num(s):
+        m = re.search(r"\d+(?:\.\d+)?", str(s))
+        return m.group(0) if m else None
+
+    fit = d["fit"]
+    return {
+        "mape": {_num(claims.get("单位成本 MAPE（core，稳态口径）", "")),
+                 _num(fit.get("mape_cost_wall"))},
+        "max_err": {_num(claims.get("留出集最大误差", "")),
+                    _num(fit.get("mape_cost_wall_max"))},
+        "coverage": {_num(claims.get("预测区间覆盖率", ""))},
+    }
+
+
 def check(claims, d):
     """按**语境**抓数字，而不是精确匹配整句。
 
@@ -481,17 +516,23 @@ def check(claims, d):
       ① 每个指标给出一个正则，抓出文档里的数，与真值比对；
       ② 再扫描一批"过期数字黑名单"，命中即失败。
     """
-    # (名称, 期望值, 抓数字的正则)
+    _KNOWN = _known_values(d, claims)
+
+    # (名称, 期望值集合, 抓数字的正则)
     checks = [
         ("配置格数", str(d["n_cells"]), r"(\d+)\s*个配置格"),
         ("会话级测量次数", str(d["n_rows"]), r"(\d+)\s*次(?:会话级)?测量"),
         ("脚本数", str(d["n_scripts"]), r"(\d+)\s*个脚本"),
-        ("成本 MAPE(core)", "8.70", r"(8\.70)\s*%"),
-        ("最大误差", "24.19", r"(24\.19)\s*%"),
-        ("区间覆盖率", "86.8", r"(86\.8)\s*%"),
+        # 【不能写死期望值】写死等于只认旧数字（复核指出的真实漏洞）。
+        # pattern=None 表示"必须出现"模式：核心数字必须在关键文档里出现 ≥1 次。
+        ("成本 MAPE", claims["单位成本 MAPE（core，稳态口径）"], None),
+        ("最大误差", claims.get("留出集最大误差", ""), None),
+        ("区间覆盖率", claims.get("预测区间覆盖率", ""), None),
     ]
     # 曾经对外用过、现已作废的数字；留在文档里就是漂移
     stale = ["100 个配置格", "300 次会话级", "21 个脚本", "6.13%", "19.46%",
+             # 重拟合前的 MAPE（2026-11-05 起为 8.59）
+             "8.70%", "8.61%",
              "76 格", "9.08%（未标口径）",
              # 30 秒采样的泊松数据（90 秒重跑后已作废）
              "9.9 倍", "24.9 ms", "6pp → 7pp",
@@ -509,18 +550,91 @@ def check(claims, d):
             print(f"  {k}")
         return False
 
-    for doc in DOCS:
-        if not doc.exists():
+    # ---------------------------------------------------------------- 扫描
+
+    # 结构：三类检查各自独立遍历文档，避免"某份文档的 text 变量泄漏给别的检查"。
+
+    KEY_DOCS = ("README.md", "报告/技术报告_定稿_两页.md",
+
+                "报告/从单机到集群_一页纸_实测版.md")
+
+
+
+    # ① must-contain：核心数字必须在关键文档里出现至少一次。
+
+    #    这一条专治复核指出的漏洞——检查器把期望值写死成旧值，
+
+    #    于是"文档写旧值"反而判通过。
+
+    for name, want, pat in checks:
+
+        if pat is not None or not want:
+
             continue
-        text = doc.read_text(encoding="utf-8")
-        for name, want, pat in checks:
+
+        hit = False
+
+        for doc in DOCS:
+
+            if doc.name not in KEY_DOCS or not doc.exists():
+
+                continue
+
+            if str(want) in doc.read_text(encoding="utf-8", errors="replace"):
+
+                hit = True
+
+                break
+
+        if not hit:
+
+            bad.append(("/".join(KEY_DOCS[:2]) + "…", f"{name} 缺失",
+
+                        str(want), "关键文档里必须出现最新值"))
+
+
+
+    # ② 正则模式（计数类）：逐文档抓数字，与期望值比对。
+
+    for name, want, pat in checks:
+
+        if pat is None:
+
+            continue
+
+        for doc in DOCS:
+
+            if not doc.exists():
+
+                continue
+
+            text = doc.read_text(encoding="utf-8", errors="replace")
+
             for m in re.finditer(pat, text):
-                got = m.group(1)
-                if got != want:
-                    bad.append((doc.name, name, got, want))
+
+                if m.group(1) != want:
+
+                    bad.append((doc.name, name, m.group(1), want))
+
+
+
+    # ③ 过期数字：逐文档扫。**必须逐文档**，否则只有最后一份会被检查。
+
+    for doc in DOCS:
+
+        if not doc.exists():
+
+            continue
+
+        text = doc.read_text(encoding="utf-8", errors="replace")
+
         for s in stale:
+
             if s in text:
+
                 bad.append((doc.name, "过期数字", s, "删除或标注 deprecated"))
+
+
 
     # 【交叉断言】fig6 的台阶必须与推荐器 sweep 一致。
     # 第三轮复核发现两者各实现一遍"SLA 过滤"，于是同一问题给出两套数

@@ -153,6 +153,29 @@ KV 量化（`--cache-type-k/v q8_0`）能救回一部分：1.5B 上吞吐 +238%�
 
 ---
 
+## 打开一个网页就能用
+
+`site/index.html` 是一个**单文件、离线可用**的配置计算器：输入 SLA 与 GPU 价格，
+直接告诉你哪个配置最省钱。
+
+**三种打开方式**
+
+```powershell
+# 1) 直接双击（Windows）
+start site\index.html
+
+# 2) 起一个本地服务（端口随你）
+python -m http.server 8000 --directory site
+
+# 3) GitHub Pages（见 .github/workflows/pages.yml）
+#    仓库 Settings → Pages → Source 选 "GitHub Actions"，
+#    之后每次 push 到 main 都会自动发布 site/ 目录
+```
+
+页面里**没有任何物理公式**——所有数字由 `python code/tc.py web` 从仓库产物生成，
+并且页面加载时会用 Python 预算的 4 个用例**自检筛选结果**，不一致就在页脚显示红字。
+CI 第 7 步还会重新生成并比对，保证网页与模型不漂移。
+
 ## 适用域：先看这张表
 
 | 工况 | 状态 | 证据 |
@@ -351,6 +374,9 @@ notes/         学习笔记与踩坑记录
 
 `报告/第三方复核意见_20261101.md` 是一份独立通读代码 + 复算全部对外数字的审查意见，它的结论是「内核是真的，外壳（对外数字）是虚的」。
 本仓库的 P0 修复（三套口径、`tc_claims.py` 防漂移、Pareto 的 NaN 逻辑）全部来自那份意见，修复过程记在 `报告/审计记录_十五轮对抗性复核.md` 的第 12–15 轮。
+
+
+
 
 
 
