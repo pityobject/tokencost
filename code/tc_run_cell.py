@@ -309,6 +309,12 @@ def run_cell_turns(model, quant, ctx, conc, turns, prompt_tokens=None,
     finally:
         if proc is not None:
             srv.stop(proc)
+    # 【必须落盘】单轮路径在 run_cell 内部写 raw_cells；
+    # 多轮分支漏了这一步 → 控制台有输出、分析却说"没有数据"（2026-11-05 实际发生）。
+    _append_jsonl(RAW_CELLS, rows)
+    if verbose:
+        print(f"    已写入 {len(rows)} 行到 raw_cells.jsonl（每轮一行）", flush=True)
+
     return rows
 
 
