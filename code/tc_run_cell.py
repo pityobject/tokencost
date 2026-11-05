@@ -250,6 +250,68 @@ def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
     return rows
 
 
+
+# ================================================================ 多轮（E3）
+def run_cell_turns(model, quant, ctx, conc, turns, prompt_tokens=None,
+                   verbose=True, requests=None, save_requests=False):
+    """多轮：一条会话跑 turns 轮，每轮产出一行（repeat = 轮次）。
+
+    与单轮的差别：每轮输入包含前面全部历史，**KV 随之累积**。
+    这正是模型的单轮假设要接受检验的地方。
+    """
+    key = (model, quant)
+    prompt_tokens = int(prompt_tokens or cfg.PROMPT_TOKENS)
+    n_sess = requests if requests else cfg.requests_per_repeat(conc)
+    cid = cfg.cell_id(model, quant, ctx, conc, f"_mt{turns}")
+
+    # 上下文守卫：最坏情况 = 首轮 + (turns-1) 轮的增长（生成 + 追问）
+    worst = prompt_tokens + (turns - 1) * (cfg.GEN_TOKENS + 24) + cfg.GEN_TOKENS
+    if worst > int(ctx):
+        raise SystemExit(
+            f"[无效实验] {turns} 轮后前缀最坏约 {worst} token，超过每槽 ctx={ctx}。"
+            f"请提高 ctx 或减少轮数。")
+
+    base = dict(cell_id=cid, model=model, quant=quant, ctx=ctx, conc=conc,
+                weight_bytes=0, n_params=0,
+                ctx_avg_tokens=prompt_tokens + cfg.GEN_TOKENS / 2,
+                vram_est_gb=round(cfg.estimate_vram_gb(key, ctx, conc), 2),
+                requests=n_sess, gen_tokens=cfg.GEN_TOKENS,
+                prompt_tokens_nominal=prompt_tokens, turns=turns)
+
+    proc = None
+    rows = []
+    try:
+        proc, log_path = srv.start(key, ctx, conc, tag=cid)
+        if verbose:
+            print(f"    [多轮] {turns} 轮 × {n_sess} 条会话，逐轮记录前缀长度", flush=True)
+        time.sleep(2.0)
+        url = f"{cfg.BASE_URL}/v1/chat/completions"
+        res = asyncio.run(lg.run_turns(url, conc, n_sess, turns,
+                                       prompt_tokens, cfg.GEN_TOKENS,
+                                       verbose=verbose))
+        for r in res:
+            if not r.get("ok"):
+                rows.append(dict(base, repeat=r["turn"], status="failed",
+                                 error="该轮没有成功的请求"))
+                continue
+            rows.append(dict(base, repeat=r["turn"], status="ok",
+                             prompt_tokens_median=r.get("prefix_tokens_median"),
+                             ttft_p50_ms=r["ttft_p50_ms"],
+                             tpot_p50_ms=r["tpot_p50_ms"],
+                             n_ok=r["n_ok"]))
+            if verbose:
+                print(f"    第{r['turn']}轮  前缀≈{r.get('prefix_tokens_median')} token  "
+                      f"TTFT {r['ttft_p50_ms']:7.1f}ms  TPOT {r['tpot_p50_ms']:6.2f}ms",
+                      flush=True)
+    except Exception as e:
+        rows.append(dict(base, repeat=-1, status="failed",
+                         error=f"{type(e).__name__}: {e}"))
+    finally:
+        if proc is not None:
+            srv.stop(proc)
+    return rows
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("model")
@@ -257,6 +319,8 @@ def main():
     ap.add_argument("ctx", type=int)
     ap.add_argument("conc", type=int)
     ap.add_argument("--repeats", type=int, default=1, help="调试时用 1 轮")
+    ap.add_argument("--turns", type=int, default=0,
+                    help="多轮对话的轮数；>1 时每轮产出一行（repeat=轮次）")
     ap.add_argument("--length-mix", default=None,
                     help="混合请求长度，如 '256:0.7,1024:0.2,2048:0.1'（长度:权重）")
     ap.add_argument("--prompt-tokens", type=int, default=None,
@@ -266,9 +330,13 @@ def main():
 
     cfg.ensure_dirs()
     print(f"=== 单格实验：{args.model} {args.quant} ctx={args.ctx} 并发={args.conc} ===")
-    rows = run_cell(args.model, args.quant, args.ctx, args.conc,
-                    repeats=args.repeats, prompt_tokens=args.prompt_tokens,
-                    length_mix=args.length_mix)
+    if args.turns and args.turns > 1:
+        rows = run_cell_turns(args.model, args.quant, args.ctx, args.conc,
+                              args.turns, prompt_tokens=args.prompt_tokens)
+    else:
+        rows = run_cell(args.model, args.quant, args.ctx, args.conc,
+                        repeats=args.repeats, prompt_tokens=args.prompt_tokens,
+                        length_mix=args.length_mix)
     print("\n结果：")
     for r in rows:
         for k, v in r.items():

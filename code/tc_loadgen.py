@@ -307,3 +307,109 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# ================================================================ 多轮（E3）
+async def run_turns(url, concurrency, n_sessions, turns, base_tokens,
+                    max_tokens, timeout_s=600, verbose=False):
+    """跑 n_sessions 条会话，每条 turns 轮；返回"每轮"的汇总行。
+
+    每轮的输入 = 之前的全部历史 + 新的追问。所以第 t 轮的真实前缀长度会增长，
+    这正是要测的：TPOT 随"有效上下文"怎么变。
+    """
+    limits = httpx.Limits(max_connections=concurrency + 2,
+                          max_keepalive_connections=concurrency + 2)
+    sem = asyncio.Semaphore(concurrency)
+    t_origin = time.perf_counter()
+    per_turn = {t: [] for t in range(1, turns + 1)}
+
+    async with httpx.AsyncClient(timeout=timeout_s, limits=limits) as client:
+
+        async def one_session(sid):
+            # 会话内容：首轮是长材料，之后每轮一句追问
+            history = [{"role": "user",
+                        "content": make_prompt(base_tokens, nonce=10000 + sid)}]
+            async with sem:
+                for t in range(1, turns + 1):
+                    if t > 1:
+                        # 上一轮的"助手回复"进历史（用占位文本，长度≈max_tokens）
+                        history.append({"role": "assistant",
+                                        "content": ("已完成上一问。" * max(1, max_tokens // 8))}) 
+                        history.append({"role": "user",
+                                        "content": f"第{t}问：请用一句话复述上面的要点#{t}。"})
+                    payload = {
+                        "model": "local",
+                        "messages": history,
+                        "max_tokens": max_tokens,
+                        "temperature": 0.0,
+                        "stream": True,
+                        "stream_options": {"include_usage": True},
+                        "cache_prompt": False,
+                        "ignore_eos": True,
+                    }
+                    t_send = time.perf_counter()
+                    t_first = t_last = None
+                    n_chunks = 0
+                    usage = None
+                    err = None
+                    try:
+                        async with client.stream("POST", url, json=payload) as resp:
+                            resp.raise_for_status()
+                            async for line in resp.aiter_lines():
+                                if not line.startswith("data:"):
+                                    continue
+                                data = line[5:].strip()
+                                if data == "[DONE]":
+                                    break
+                                try:
+                                    obj = json.loads(data)
+                                except json.JSONDecodeError:
+                                    continue
+                                if obj.get("usage"):
+                                    usage = obj["usage"]
+                                ch = obj.get("choices") or []
+                                if not ch:
+                                    continue
+                                if (ch[0].get("delta") or {}).get("content"):
+                                    now = time.perf_counter()
+                                    if t_first is None:
+                                        t_first = now
+                                    t_last = now
+                                    n_chunks += 1
+                    except Exception as e:
+                        err = f"{type(e).__name__}: {e}"
+                    if not t_first:
+                        per_turn[t].append(dict(ok=False, error=err, turn=t))
+                        continue
+                    n_out = int((usage or {}).get("completion_tokens") or n_chunks or 1)
+                    per_turn[t].append(dict(
+                        ok=True, turn=t,
+                        prompt_tokens=int((usage or {}).get("prompt_tokens") or 0),
+                        ttft_ms=(t_first - t_send) * 1e3,
+                        tpot_ms=((t_last - t_first) / (n_out - 1) * 1e3) if n_out > 1 else None,
+                        n_out=n_out,
+                    ))
+                    if verbose:
+                        print(f"    会话{sid} 第{t}轮 前缀≈"
+                              f"{(usage or {}).get('prompt_tokens')} token", flush=True)
+
+        await asyncio.gather(*(one_session(i) for i in range(n_sessions)))
+
+    rows = []
+    for t in range(1, turns + 1):
+        rs = [r for r in per_turn[t] if r.get("ok") and r.get("tpot_ms")]
+        if not rs:
+            rows.append(dict(turn=t, ok=False, n_ok=0))
+            continue
+        ttft = sorted(r["ttft_ms"] for r in rs)
+        tpot = sorted(r["tpot_ms"] for r in rs)
+        pre = [r["prompt_tokens"] for r in rs if r["prompt_tokens"]]
+        rows.append(dict(
+            turn=t, ok=True, n_ok=len(rs),
+            prefix_tokens_median=(int(statistics.median(pre)) if pre else None),
+            ttft_p50_ms=float(statistics.median(ttft)),
+            tpot_p50_ms=float(statistics.median(tpot)),
+            throughput_tps=float(len(rs) * max_tokens / max(
+                (max(r["ttft_ms"] + r["tpot_ms"] * max(r["n_out"] - 1, 1) for r in rs)) / 1e3, 1e-9)),
+        ))
+    return rows
