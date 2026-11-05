@@ -15,6 +15,7 @@ tc_run_cell.py —— 跑完"一格"实验（一个固定组合：模型+量化+
 
 import argparse
 import asyncio
+import hashlib
 import json
 import statistics
 import sys
@@ -64,15 +65,40 @@ def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
     if isinstance(length_mix, str):
         length_mix = lg.parse_length_mix(length_mix)
     if length_mix:
-        suffix = (suffix or "") + "_mix"
+        # 【指纹必须进 id】不同混合分布若共用 `_mix` 后缀，两次实验会写进同一格、
+        # 后者覆盖前者的身份（2026-11-05 实际发生过）。
+        key_s = ",".join(f"{k}:{v:.4f}" for k, v in sorted(length_mix.items()))
+        fp = hashlib.sha1(key_s.encode()).hexdigest()[:4]
+        suffix = (suffix or "") + f"_mix{fp}"
         if verbose:
             mean_L = sum(k * v for k, v in length_mix.items())
-            print(f"    [混合长度] {length_mix}（加权平均 {mean_L:.0f} token）", flush=True)
-            prompt_tokens = int(round(mean_L))   # 用于显存/上下文校验与记录
+            print(f"    [混合长度] {length_mix}（加权平均 {mean_L:.0f} token，指纹 {fp}）",
+                  flush=True)
+        prompt_tokens = int(round(mean_L))   # 用于显存/上下文校验与记录
 
     if prompt_tokens != cfg.PROMPT_TOKENS and not suffix:
         suffix = f"_p{prompt_tokens}"        # 自动加后缀，避免覆盖已有格
     cid = cfg.cell_id(model, quant, ctx, conc, suffix)
+
+    # 【守卫】同一 id 不允许承载不同的混合分布（否则身份会被覆盖）
+    if length_mix:
+        raw = cfg.DATA_DIR / "raw_cells.jsonl"
+        if raw.exists():
+            import json as _json
+            want = ",".join(f"{k}:{v:.4f}" for k, v in sorted(length_mix.items()))
+            for line in raw.open(encoding="utf-8"):
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    r = _json.loads(line)
+                except Exception:
+                    continue
+                if r.get("cell_id") == cid and r.get("length_mix") not in (None, want):
+                    raise SystemExit(
+                        f"[冲突] {cid} 已存在，但混合分布不同："
+                        f"已有 {r.get('length_mix')}，本次 {want}。"
+                        f"指纹机制本应避免这种情况，请检查 make_prompt 或后缀逻辑。")
 
     # 【防呆（已纠正）】llama.cpp 的 --ctx-size 会按 --parallel 平分；
     # 而本项目的启动脚本传的是 `ctx × 并发`，所以每槽恰好 = ctx（日志里的 n_ctx_slot 就是它）。
@@ -103,6 +129,8 @@ def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
         vram_est_gb=round(cfg.estimate_vram_gb(key, ctx, conc), 2),
         requests=n_req, gen_tokens=cfg.GEN_TOKENS,
         prompt_tokens_nominal=prompt_tokens,
+    **({"length_mix": ",".join(f"{k}:{v:.4f}" for k, v in sorted(length_mix.items()))}
+       if length_mix else {}),
     )
 
     proc, log_path = None, None
