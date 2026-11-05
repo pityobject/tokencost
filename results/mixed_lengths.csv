@@ -1,3 +1,3 @@
-cell_id,n_requests,L_mean,L_p10,L_p90,L_cv,ttft_meas_p50,ttft_meas_p90,ttft_pred,ttft_err_pct,tpot_meas,tpot_pred,tpot_err_pct
-3B_q4_k_m_ctx8192_c4_mix,48,1079.9,177.7,1973.0,0.738,461.9,889.4,855.5,85.2,13.05,12.19,-6.6
-3B_q4_k_m_ctx8192_c4_mix,48,1079.9,177.7,1973.0,0.738,461.9,889.4,855.5,85.2,16.91,12.19,-27.9
+cell_id,n_requests,L_mean,L_p10,L_p90,L_cv,ttft_meas_p50,ttft_meas_p90,ttft_pred,ttft_pred_perreq,ttft_err_perreq_pct,ttft_err_pct,tpot_meas,tpot_pred,tpot_err_pct
+3B_q4_k_m_ctx8192_c4_mix1d02,24,785.6,296.0,1973.0,0.785,433.7,790.8,627.5,249.1,-42.6,44.7,12.97,12.02,-7.4
+3B_q4_k_m_ctx8192_c4_mix5576,24,1374.2,177.0,1973.0,0.616,517.6,889.0,1083.4,1546.4,198.8,109.3,16.79,12.37,-26.3

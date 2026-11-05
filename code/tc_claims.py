@@ -225,6 +225,10 @@ def load_inputs():
     _p = RESULTS / "bimodal_3B_q4_k_m_ctx512_c16.json"
     if _p.exists():
         bim = json.loads(_p.read_text(encoding="utf-8"))
+    mixed = {}
+    _p = RESULTS / "mixed_lengths.json"
+    if _p.exists():
+        mixed = json.loads(_p.read_text(encoding="utf-8"))
 
     # ---- 三套数据口径（复核第 12 轮提的第 4 条）----
     # 原始行 / 去重行 / 对外口径，三者不同，必须在一处讲清。
@@ -243,7 +247,7 @@ def load_inputs():
     return dict(rows=rows, ok=ok, n_cells=n_cells, n_rows=len(ok),
                 fit=fit, verify=ver, n_scripts=len(codes), pois=pois,
                 var=var, tails=tails, byq=byq, counts=counts,
-                clock=clock, bim=bim)
+                clock=clock, bim=bim, mixed=mixed)
 
 
 def build_claims(d):
@@ -373,6 +377,12 @@ def build_claims(d):
         claims["成本（A10 按量 10.5 元/时）"] = f"{_rc.to_cny(_cost, 10.5):.2f} 元 / 百万 token"
     except Exception as _e:
         print(f"  （钱换算跳过：{type(_e).__name__}: {_e}）", flush=True)
+
+    mixed = d.get("mixed") or {}
+    if mixed:
+        claims["混合长度：TTFT 误差（均值口径）"] = f"{mixed.get('ttft_mape_mean_approx', float('nan')):.1f}%"
+        claims["混合长度：TTFT 误差（逐请求口径）"] = f"{mixed.get('ttft_mape_per_request', float('nan')):.1f}%"
+        claims["混合长度：TPOT 误差"] = f"{mixed.get('tpot_mape', float('nan')):.1f}%"
 
     cnt = d.get("counts") or {}
     if cnt:

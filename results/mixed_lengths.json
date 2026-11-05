@@ -1,7 +1,9 @@
 {
   "n_cells": 2,
-  "ttft_mape": 85.2,
-  "tpot_mape": 17.25,
-  "max_L_cv": 0.738,
+  "ttft_mape_mean_approx": 77.0,
+  "ttft_mape_per_request": 120.7,
+  "tpot_mape": 16.85,
+  "max_L_cv": 0.785,
+  "n_ref_pairs": 0,
   "note": "模型的『平均长度近似』在混合负载上的误差；L_cv 越大说明混合越极端"
 }
