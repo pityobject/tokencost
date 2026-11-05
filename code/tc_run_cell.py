@@ -130,8 +130,13 @@ def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
                                     prompt_tokens, 16, timeout_s=180))
             time.sleep(1.0)
 
-        with GpuMonitor(interval_s=2.0) as mon:
-            for r in range(repeats):
+        # 【E1】监控粒度为"每一轮"，不是整个 cell。
+        # 原因：只有逐轮的温度/时钟才能区分两种情况——
+        #   ① 热状态：同一批内越跑越慢（温度上升、时钟下降）
+        #   ② 批次状态：批内平稳、批与批之间跳变（显存碎片/驱动状态）
+        # 之前 GpuMonitor 包住整个 cell，所有轮共享一个 summary，这两种情况分不开。
+        for r in range(repeats):
+            with GpuMonitor(interval_s=1.0) as mon:
                 t0 = time.perf_counter()
                 cpu0 = _client_cpu_seconds()
                 req_rows = asyncio.run(lg.run_load(
@@ -143,39 +148,38 @@ def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
                 # 说明测出来的是"我的 Python 脚本能跑多快"，而不是"显卡能跑多快"。
                 client_cpu_pct = ((cpu1 - cpu0) / dur * 100.0) if cpu0 is not None else None
                 agg = lg.aggregate(req_rows, conc)
-                row = dict(base, repeat=r, status="ok", **bg,
-                           # 注意：这里的 wall_s 是"含客户端开销的整轮耗时"，
-                           # 与 agg 里的 measure_span_s（纯测量窗口）含义不同，故意分开命名
-                           wall_s=round(dur, 2), client_cpu_pct=client_cpu_pct, **agg)
-                rows.append(row)
-                if save_requests:
-                    _append_jsonl(RAW_REQS, [dict(base, repeat=r, **x) for x in req_rows])
-                if verbose:
-                    print(f"    第{r+1}/{repeats}轮  "
-                          f"TTFT {agg.get('ttft_p50_ms', float('nan')):7.1f}ms  "
-                          f"TPOT {agg.get('tpot_p50_ms', float('nan')):6.1f}ms  "
-                          f"吞吐 {agg.get('throughput_tps', float('nan')):7.1f} tok/s"
-                          + (f"  客户端CPU {client_cpu_pct:.0f}%" if client_cpu_pct else ""))
-                    if client_cpu_pct and client_cpu_pct > 90:
-                        print("      [注意] 客户端 CPU 接近单核饱和：这一格的吞吐可能被我的脚本限制，"
-                              "不是模型的上限。报告里要标注。")
-
-        gpu = mon.summary()
-        # 【W1】时钟相对判据：记录可达参考值下的比值，不做静默剔除
-        try:
-            clk = gpu.get("clock_sm_median") if isinstance(gpu, dict) else None
-            ratio, gate, note = tc_gpu_mod.clock_gate(clk, model)
-            gpu["clock_ref_mhz"] = (tc_gpu_mod.clock_reference() or {}).get(model)
-            gpu["clock_ratio"] = ratio
-            gpu["clock_gate"] = gate
-            gpu["clock_note"] = note
-            if gate in ("warn", "bad"):
-                print(f"    ⚠️ 时钟偏低（{gate}）：{note}", flush=True)
-        except Exception as _e:
-            gpu["clock_gate"] = "unknown"
-            gpu["clock_note"] = f"判定失败：{type(_e).__name__}: {str(_e)[:80]}"
-        for row in rows:
-            row.update(gpu)
+                gpu = mon.summary()
+            # 【W1】时钟相对判据：记录可达参考值下的比值，不做静默剔除
+            try:
+                clk = gpu.get("clock_sm_median") if isinstance(gpu, dict) else None
+                ratio, gate, note = tc_gpu_mod.clock_gate(clk, model)
+                gpu["clock_ref_mhz"] = (tc_gpu_mod.clock_reference() or {}).get(model)
+                gpu["clock_ratio"] = ratio
+                gpu["clock_gate"] = gate
+                gpu["clock_note"] = note
+                if gate in ("warn", "bad"):
+                    print(f"    ⚠️ 第{r+1}轮时钟偏低（{gate}）：{note}", flush=True)
+            except Exception as _e:
+                gpu["clock_gate"] = "unknown"
+                gpu["clock_note"] = f"判定失败：{type(_e).__name__}: {str(_e)[:80]}"
+            row = dict(base, repeat=r, status="ok", **bg, **gpu,
+                       # 注意：这里的 wall_s 是"含客户端开销的整轮耗时"，
+                       # 与 agg 里的 measure_span_s（纯测量窗口）含义不同，故意分开命名
+                       wall_s=round(dur, 2), client_cpu_pct=client_cpu_pct, **agg)
+            rows.append(row)
+            if save_requests:
+                _append_jsonl(RAW_REQS, [dict(base, repeat=r, **x) for x in req_rows])
+            if verbose:
+                print(f"    第{r+1}/{repeats}轮  "
+                      f"TTFT {agg.get('ttft_p50_ms', float('nan')):7.1f}ms  "
+                      f"TPOT {agg.get('tpot_p50_ms', float('nan')):6.1f}ms  "
+                      f"吞吐 {agg.get('throughput_tps', float('nan')):7.1f} tok/s"
+                      f"  温度 {gpu.get('temp_c_median', float('nan')):.0f}°C"
+                      f"  时钟 {gpu.get('clock_sm_median', float('nan')):.0f}MHz"
+                      + (f"  客户端CPU {client_cpu_pct:.0f}%" if client_cpu_pct else ""))
+                if client_cpu_pct and client_cpu_pct > 90:
+                    print("      [注意] 客户端 CPU 接近单核饱和：这一格的吞吐可能被我的脚本限制，"
+                          "不是模型的上限。报告里要标注。")
 
         # 当场判定这次测量是否有效：时钟与功耗双低 = 降频
         clk = gpu.get('clock_sm_median', 1e9)
