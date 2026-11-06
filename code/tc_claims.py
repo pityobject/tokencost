@@ -678,9 +678,10 @@ def check(claims, d):
         # 复核 3.1：文档写 68、实际 76，却没有检查项能抓到
         ("留出集格数", _need(d["fit"], "n_holdout"),
          r"(?:留出|未见)(?:集)?\s*(\d+)\s*(?:个|格)"),
-        # 三套非默认口径也必须能在文档里核对（复核两轮都抓到 valid/all 漂移）
-        ("valid 口径", claims.get("valid 口径（+跨模型族）", ""), None),
-        ("all 口径", claims.get("all 口径（含探针）", ""), None),
+        # 三套非默认口径也必须能在文档里核对（复核两轮都抓到 valid/all 漂移）。
+        # 只要求"格数"这个 token 出现——文档里是表格行，整串不可能逐字一致。
+        ("valid 口径格数", _pops_n(d, "valid"), None),
+        ("all 口径格数", _pops_n(d, "all"), None),
         # 【不能写死期望值】写死等于只认旧数字（复核指出的真实漏洞）。
         # pattern=None 表示"必须出现"模式：核心数字必须在关键文档里出现 ≥1 次。
         ("成本 MAPE", _need(claims, "单位成本 MAPE（core，稳态口径）"), None),
