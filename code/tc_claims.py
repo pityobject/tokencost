@@ -550,6 +550,9 @@ def build_claims(d):
         claims["同硬件换栈：vLLM 的 c_srv"] = f"{_vl['c_srv']:.3f} ms"
         claims["同硬件换栈：vLLM / llama.cpp"] = f"{_vl['c_srv'] / _lc['c_srv']:.2f}×"
         claims["同硬件换栈：B_SAT 对比"] = f"{_lc['b_sat']:.1f} vs {_vl['b_sat']:.1f}"
+        claims["c_srv 的属性归属"] = (
+            "服务进程（部署栈 + 主机 CPU），非 GPU、非模型权重；"
+            "同卡换栈差 5.6×，同栈换机器差 2.0×")
 
     if len(be) >= 2:
         _a, _b = be[0], be[1]
