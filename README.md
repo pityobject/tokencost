@@ -153,6 +153,8 @@ KV 量化（`--cache-type-k/v q8_0`）能救回一部分：1.5B 上吞吐 +238%�
 
 ---
 
+> **每个数据文件的列含义**见 `报告/数据字典.md`（自动生成、CI 校验，18 个数据文件全覆盖）。
+
 ## 打开一个网页就能用
 
 `site/index.html` 是一个**单文件、离线可用**的配置计算器：输入 SLA 与 GPU 价格，
@@ -293,7 +295,7 @@ python code/tc_decompose_csrv.py   # c_srv 三向分解
 ## 目录
 
 ```
-code/          59 个脚本（采集 / 分析 / 拟合 / 推荐 / 探针 / 对账）
+code/          60 个脚本（采集 / 分析 / 拟合 / 推荐 / 探针 / 对账）
 data/          原始数据（raw_cells.jsonl 300 行、raw_requests.jsonl 逐请求明细）
 results/       fit.json（6 参数）、predictions.csv、recommendation.csv
 figures/       fig1–fig5（吞吐、成本、带宽、预测vs实测、Pareto）

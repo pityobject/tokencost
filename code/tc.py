@@ -83,6 +83,7 @@ COMMANDS = {
     "cv":            ("tc_cv.py", []),
     "csrv":          ("tc_check_csrv_linear.py", []),
     "tailflip":      ("tc_tail_flip.py", []),
+    "datadict":      ("tc_docs_data.py", []),
     "audit":         ("tc_audit.py", []),
     "ci":            ("../scripts/ci.ps1", []),
     "reset":         ("tc_reset_data.py", []),
