@@ -449,7 +449,8 @@ def main():
     import argparse
     global INCLUDE_PROBES, POPULATION
     ap = argparse.ArgumentParser(description="6 参数模型拟合与留出验证")
-    ap.add_argument("--population", default="core", choices=["core", "valid", "all"],
+    ap.add_argument("--population", default="core",
+                    choices=["core", "valid", "all", "ext"],
                     help="留出集口径：core=设计空间(默认) / valid=+跨模型族 / all=含全部探针")
     ap.add_argument("--bootstrap", type=int, default=0,
                     help="参数区间：对 12 个标定格做 N 次重采样（建议 200）")

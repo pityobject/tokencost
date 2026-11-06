@@ -79,6 +79,10 @@ DEPRECATED = {
 # ---------------------------------------------------------------- 一致性扫描
 PARAM_COUNT = 6      # 唯一真值：六参数模型
 PARAM_PAT = re.compile(r"(\d+)\s*个\s*(?:待定)?参数")
+# 声称 vs 讨论：只有「声称模型有 N 个参数」才必须等于 PARAM_COUNT。
+# 讨论语气里出现任何数字都合法——F16 正是在讲「试过第 7 个参数但失败」。
+DISCUSS_HINTS = ("试了", "试过", "尝试", "失败", "原先", "曾经",
+                 "改为", "退回", "不支持", "候选", "负结果")
 MUL3_PAT = re.compile(r"(\d+)\s*[×x]\s*(\d+)\s*[×x]\s*(\d+)\s*[=＝]\s*(\d+)")
 MUL2_PAT = re.compile(r"(\d+)\s*[×x]\s*(\d+)\s*[=＝]\s*(\d+)")
 
@@ -88,6 +92,9 @@ def consistent_checks(text, rel, line_no, line):
     out = []
     for m in PARAM_PAT.finditer(line):
         n = int(m.group(1))
+        # 声称 vs 讨论：整行含讨论词就跳过（含「试了 7 个参数但失败」这类叙述）
+        if any(h in line for h in DISCUSS_HINTS):
+            continue
         # 只报"当前版本"的错：本项目里 3 个参数永远是 v1 历史叙述，
         # 1/2 个参数是推导过程中的中间量，都不该报。
         if n >= 4 and n != PARAM_COUNT:
