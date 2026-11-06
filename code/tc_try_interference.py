@@ -118,8 +118,8 @@ def main():
                 or "_mix" in c}
     calib_ids = design_ids | fail_ids
     calib = df[df["cell_id"].isin(calib_ids)]
-    core_hold = set(df[(df["kind"] == "design") & ~df["cell_id"].isin(design_ids)]["cell_id"])
-    probe_hold = set(df[(df["kind"] == "probe") & ~df["cell_id"].isin(calib_ids)]["cell_id"])
+    core_hold = set(df[(df["kind"] == "core") & ~df["cell_id"].isin(design_ids)]["cell_id"])
+    probe_hold = set(df[(df["kind"] == "other") & ~df["cell_id"].isin(calib_ids)]["cell_id"])   # 探针/长度实验
 
     print("=" * 74)
     print("P0-1b：prefill 抢占 decode 作为服务时间项")

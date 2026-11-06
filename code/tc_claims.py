@@ -548,9 +548,11 @@ def build_claims(d):
         claims["prefill 抢占项的结论"] = it.get("verdict", "—")
     jj = d.get("jit") or {}
     if jj:
+        # 只报两端会误导（两端差大、中间不单调）；必须同时给相关系数
         claims["同格内 TPOT 抖动（b=1 → b=128 的 CV）"] = (
             f"{jj.get('by_conc', {}).get('1', {}).get('cv', float('nan'))*100:.1f}% → "
-            f"{jj.get('by_conc', {}).get('128', {}).get('cv', float('nan'))*100:.1f}%")
+            f"{jj.get('by_conc', {}).get('128', {}).get('cv', float('nan'))*100:.1f}%"
+            f"（相关系数 r={jj.get('corr_cv_conc', float('nan')):+.2f}，趋势不显著）")
 
     be = (d.get("bemp") or {}).get("entries") or []
 
