@@ -111,6 +111,10 @@ def make_prompt(target_tokens, nonce):
     return lg.make_prompt(int(target_tokens), int(nonce))
 
 
+# 后端能力开关：cache_prompt 只有 llama.cpp 认识（vLLM 会 400）
+BACKEND = "llamacpp"
+
+
 async def one_request(client, base_url, model, prompt, max_tokens, timeout=180):
     """返回 dict(ttft_ms, total_ms, n_out, prompt_tokens)。流式取首字时间。"""
     payload = {
@@ -120,11 +124,13 @@ async def one_request(client, base_url, model, prompt, max_tokens, timeout=180):
         "temperature": 0.0,
         "stream": True,
         "stream_options": {"include_usage": True},
-        # 必须显式关闭：否则同一槽位复用前缀时 TTFT 会变成缓存命中时间
-        "cache_prompt": False,
         # 强制生成满 max_tokens：不同格生成长度不一致时 TPOT 无法横向比较
         "ignore_eos": True,
     }
+    if BACKEND != "vllm":
+        # llama.cpp 专有：显式关闭前缀缓存，否则 TTFT 会变成缓存命中时间（F9）。
+        # vLLM 的 schema 不认识这个字段，发了会 400。
+        payload["cache_prompt"] = False
     t_send = time.perf_counter()
     first = None
     last = None          # 【关键】最后一个内容块的时刻，TPOT 要用它
@@ -262,6 +268,19 @@ def identifiability(params, df, model_name, quant):
 
 # ---------------------------------------------------------------- 主流程
 def cmd_measure(args):
+    global BACKEND
+    BACKEND = args.backend
+    if BACKEND == "auto":
+        # llama.cpp 有 /props，vLLM 没有
+        try:
+            r = httpx.get(args.base_url.rsplit("/v1", 1)[0] + "/props", timeout=3)
+            BACKEND = "llamacpp" if r.status_code == 200 else "vllm"
+        except Exception:
+            BACKEND = "vllm"
+        print(f"[后端] 自动探测：{BACKEND}")
+    else:
+        print(f"[后端] {BACKEND}")
+
     model_name, quant, spec = resolve_spec(args.spec, args.spec_json)
     plan = [(c, (args.calib_l if L == "L" else L)) for c, L in DEFAULT_PLAN]
     if args.concs and args.lengths:
@@ -468,6 +487,8 @@ def main():
                     help="服务端 --parallel（必须 >= 计划里的最大并发）")
     ap.add_argument("--per-slot-ctx", type=int, default=2304,
                     help="服务端每槽上下文（必须 >= 最大 prompt + 生成长度）")
+    ap.add_argument("--backend", choices=["llamacpp", "vllm", "auto"], default="llamacpp",
+                    help="后端类型：llamacpp 会发 cache_prompt 字段，vllm 不发（发了会 400）")
     ap.add_argument("--hardware", default="（未填）")
     ap.add_argument("--out", default=None)
     ap.add_argument("--selftest", action="store_true", help="不连服务器，验证链路")
