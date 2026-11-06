@@ -241,6 +241,10 @@ def load_inputs():
     _p = RESULTS / "decode_bound.json"
     if _p.exists():
         dbound = json.loads(_p.read_text(encoding="utf-8"))
+    cv = {}
+    _p = RESULTS / "cv_summary.json"
+    if _p.exists():
+        cv = json.loads(_p.read_text(encoding="utf-8"))
 
     # ---- 三套数据口径（复核第 12 轮提的第 4 条）----
     # 原始行 / 去重行 / 对外口径，三者不同，必须在一处讲清。
@@ -260,7 +264,7 @@ def load_inputs():
                 fit=fit, verify=ver, n_scripts=len(codes), pois=pois,
                 var=var, tails=tails, byq=byq, counts=counts,
                 clock=clock, bim=bim, mixed=mixed, mt=mt, pops=pops,
-                dbound=dbound)
+                dbound=dbound, cv=cv)
 
 
 def build_claims(d):
@@ -411,6 +415,16 @@ def build_claims(d):
         claims["PEAK_dec 的临界算力"] = (
             f"{db.get('min_peak_needed_tflops', float('nan')):.2f} TFLOP/s"
             f"（本机 {db.get('peak_dec_tflops', float('nan')):.1f}）")
+
+    cvv = d.get("cv") or {}
+    if cvv:
+        claims["交叉验证：设计划分的 MAPE"] = f"{cvv.get('designed_mape', float('nan')):.2f}%"
+        claims["交叉验证：随机划分中位"] = f"{cvv.get('random_median', float('nan')):.2f}%"
+        claims["交叉验证：随机划分 5–95% 区间"] = (
+            f"[{cvv.get('random_p5', float('nan')):.2f}%, "
+            f"{cvv.get('random_p95', float('nan')):.2f}%]")
+        claims["交叉验证：设计划分的增益"] = (
+            f"{-(cvv.get('shift_vs_designed', 0.0)):.2f} pp（相对随机中位）")
 
     cnt = d.get("counts") or {}
     if cnt:

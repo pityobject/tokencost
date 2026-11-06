@@ -80,6 +80,7 @@ COMMANDS = {
     "mixed":         ("tc_analyze_mixed.py", []),
     "multiturn":     ("tc_analyze_multiturn.py", []),
     "decodebound":   ("tc_decode_bound.py", []),
+    "cv":            ("tc_cv.py", []),
     "audit":         ("tc_audit.py", []),
     "ci":            ("../scripts/ci.ps1", []),
     "reset":         ("tc_reset_data.py", []),
