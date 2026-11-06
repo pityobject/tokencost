@@ -62,6 +62,43 @@ def to_cny(cost_gpu_s_per_1m, price_per_hour):
     return cost_gpu_s_per_1m / 3600.0 * price_per_hour
 
 
+# ---------------------------------------------------------------- 实测尾部（A3）
+def load_measured_tails():
+    """从 results/quantile_tails.csv 读每格的 p90/p50，按并发取中位。
+
+    返回 {"ttft": {conc: ratio}, "tpot": {conc: ratio}}；没有文件则返回 {}。
+    """
+    fp = cfg.RESULTS_DIR / "quantile_tails.csv"
+    if not fp.exists():
+        return {}
+    import pandas as pd
+    t = pd.read_csv(fp)
+    out = {}
+    for metric in ("ttft", "tpot"):
+        col = f"{metric}_p90_over_p50"
+        if col not in t.columns:
+            continue
+        by = t.groupby("conc")[col].median()
+        out[metric] = {int(k): float(v) for k, v in by.items() if float(v) == float(v)}
+    return out
+
+
+def measured_tail_factor(tails, metric, conc):
+    """按并发对数插值取实测 p90/p50；超出范围用端点值。"""
+    m = tails.get(metric) or {}
+    if not m:
+        return 1.0
+    ks = sorted(m)
+    if conc <= ks[0]:
+        return m[ks[0]]
+    if conc >= ks[-1]:
+        return m[ks[-1]]
+    import numpy as np
+    xs = np.log(np.array(ks, dtype=float))
+    ys = np.array([m[k] for k in ks], dtype=float)
+    return float(np.interp(np.log(float(conc)), xs, ys))
+
+
 def cvar(x, q=0.9):
     xs = np.sort(np.asarray(x))[::-1]
     k = max(1, int(round(len(xs) * (1 - q))))
@@ -128,6 +165,9 @@ def main():
                     help="质量约束用点估计(point)还是 Wilson 下界(lcb，默认，更保守)")
     ap.add_argument("--min-acc-drop", type=float, default=6.0,
                     help="允许比最高准确率低几个百分点（质量下限）。默认 6 ≈ 一个 CI 半宽")
+    ap.add_argument("--tail", choices=["assumed", "measured"], default="assumed",
+                    help="尾部口径：assumed=对数正态假设（历史行为）；"
+                         "measured=用实测 p90/p50 随并发变化")
     ap.add_argument("--gpu-price", default=None,
                     help="GPU 价格（元/小时），接受数字或预设：laptop / a10 / 4090 / a100_40g。"
                          "不给则只报 GPU·秒——价格是外部假设，不设默认值")
@@ -173,8 +213,15 @@ def main():
         half_log = Z_90 * args.sigma_log
     else:
         half_log = fit.get("half_width_log", Z_90 * fit.get("sigma_log", 0.1))
+    tails = load_measured_tails() if args.tail == "measured" else {}
+    if args.tail == "measured" and not tails:
+        raise SystemExit("[尾部] 需要 results/quantile_tails.csv（先跑 tc.py tails）")
+
     price, price_src = resolve_price(args.gpu_price)
     print("=" * 78)
+    print(f"尾部口径：{args.tail}"
+          + ("（实测 p90/p50 随并发变化）" if args.tail == "measured"
+             else "（对数正态假设，历史行为）"))
     print(f"输入：首字延迟 ≤ {args.ttft:.0f} ms，出字间隔 ≤ {args.tpot:.0f} ms（均按 CVaR90 判定）")
     print(f"请求长度：均值 {args.prompt_mean:.0f} token，对数标准差 {args.prompt_sigma}")
     print(f"模型参数：带宽 {params['bw_gbs']:.0f} GB/s，算力 {params['peak_tflops']:.0f} TFLOP/s，"

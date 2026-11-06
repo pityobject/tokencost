@@ -1,0 +1,11 @@
+ttft,tpot,assumed,cost_assumed,measured,cost_measured,same,cost_delta_pct
+600,45,7B_q4_k_m_ctx2048_c1,20847.0,7B_q4_k_m_ctx2048_c1,20847.0,True,0.0
+600,60,7B_q4_k_m_ctx2048_c1,20847.0,7B_q4_k_m_ctx2048_c1,20847.0,True,0.0
+800,50,7B_q4_k_m_ctx2048_c1,20847.0,7B_q4_k_m_ctx2048_c1,20847.0,True,0.0
+800,60,7B_q4_k_m_ctx2048_c1,20847.0,7B_q4_k_m_ctx2048_c1,20847.0,True,0.0
+1000,60,7B_q4_k_m_ctx2048_c1,20847.0,7B_q4_k_m_ctx2048_c1,20847.0,True,0.0
+1200,70,7B_q4_k_m_ctx2048_c1,20847.0,7B_q4_k_m_ctx2048_c1,20847.0,True,0.0
+1500,80,7B_q4_k_m_ctx2048_c4,6655.0,7B_q4_k_m_ctx2048_c4,6655.0,True,0.0
+2000,100,7B_q4_k_m_ctx2048_c4,6655.0,7B_q4_k_m_ctx2048_c4,6655.0,True,0.0
+2500,150,7B_q4_k_m_ctx2048_c4,6655.0,7B_q4_k_m_ctx2048_c4,6655.0,True,0.0
+3000,200,7B_q4_k_m_ctx2048_c4,6655.0,7B_q4_k_m_ctx2048_c4,6655.0,True,0.0

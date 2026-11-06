@@ -249,6 +249,17 @@ def load_inputs():
     _p = RESULTS / "csrv_linearity.json"
     if _p.exists():
         cslin = json.loads(_p.read_text(encoding="utf-8"))
+    tflip = {}
+    _p = RESULTS / "tail_flip.csv"
+    if _p.exists():
+        _t = pd.read_csv(_p)
+        tflip = dict(
+            n_cells=int(len(_t)),
+            pass_assumed=int(_t["pass_assumed"].sum()),
+            pass_measured=int(_t["pass_measured"].sum()),
+            n_flips=int((_t["pass_assumed"] != _t["pass_measured"]).sum()),
+            max_amp=round(float((_t["ttft_measured"] / _t["ttft_assumed"]).max()), 3),
+        )
 
     # ---- 三套数据口径（复核第 12 轮提的第 4 条）----
     # 原始行 / 去重行 / 对外口径，三者不同，必须在一处讲清。
@@ -268,7 +279,7 @@ def load_inputs():
                 fit=fit, verify=ver, n_scripts=len(codes), pois=pois,
                 var=var, tails=tails, byq=byq, counts=counts,
                 clock=clock, bim=bim, mixed=mixed, mt=mt, pops=pops,
-                dbound=dbound, cv=cv, cslin=cslin)
+                dbound=dbound, cv=cv, cslin=cslin, tflip=tflip)
 
 
 def build_claims(d):
@@ -440,6 +451,12 @@ def build_claims(d):
             claims["7B 的隐含 c_srv 最高点（b 扫描）"] = (
                 f"{max(_m7['implied_by_conc'].values()):.2f} ms"
                 f"（最低 {min(_m7['implied_by_conc'].values()):.2f} ms）")
+
+    tf = d.get("tflip") or {}
+    if tf:
+        claims["尾部口径导致的 SLA 翻转（TTFT≤2000/TPOT≤100）"] = (
+            f"{tf['n_flips']} 格（假设通过 {tf['pass_assumed']} → 实测通过 {tf['pass_measured']}）")
+        claims["实测尾部对 TTFT 上界的放大（最大）"] = f"{tf['max_amp']:.2f}×"
 
     cnt = d.get("counts") or {}
     if cnt:

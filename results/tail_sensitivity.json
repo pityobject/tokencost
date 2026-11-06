@@ -1,0 +1,110 @@
+{
+  "summary": {
+    "n_cases": 10,
+    "n_different": 0,
+    "max_cost_delta_pct": 0,
+    "note": "尾部口径（对数正态假设 vs 实测 p90/p50）对推荐的影响；不同 SLA 下触发的程度不同"
+  },
+  "cases": [
+    {
+      "ttft": 600,
+      "tpot": 45,
+      "assumed": "7B_q4_k_m_ctx2048_c1",
+      "cost_assumed": 20847.0,
+      "measured": "7B_q4_k_m_ctx2048_c1",
+      "cost_measured": 20847.0,
+      "same": true,
+      "cost_delta_pct": 0.0
+    },
+    {
+      "ttft": 600,
+      "tpot": 60,
+      "assumed": "7B_q4_k_m_ctx2048_c1",
+      "cost_assumed": 20847.0,
+      "measured": "7B_q4_k_m_ctx2048_c1",
+      "cost_measured": 20847.0,
+      "same": true,
+      "cost_delta_pct": 0.0
+    },
+    {
+      "ttft": 800,
+      "tpot": 50,
+      "assumed": "7B_q4_k_m_ctx2048_c1",
+      "cost_assumed": 20847.0,
+      "measured": "7B_q4_k_m_ctx2048_c1",
+      "cost_measured": 20847.0,
+      "same": true,
+      "cost_delta_pct": 0.0
+    },
+    {
+      "ttft": 800,
+      "tpot": 60,
+      "assumed": "7B_q4_k_m_ctx2048_c1",
+      "cost_assumed": 20847.0,
+      "measured": "7B_q4_k_m_ctx2048_c1",
+      "cost_measured": 20847.0,
+      "same": true,
+      "cost_delta_pct": 0.0
+    },
+    {
+      "ttft": 1000,
+      "tpot": 60,
+      "assumed": "7B_q4_k_m_ctx2048_c1",
+      "cost_assumed": 20847.0,
+      "measured": "7B_q4_k_m_ctx2048_c1",
+      "cost_measured": 20847.0,
+      "same": true,
+      "cost_delta_pct": 0.0
+    },
+    {
+      "ttft": 1200,
+      "tpot": 70,
+      "assumed": "7B_q4_k_m_ctx2048_c1",
+      "cost_assumed": 20847.0,
+      "measured": "7B_q4_k_m_ctx2048_c1",
+      "cost_measured": 20847.0,
+      "same": true,
+      "cost_delta_pct": 0.0
+    },
+    {
+      "ttft": 1500,
+      "tpot": 80,
+      "assumed": "7B_q4_k_m_ctx2048_c4",
+      "cost_assumed": 6655.0,
+      "measured": "7B_q4_k_m_ctx2048_c4",
+      "cost_measured": 6655.0,
+      "same": true,
+      "cost_delta_pct": 0.0
+    },
+    {
+      "ttft": 2000,
+      "tpot": 100,
+      "assumed": "7B_q4_k_m_ctx2048_c4",
+      "cost_assumed": 6655.0,
+      "measured": "7B_q4_k_m_ctx2048_c4",
+      "cost_measured": 6655.0,
+      "same": true,
+      "cost_delta_pct": 0.0
+    },
+    {
+      "ttft": 2500,
+      "tpot": 150,
+      "assumed": "7B_q4_k_m_ctx2048_c4",
+      "cost_assumed": 6655.0,
+      "measured": "7B_q4_k_m_ctx2048_c4",
+      "cost_measured": 6655.0,
+      "same": true,
+      "cost_delta_pct": 0.0
+    },
+    {
+      "ttft": 3000,
+      "tpot": 200,
+      "assumed": "7B_q4_k_m_ctx2048_c4",
+      "cost_assumed": 6655.0,
+      "measured": "7B_q4_k_m_ctx2048_c4",
+      "cost_measured": 6655.0,
+      "same": true,
+      "cost_delta_pct": 0.0
+    }
+  ]
+}
