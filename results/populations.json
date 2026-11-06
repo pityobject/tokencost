@@ -1,4 +1,10 @@
 {
+  "ext": {
+    "n_holdout": 8,
+    "mape_cost": 11.618307343198413,
+    "max_err": 23.421213619723037,
+    "coverage": 0.625
+  },
   "core": {
     "n_holdout": 68,
     "mape_cost": 8.581203372479361,

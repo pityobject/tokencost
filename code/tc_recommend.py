@@ -165,7 +165,7 @@ def main():
                     help="质量约束用点估计(point)还是 Wilson 下界(lcb，默认，更保守)")
     ap.add_argument("--min-acc-drop", type=float, default=6.0,
                     help="允许比最高准确率低几个百分点（质量下限）。默认 6 ≈ 一个 CI 半宽")
-    ap.add_argument("--tail", choices=["assumed", "measured"], default="assumed",
+    ap.add_argument("--tail", choices=["assumed", "measured"], default="measured",
                     help="尾部口径：assumed=对数正态假设（历史行为）；"
                          "measured=用实测 p90/p50 随并发变化")
     ap.add_argument("--gpu-price", default=None,
@@ -215,7 +215,10 @@ def main():
         half_log = fit.get("half_width_log", Z_90 * fit.get("sigma_log", 0.1))
     tails = load_measured_tails() if args.tail == "measured" else {}
     if args.tail == "measured" and not tails:
-        raise SystemExit("[尾部] 需要 results/quantile_tails.csv（先跑 tc.py tails）")
+        # 缺产物时不要静默退回假设口径——明确告警并说明后果
+        print("[尾部][warn] 缺 results/quantile_tails.csv，"
+              "退回「假设」口径（高并发 SLA 会偏乐观约 2 倍，先跑 tc.py tails）")
+        args.tail = "assumed"
 
     price, price_src = resolve_price(args.gpu_price)
     print("=" * 78)

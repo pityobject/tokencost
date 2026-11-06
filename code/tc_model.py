@@ -539,7 +539,13 @@ def main():
 
     # 探针（step/wave/knee）+ 新实验（_p 长度、_mt 多轮、_mix 混合）都不进 core
     probe_like = has_suffix | is_mix
+    # ext = 三族扩展实验（多轮 _mt / 混合长度 _mix / 高并发 c48-128），
+    # 它们既不在设计空间、也不属于探针，单独成一套口径，避免"读者不知道这些格算什么"。
+    is_ext_suffix = cid_series.str.contains(r"_(?:mt\d+)$", regex=True) | is_mix
+    extra_conc = ~in_design & ~has_suffix & ~is_xf & ~is_mix
+
     pops = {
+        "ext": df[(is_ext_suffix | extra_conc) & ~is_xf],
         "core": df[in_design & ~probe_like & ~is_xf],
         "valid": df[~has_suffix],
         "all": df,

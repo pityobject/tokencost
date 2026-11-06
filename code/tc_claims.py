@@ -449,6 +449,17 @@ def build_claims(d):
             f"{db.get('min_peak_needed_tflops', float('nan')):.2f} TFLOP/s"
             f"（本机 {db.get('peak_dec_tflops', float('nan')):.1f}）")
 
+    # ---- 四套口径（core/valid/all/ext）全部落进对外数字 ----
+    _pops = d.get("pops") or {}
+    for _name, _label in (("valid", "valid 口径（+跨模型族）"),
+                          ("all", "all 口径（含探针）"),
+                          ("ext", "ext 口径（多轮/混合/高并发三族）")):
+        _r = _pops.get(_name)
+        if not _r:
+            continue
+        claims[_label] = (f"{_r['n_holdout']} 格 · MAPE {_r['mape_cost']:.2f}% · "
+                          f"覆盖率 {_r['coverage']*100:.1f}%")
+
     cvv = d.get("cv") or {}
     if cvv:
         claims["交叉验证：设计划分的 MAPE"] = f"{cvv.get('designed_mape', float('nan')):.2f}%"
@@ -523,6 +534,9 @@ def write_md(claims, d):
             "[CLAIMS] 缺 results/populations.json —— 先跑 `python code/tc.py model`。\n"
             "（三套口径必须来自产物，不能写死在文档里）")
 
+    def _pop_has(d, name):
+        return bool((d.get("pops") or {}).get(name))
+
     def _pop(name):
         p0 = _pops.get(name) or {}
         if not p0:
@@ -554,6 +568,10 @@ def write_md(claims, d):
         f"| `all` | {_pop('all')['n_holdout']} | {_pct100(_pop('all')['mape_cost'])} | "
         f"{_pct100(_pop('all')['max_err'])} | {_pct100(_pop('all')['coverage'])} | "
         f"含台阶/波次/拐点探针 |",
+        (f"| `ext` | {_pop('ext')['n_holdout']} | {_pct100(_pop('ext')['mape_cost'])} | "
+         f"{_pct100(_pop('ext')['max_err'])} | {_pct100(_pop('ext')['coverage'])} | "
+         f"三族扩展实验（多轮 _mt / 混合长度 _mix / 高并发 c48-128），不属于设计空间 |")
+        if (_pop_has(d, "ext")) else "| `ext` | — | — | — | — | 无扩展实验 |",
         "",
         "## 口径说明（必须同时引用，否则失真）",
         "",
@@ -562,6 +580,8 @@ def write_md(claims, d):
         "- **墙钟口径**：成本 = 1e6 ÷ 实测总吞吐。端到端真实得多，但受波次/空闲影响。",
         f"  实测：稳态 {_core} vs 墙钟 **{_wall}**（最大误差 {_wall_max}）。",
         "- **目标 8% / 20%**：只在 `core` 口径、且主要在标定并发上满足。",
+        "- **ext 口径**：多轮（`_mtN`）、混合长度（`_mixXXXX`）、高并发（c48/64/128）三族实验。",
+        "  它们**不属于设计空间**，单独统计；其中混合长度的 TTFT 已被《适用域矩阵》标注为不可用。",
         "  `fit.json` 的 `passed` 字段为 **false**，引用时请照实说。",
         "",
         "## 参数可辨识性",
@@ -656,7 +676,11 @@ def check(claims, d):
         ("会话级测量次数", str(d["n_rows"]), r"(\d+)\s*次(?:会话级)?测量"),
         ("脚本数", str(d["n_scripts"]), r"(\d+)\s*个脚本"),
         # 复核 3.1：文档写 68、实际 76，却没有检查项能抓到
-        ("留出集格数", str(d["fit"].get("n_holdout", "")), r"(?:留出|未见)(?:集)?\s*(\d+)\s*(?:个|格)"),
+        ("留出集格数", _need(d["fit"], "n_holdout"),
+         r"(?:留出|未见)(?:集)?\s*(\d+)\s*(?:个|格)"),
+        # 三套非默认口径也必须能在文档里核对（复核两轮都抓到 valid/all 漂移）
+        ("valid 口径", claims.get("valid 口径（+跨模型族）", ""), None),
+        ("all 口径", claims.get("all 口径（含探针）", ""), None),
         # 【不能写死期望值】写死等于只认旧数字（复核指出的真实漏洞）。
         # pattern=None 表示"必须出现"模式：核心数字必须在关键文档里出现 ≥1 次。
         ("成本 MAPE", _need(claims, "单位成本 MAPE（core，稳态口径）"), None),
