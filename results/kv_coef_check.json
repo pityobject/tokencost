@@ -1,0 +1,70 @@
+{
+  "bw_model_gbs": 249.10297621883768,
+  "n_groups": 5,
+  "ratio_median": 0.222,
+  "n_within_25pct": 2,
+  "verdict": "**单并发正确、并发>1 失效**：b>1 时 TPOT 随 L 的增长比 KV 项快 5–10 倍（隐含 BW 只剩 9–22%）",
+  "ctx_verdict": "ctx 对 TPOT 影响中位 0.40%（最大 17.61%）",
+  "groups": [
+    {
+      "model": "3B",
+      "quant": "q4_k_m",
+      "ctx": 8192,
+      "conc": 1,
+      "n_points": 4,
+      "L_min": 177.0,
+      "L_max": 1972.0,
+      "slope_us_per_token": 0.193,
+      "bw_implied_gbs": 191.4,
+      "ratio_to_model": 0.768
+    },
+    {
+      "model": "3B",
+      "quant": "q4_k_m",
+      "ctx": 8192,
+      "conc": 2,
+      "n_points": 4,
+      "L_min": 178.0,
+      "L_max": 1973.0,
+      "slope_us_per_token": 1.33,
+      "bw_implied_gbs": 55.4,
+      "ratio_to_model": 0.222
+    },
+    {
+      "model": "3B",
+      "quant": "q4_k_m",
+      "ctx": 8192,
+      "conc": 4,
+      "n_points": 5,
+      "L_min": 178.0,
+      "L_max": 1973.0,
+      "slope_us_per_token": 4.821,
+      "bw_implied_gbs": 30.6,
+      "ratio_to_model": 0.123
+    },
+    {
+      "model": "3B",
+      "quant": "q4_k_m",
+      "ctx": 8192,
+      "conc": 8,
+      "n_points": 4,
+      "L_min": 178.0,
+      "L_max": 1973.0,
+      "slope_us_per_token": 13.899,
+      "bw_implied_gbs": 21.2,
+      "ratio_to_model": 0.085
+    },
+    {
+      "model": "7B",
+      "quant": "q4_k_m",
+      "ctx": 8192,
+      "conc": 1,
+      "n_points": 3,
+      "L_min": 177.0,
+      "L_max": 1972.0,
+      "slope_us_per_token": 0.241,
+      "bw_implied_gbs": 237.6,
+      "ratio_to_model": 0.954
+    }
+  ]
+}

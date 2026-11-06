@@ -1,0 +1,40 @@
+{
+  "model": "3B",
+  "quant": "q4_k_m",
+  "conc": 4,
+  "kv_bytes_per_token": 36864,
+  "slope_us_per_token": 21.6184,
+  "bw_implied_gbs": 6.82,
+  "bw_model_gbs": 249.1,
+  "ratio": 0.027,
+  "verdict": "**模型低估长上下文代价**（反推 BW 偏低 = 每 token 更贵）",
+  "rows": [
+    {
+      "cell_id": "3B_q4_k_m_ctx512_c4",
+      "ctx": 512,
+      "L": 297.0,
+      "conc": 4,
+      "tpot_meas": 12.899581496017127,
+      "tpot_pred": 11.726616806132487,
+      "err_pct": -9.093044532078853
+    },
+    {
+      "cell_id": "3B_q4_k_m_ctx2048_c4",
+      "ctx": 2048,
+      "L": 297.0,
+      "conc": 4,
+      "tpot_meas": 13.062070472524354,
+      "tpot_pred": 11.726616806132487,
+      "err_pct": -10.223904925340522
+    },
+    {
+      "cell_id": "3B_q4_k_m_ctx8192_c4",
+      "ctx": 8192,
+      "L": 297.0,
+      "conc": 4,
+      "tpot_meas": 12.562378346791682,
+      "tpot_pred": 11.726616806132487,
+      "err_pct": -6.652892609882599
+    }
+  ]
+}

@@ -82,6 +82,7 @@ COMMANDS = {
     "decodebound":   ("tc_decode_bound.py", []),
     "cv":            ("tc_cv.py", []),
     "csrv":          ("tc_check_csrv_linear.py", []),
+    "kvcoef":        ("tc_check_kv_coef.py", []),
     "tailflip":      ("tc_tail_flip.py", []),
     "datadict":      ("tc_docs_data.py", []),
     "audit":         ("tc_audit.py", []),

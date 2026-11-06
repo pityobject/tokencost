@@ -249,6 +249,10 @@ def load_inputs():
     _p = RESULTS / "csrv_linearity.json"
     if _p.exists():
         cslin = json.loads(_p.read_text(encoding="utf-8"))
+    kvcoef = {}
+    _p = RESULTS / "kv_coef_check.json"
+    if _p.exists():
+        kvcoef = json.loads(_p.read_text(encoding="utf-8"))
     tflip = {}
     _p = RESULTS / "tail_flip.csv"
     if _p.exists():
@@ -279,7 +283,7 @@ def load_inputs():
                 fit=fit, verify=ver, n_scripts=len(codes), pois=pois,
                 var=var, tails=tails, byq=byq, counts=counts,
                 clock=clock, bim=bim, mixed=mixed, mt=mt, pops=pops,
-                dbound=dbound, cv=cv, cslin=cslin, tflip=tflip)
+                dbound=dbound, cv=cv, cslin=cslin, tflip=tflip, kvcoef=kvcoef)
 
 
 def build_claims(d):
@@ -457,6 +461,13 @@ def build_claims(d):
         claims["尾部口径导致的 SLA 翻转（TTFT≤2000/TPOT≤100）"] = (
             f"{tf['n_flips']} 格（假设通过 {tf['pass_assumed']} → 实测通过 {tf['pass_measured']}）")
         claims["实测尾部对 TTFT 上界的放大（最大）"] = f"{tf['max_amp']:.2f}×"
+
+    kv = d.get("kvcoef") or {}
+    if kv:
+        claims["KV 系数检验：反推 BW / 模型 BW（中位）"] = (
+            f"{kv.get('ratio_median', float('nan')):.2f}×")
+        claims["KV 系数检验判定"] = kv.get("verdict", "—")
+        claims["ctx 本身对 TPOT 的影响"] = kv.get("ctx_verdict", "—")
 
     cnt = d.get("counts") or {}
     if cnt:
