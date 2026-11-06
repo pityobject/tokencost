@@ -217,6 +217,10 @@ def load_inputs():
     _p = RESULTS / "params_by_quant.csv"
     if _p.exists():
         byq = pd.read_csv(_p)
+    pops = {}
+    _p = RESULTS / "populations.json"
+    if _p.exists():
+        pops = json.loads(_p.read_text(encoding="utf-8"))
     clock = {}
     _p = RESULTS / "clock_audit.json"
     if _p.exists():
@@ -251,7 +255,7 @@ def load_inputs():
     return dict(rows=rows, ok=ok, n_cells=n_cells, n_rows=len(ok),
                 fit=fit, verify=ver, n_scripts=len(codes), pois=pois,
                 var=var, tails=tails, byq=byq, counts=counts,
-                clock=clock, bim=bim, mixed=mixed, mt=mt)
+                clock=clock, bim=bim, mixed=mixed, mt=mt, pops=pops)
 
 
 def build_claims(d):
@@ -422,11 +426,29 @@ def write_md(claims, d):
     def _pct(x):
         return f"{float(x):.2f}%"
 
-    _core = _pct(_fit.get("mape_cost", float("nan")))
-    _core_max = _pct(_fit.get("mape_cost_max", float("nan")))
-    _cov = _pct(_fit.get("coverage", float("nan")))
+    # 【比例 vs 百分数】fit.json 的 coverage 是比例（0.8676），直接 {:.2f}% 会输出 0.87%。
+    def _pct100(x):
+        """比率或百分数都能正确格式化成百分数。"""
+        v = float(x)
+        return f"{(v * 100 if v <= 1.0 else v):.2f}%"
+
+    _pops = d.get("pops") or {}
+    if not _pops:
+        raise SystemExit(
+            "[CLAIMS] 缺 results/populations.json —— 先跑 `python code/tc.py model`。\n"
+            "（三套口径必须来自产物，不能写死在文档里）")
+
+    def _pop(name):
+        p0 = _pops.get(name) or {}
+        if not p0:
+            raise SystemExit(f"[CLAIMS] populations.json 里没有口径 {name!r}")
+        return p0
+
+    _core = _pct100(_pop("core")["mape_cost"])
+    _core_max = _pct100(_pop("core")["max_err"])
+    _cov = _pct100(_pop("core")["coverage"])
     _wall = _pct(_fit.get("mape_cost_wall", float("nan")))
-    _wall_max = _pct(_fit.get("mape_cost_wall_max", float("nan")))
+    _wall_max = _pct(_fit.get("max_err_wall", float("nan")))
     _valid = _pct(_fit.get("mape_cost_valid", float("nan")))
     _all = _pct(_fit.get("mape_cost_all", float("nan")))
     _n_core = _fit.get("n_holdout", "?")
@@ -439,10 +461,14 @@ def write_md(claims, d):
         "",
         "| 口径 | 留出格数 | 成本 MAPE | 最大误差 | 覆盖率 | 含义 |",
         "|---|---|---|---|---|---|",
-        f"| `core`（默认） | {_n_core} | {_core} | {_core_max} | {_cov} | "
+        f"| `core`（默认） | {_pop('core')['n_holdout']} | {_core} | {_core_max} | {_cov} | "
         f"设计空间本身（45 core + 35 dense） |",
-        f"| `valid` | {_n_valid} | {_valid} | {_core_max} | 85.5% | core + 8 个跨模型族格 |",
-        f"| `all` | {_n_all} | {_all} | 26.64% | 76.0% | 含台阶/波次/拐点探针 |",
+        f"| `valid` | {_pop('valid')['n_holdout']} | {_pct100(_pop('valid')['mape_cost'])} | "
+        f"{_pct100(_pop('valid')['max_err'])} | {_pct100(_pop('valid')['coverage'])} | "
+        f"core + 8 个跨模型族格 |",
+        f"| `all` | {_pop('all')['n_holdout']} | {_pct100(_pop('all')['mape_cost'])} | "
+        f"{_pct100(_pop('all')['max_err'])} | {_pct100(_pop('all')['coverage'])} | "
+        f"含台阶/波次/拐点探针 |",
         "",
         "## 口径说明（必须同时引用，否则失真）",
         "",
@@ -488,7 +514,15 @@ def write_md(claims, d):
         lines += ["", "> 相对宽度 > 30% 的参数只能当量级引用；"
                      "`ovh_ttft` 的区间宽度超过 100%，说明标定集几乎约束不住它。"]
 
-    (RESULTS / "CLAIMS.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    body = "\n".join(lines)
+    # 【脏文件守卫】生成物里出现 nan / 空占位就直接失败：
+    # 以前 nan% 会被写进 CLAIMS.md，而 --check 只比对 claims 字典，于是"脏文件仍报 OK"。
+    dirt = [t for t in ("nan", "NaN", "? |") if t in body]
+    if dirt:
+        raise SystemExit(
+            f"[CLAIMS] 生成物里出现异常占位 {dirt}——拒绝写出脏文件。\n"
+            f"通常是某个产物字段缺失（先跑 `python code/tc.py model`）。")
+    (RESULTS / "CLAIMS.md").write_text(body + "\n", encoding="utf-8")
     return RESULTS / "CLAIMS.md"
 
 
@@ -508,6 +542,19 @@ def _known_values(d, claims):
     }
 
 
+def _need(claims, key):
+    """取 claims 里的键；取不到就抛错。
+
+    复核抓到过：用 claims.get("留出集最大误差", "") 取一个**不存在的键**，
+    返回空串 → 检查项变成空操作（永远匹配）。键名必须显式断言。
+    """
+    if key not in claims:
+        raise SystemExit(
+            f"[CLAIMS] 检查器引用了不存在的键 {key!r}。"
+            f"可用键：{sorted(claims)[:8]}…")
+    return claims[key]
+
+
 def check(claims, d):
     """按**语境**抓数字，而不是精确匹配整句。
 
@@ -525,14 +572,16 @@ def check(claims, d):
         ("脚本数", str(d["n_scripts"]), r"(\d+)\s*个脚本"),
         # 【不能写死期望值】写死等于只认旧数字（复核指出的真实漏洞）。
         # pattern=None 表示"必须出现"模式：核心数字必须在关键文档里出现 ≥1 次。
-        ("成本 MAPE", claims["单位成本 MAPE（core，稳态口径）"], None),
-        ("最大误差", claims.get("留出集最大误差", ""), None),
-        ("区间覆盖率", claims.get("预测区间覆盖率", ""), None),
+        ("成本 MAPE", _need(claims, "单位成本 MAPE（core，稳态口径）"), None),
+        ("最大误差", _need(claims, "单点最大误差"), None),
+        ("区间覆盖率", _need(claims, "90% 区间覆盖率"), None),
     ]
     # 曾经对外用过、现已作废的数字；留在文档里就是漂移
     stale = ["100 个配置格", "300 次会话级", "21 个脚本", "6.13%", "19.46%",
              # 重拟合前的 MAPE（2026-11-05 起为 8.59）
              "8.70%", "8.61%",
+             # valid / all 口径的旧值（2026-11-06 起由 populations.json 现算）
+             "9.08%", "10.21%",
              "76 格", "9.08%（未标口径）",
              # 30 秒采样的泊松数据（90 秒重跑后已作废）
              "9.9 倍", "24.9 ms", "6pp → 7pp",

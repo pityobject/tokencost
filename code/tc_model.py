@@ -580,6 +580,7 @@ def main():
     print("三套口径（同一组参数，只改留出集范围）")
     print("=" * 66)
     print(f"{'口径':<8}{'留出格数':>8}{'成本MAPE':>10}{'最大误差':>10}{'覆盖率':>9}")
+    pops_out = {}
     for name, sub in pops.items():
         p2 = evaluate(sub, params, calib_ids)
         hold2 = p2[~p2["cell_id"].isin(calib_ids)]
@@ -590,6 +591,13 @@ def main():
         half_w = float(summary.get("half_width_log", float("nan")))
         cov = float((hold2["log_resid"].abs() <= half_w).mean()) if np.isfinite(half_w) else float("nan")
         print(f"{name:<8}{len(hold2):>8}{cmape:>9.2f}%{mx:>9.2f}%{cov*100:>8.1f}%")
+        # 【必须落盘】这些数以前只存在于控制台输出和 CLAIMS 的静态文本里，
+        # 于是"重拟合后 CLAIMS 自相矛盾 / nan"。现在统一由这里产出一份。
+        pops_out[name] = dict(n_holdout=int(len(hold2)), mape_cost=float(cmape),
+                              max_err=float(mx), coverage=float(cov))
+    (cfg.RESULTS_DIR / "populations.json").write_text(
+        json.dumps(pops_out, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"  三套口径已写入 {cfg.RESULTS_DIR / 'populations.json'}")
     print("  对外引用时必须带口径名（默认 core）。")
 
     (cfg.RESULTS_DIR / "fit.json").write_text(
