@@ -50,22 +50,8 @@ def load_cells(population="core"):
     教训：第一版把 wave/knee 探针和跨族格都当留出集，算出 11.98%，
     而官方是 8.59%——**同样的代码、不同的口径，数字差 40%**。
     """
-    df = pd.read_csv(cfg.DATA_DIR / "summary_steady.csv")
-    cid = df["cell_id"].astype(str)
-    # 与 tc_model 同一套判定：白名单（设计空间四元组）+ 排除探针/新实验
-    has_suffix = cid.str.contains(r"_(?:w\d+|n\d+|p\d+|mt\d+)$", regex=True)
-    is_mix = cid.str.contains("_mix", regex=False)
-    is_xf = cid.str.endswith("_xf")
-    design = cfg.design_space_cells()
-    keys = list(zip(df["model"], df["quant"],
-                    df["ctx"].astype(int), df["conc"].astype(int)))
-    in_design = pd.Series([k in design for k in keys], index=df.index)
-    probe_like = has_suffix | is_mix
-    if population == "core":
-        df = df[in_design & ~probe_like & ~is_xf]
-    elif population == "valid":
-        df = df[~probe_like]
-    df = df.copy()
+    # 口径判定统一来自 tc_config（唯一实现）
+    df = cfg.load_population(population)
     df["prompt_tokens"] = df["prompt_tokens_median"]
     df["ctx_avg_tokens"] = df["prompt_tokens"] + cfg.GEN_TOKENS / 2
 

@@ -58,7 +58,9 @@ def load_data():
     # 【口径必须与对外一致】core = 设计空间（剔除探针格 _w*/_n* 与跨族格 _xf），
     # 否则这里算出的 MAPE 会是 10.21%（all 口径），与 README 的 8.70% 对不上。
     cid = df["cell_id"].astype(str)
-    has_suffix = cid.str.contains(r"_(?:w\d+|n\d+|p\d+)$", regex=True)
+    # 【唯一实现】口径判定统一来自 tc_config
+    _marks = cfg.mark_population(df)
+    has_suffix = _marks["is_probe"]
     is_xf = cid.str.endswith("_xf")
     df = df[~has_suffix & ~is_xf].copy()
 

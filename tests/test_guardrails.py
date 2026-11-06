@@ -122,6 +122,26 @@ def test_multiturn_persists_rows(tmp_path, monkeypatch):
     assert n == 2, f"落盘行数应为 2，实际 {n}"
 
 
+def test_population_single_source():
+    """口径后缀正则只允许出现在 tc_config.py —— 否则就是第二份实现。
+
+    历史上同一类 bug 出现过三次：tc_cv 漏改、两个试验脚本各判一次，
+    每次都让"同一指标出现两个答案"。这个测试让"再复制一份"直接失败。
+    """
+    import re
+    from pathlib import Path
+
+    pat = re.compile(r"_\(\?:w\\d\+\|n\\d\+\|p\\d\+")
+    offenders = []
+    for f in (Path(__file__).resolve().parent.parent / "code").glob("*.py"):
+        if f.name == "tc_config.py":
+            continue
+        text = f.read_text(encoding="utf-8", errors="replace")
+        if pat.search(text):
+            offenders.append(f.name)
+    assert not offenders, f"口径判定被复制到了：{offenders}（应统一用 cfg.population_mask）"
+
+
 def main():
     """不依赖 pytest 也能跑：直接执行所有 test_* 函数。"""
     import shutil
@@ -172,4 +192,3 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-

@@ -44,15 +44,8 @@ plt.rcParams["axes.unicode_minus"] = False
 
 
 def load():
-    df = pd.read_csv(cfg.DATA_DIR / "summary_steady.csv")
-    cid = df["cell_id"].astype(str)
-    df = df[~cid.str.contains(r"_(?:w\d+|n\d+|p\d+|mt\d+)$", regex=True)
-            & ~cid.str.endswith("_xf")].copy()
-    if "steady_cost_gpu_s_per_1m" in df.columns:
-        df["cost_gpu_s_per_1m"] = df["steady_cost_gpu_s_per_1m"]
-    df["prompt_tokens"] = df["prompt_tokens_median"]
-    df["ctx_avg_tokens"] = df["prompt_tokens"] + cfg.GEN_TOKENS / 2
-    return df
+    """口径判定统一来自 tc_config（唯一实现）。core = 设计空间，不含混合/多轮/探针。"""
+    return cfg.load_population("core")
 
 
 def main():

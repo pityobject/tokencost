@@ -9,6 +9,7 @@ tc_config.py —— 全局配置。所有脚本只从这里读路径和参数，
       - n_params = 参数量（决定每步要做多少浮点运算）
 """
 
+import pandas as pd
 from pathlib import Path
 import os
 
@@ -431,3 +432,76 @@ def design_space_cells():
     for c in preset_cells("dense"):
         cells.add((c["model"], c["quant"], int(c["ctx"]), int(c["conc"])))
     return cells
+
+
+# ================================================================ 口径：唯一实现
+def load_summary(path=None):
+    """读 summary_steady.csv 并补齐模型需要的列。**所有分析脚本都应调用它。**
+
+    - prompt_tokens：真实提示长度（不是名义值）
+    - ctx_avg_tokens：解码时平均上下文 = 提示 + 生成/2
+    - cost_gpu_s_per_1m：**稳态**口径（wall 口径另存列）
+    """
+    import pandas as pd
+    from pathlib import Path as _P
+    fp = _P(path) if path else (DATA_DIR / "summary_steady.csv")
+    df = pd.read_csv(fp).copy()
+    if "prompt_tokens_median" in df.columns:
+        df["prompt_tokens"] = df["prompt_tokens_median"].astype(float)
+    else:
+        df["prompt_tokens"] = float(PROMPT_TOKENS)
+    df["ctx_avg_tokens"] = df["prompt_tokens"] + GEN_TOKENS / 2
+    if "steady_cost_gpu_s_per_1m" in df.columns:
+        df["cost_wall_gpu_s_per_1m"] = df["cost_gpu_s_per_1m"]
+        df["cost_gpu_s_per_1m"] = df["steady_cost_gpu_s_per_1m"]
+    return df
+
+
+def mark_population(df):
+    """给每行打口径标签。返回新 DataFrame（含布尔列）。
+
+    这是**唯一**的判定处：
+      in_design  四元组命中设计网格（core 45 + dense 35 = 80）
+      is_probe   后缀 _wN/_nN/_pN（step/wave/knee/长度探针）
+      is_mt      多轮 _mtN
+      is_mix     混合长度 _mixXXXX
+      is_xf      跨模型族 _xf
+    """
+    import pandas as pd
+    out = df.copy()
+    cid = out["cell_id"].astype(str)
+    design = design_space_cells()
+    keys = list(zip(out["model"], out["quant"],
+                    out["ctx"].astype(int), out["conc"].astype(int)))
+    out["in_design"] = pd.Series([k in design for k in keys], index=out.index)
+    out["is_probe"] = cid.str.contains(r"_(?:w\d+|n\d+|p\d+)$", regex=True)
+    out["is_mt"] = cid.str.contains(r"_mt\d+$", regex=True)
+    out["is_mix"] = cid.str.contains("_mix", regex=False)
+    out["is_xf"] = cid.str.endswith("_xf")
+    return out
+
+
+def population_mask(df, name="core"):
+    """返回布尔掩码。缺少标记列时先调用 mark_population()。"""
+    if "in_design" not in df.columns:
+        df = mark_population(df)
+    # 语义与 tc_model 既有口径**逐字对齐**（改这里必须同时改文档与人口统计）
+    probe_like = df["is_probe"] | df["is_mt"]            # 探针 + 多轮
+    if name == "core":
+        return df["in_design"] & ~probe_like & ~df["is_mix"] & ~df["is_xf"]
+    if name == "valid":
+        return ~probe_like                                # 含 _mix 与扩展并发
+    if name == "all":
+        return pd.Series(True, index=df.index)            # 全部（含 _xf）
+    if name == "ext":
+        return ((df["is_mt"] | df["is_mix"]
+                 | (~df["in_design"] & ~probe_like)) & ~df["is_xf"])
+    raise SystemExit(f"未知口径 {name!r}（可选 core/valid/all/ext）")
+
+
+def load_population(name="core", path=None):
+    """一步得到某个口径的数据（已打完标签）。"""
+    df = mark_population(load_summary(path))
+    return df[population_mask(df, name)].reset_index(drop=True)
+
+

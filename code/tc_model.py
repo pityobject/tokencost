@@ -526,9 +526,11 @@ def main():
     #   all   = 全部 108 格（含台阶/波次/拐点探针，只作参考）
     # ---------------------------------------------------------------
     cid_series = df["cell_id"].astype(str)
-    has_suffix = cid_series.str.contains(r"_(?:w\d+|n\d+|p\d+|mt\d+)$", regex=True)
-    is_mix = cid_series.str.contains("_mix", regex=False)
-    is_xf = cid_series.str.endswith("_xf")
+    # 【唯一实现】探针/多轮/混合/跨族 的判定来自 tc_config
+    _marks = cfg.mark_population(df)
+    has_suffix = _marks["is_probe"] | _marks["is_mt"]
+    is_mix = _marks["is_mix"]
+    is_xf = _marks["is_xf"]
 
     # 【白名单判定】是否属于设计空间（只看 model/quant/ctx/conc 四元组）。
     # 之前用后缀黑名单，导致 _mtN / _mix / c48|64|128 悄悄混进 core——
@@ -545,12 +547,11 @@ def main():
     is_ext_suffix = cid_series.str.contains(r"_(?:mt\d+)$", regex=True) | is_mix
     extra_conc = ~in_design & ~has_suffix & ~is_xf & ~is_mix
 
-    pops = {
-        "ext": df[(is_ext_suffix | extra_conc) & ~is_xf],
-        "core": df[in_design & ~probe_like & ~is_xf],
-        "valid": df[~has_suffix],
-        "all": df,
-    }
+    # 【唯一实现】口径判定全部来自 tc_config；这里只做一次标记 + 取掩码。
+    # 以前这段逻辑在 5 个脚本里各写一遍，漏改一处就出现"同一指标两个答案"。
+    _marked = cfg.mark_population(df)
+    pops = {_n: df[cfg.population_mask(_marked, _n)] for _n in
+            ("core", "valid", "all", "ext")}
     df = pops[POPULATION]
     print(f"[口径] population={args.population}（core=设计空间 / valid=+跨族 / all=含全部探针）")
 
@@ -639,6 +640,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 

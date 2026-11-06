@@ -56,6 +56,11 @@ def predict7(params, row):
 
 def load_all():
     """返回 (行列表, 索引)：每行含 model/quant/ctx/conc/L/实测 ttft/tpot/cost/族标签。"""
+    # 口径标签统一由 cfg 给出（唯一实现）
+    _core_ids = set(cfg.load_population("core")["cell_id"])
+    _ext_ids = set(cfg.load_population("ext")["cell_id"])
+    _valid_ids = set(cfg.load_population("valid")["cell_id"])
+
     rows = []
     raw = [json.loads(l) for l in (cfg.DATA_DIR / "raw_cells.jsonl").open(encoding="utf-8")
            if l.strip()]
@@ -75,10 +80,9 @@ def load_all():
         L = m.get("prompt_tokens_median")
         if not L or not np.isfinite(float(L)):
             continue
-        kind = ("probe" if "_p" in cid else
-                "mix" if "_mix" in cid else
-                "mt" if "_mt" in cid else
-                "design" if not any(x in cid for x in ("_w", "_n", "_xf")) else "probe")
+        kind = ("core" if cid in _core_ids else
+                "ext" if cid in _ext_ids else
+                "valid" if cid in _valid_ids else "other")
         rows.append(dict(cell_id=cid, kind=kind, model=r["model"], quant=r["quant"],
                          ctx=int(r["ctx"]), conc=int(r["conc"]),
                          prompt_tokens=float(L),

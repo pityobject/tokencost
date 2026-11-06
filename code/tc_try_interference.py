@@ -69,6 +69,11 @@ _DESIGN = cfg.design_space_cells()
 
 
 def load_all():
+    # 口径标签统一由 cfg 给出（唯一实现）
+    _core_ids = set(cfg.load_population("core")["cell_id"])
+    _ext_ids = set(cfg.load_population("ext")["cell_id"])
+    _valid_ids = set(cfg.load_population("valid")["cell_id"])
+
     rows = []
     raw = [json.loads(l) for l in (cfg.DATA_DIR / "raw_cells.jsonl").open(encoding="utf-8")
            if l.strip()]
@@ -87,10 +92,9 @@ def load_all():
             continue
         cid = r["cell_id"]
         # 【白名单】只有命中设计空间四元组才算 design；否则是扩展实验
-        key = (r["model"], r["quant"], int(r["ctx"]), int(r["conc"]))
-        in_design = key in _DESIGN
-        kind = ("probe" if "_p" in cid else "mix" if "_mix" in cid else
-                "mt" if "_mt" in cid else ("design" if in_design else "extra"))
+        kind = ("core" if cid in _core_ids else
+                "ext" if cid in _ext_ids else
+                "valid" if cid in _valid_ids else "other")
         rows.append(dict(cell_id=cid, kind=kind, model=r["model"], quant=r["quant"],
                          ctx=int(r["ctx"]), conc=int(r["conc"]),
                          prompt_tokens=float(L),
