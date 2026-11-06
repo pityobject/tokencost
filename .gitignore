@@ -37,4 +37,5 @@ raw_cells_备份_*.jsonl
 
 # 自标定产物（每人每机不同，不应提交）
 results/calib_*.json
+a10_results.tar.gz
 

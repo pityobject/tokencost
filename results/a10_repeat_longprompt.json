@@ -17,7 +17,7 @@
       "b_sat": 7.088,
       "ovh_ttft": 17.525,
       "source": "云端 rep2 运行（原始输出）",
-      "raw_json_archived": false
+      "raw_json_archived": true
     },
     "vllm_run1": {
       "c_srv": 0.2729086935109363,
@@ -34,7 +34,7 @@
       "b_sat": 14.3,
       "ovh_ttft": 10.53,
       "source": "云端 rep2 运行（原始输出）",
-      "raw_json_archived": false
+      "raw_json_archived": true
     }
   },
   "longprompt": {
@@ -84,7 +84,7 @@
       }
     ],
     "note": "这两组标定只用 4 个同长度点，参数退化（c_srv/b_sat 不可分），因此只取实测值，不引用其拟合参数",
-    "raw_json_archived": false
+    "raw_json_archived": true
   },
   "spec": {
     "weight_bytes": 6178317312,
@@ -99,7 +99,9 @@
       "llamacpp_run2 / vllm_run2：只转录了 5 个参数（原始 json 未入库）",
       "longprompt：只转录了每并发点的 ttft/tpot（原始 json 未入库）"
     ],
-    "raw_json_location": "云端实例 /mnt/workspace/tc_a10/results/（实例已停止，磁盘按平台规则保留约 15 小时）",
-    "impact": "当前所有已发表结论只依赖：两份 calib_a10_*.json + 本文件转录的参数与测点；若将来需要重算 rep2/long 的残差，需重跑对应标定（各约 3 分钟）"
+    "raw_json_location": "results/a10_raw/（6 个原始 json，已归档）",
+    "impact": "当前所有已发表结论只依赖：两份 calib_a10_*.json + 本文件转录的参数与测点；若将来需要重算 rep2/long 的残差，需重跑对应标定（各约 3 分钟）",
+    "archived": true,
+    "verified": "2026-11-06 用原始文件逐项校验 22 个数值，全部一致"
   }
 }

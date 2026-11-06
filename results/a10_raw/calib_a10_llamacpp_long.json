@@ -1,0 +1,67 @@
+{
+  "hardware": "A10 24GB / llama.cpp longprompt",
+  "backend": "http://127.0.0.1:8092/v1",
+  "model": {
+    "name": "Qwen3B",
+    "quant": "fp16",
+    "weight_bytes": 6178317312,
+    "n_params": 3080000000,
+    "n_layers": 36,
+    "n_kv_heads": 2,
+    "head_dim": 128
+  },
+  "n_points": 4,
+  "measurements": [
+    {
+      "conc": 1,
+      "target_L": 1900,
+      "L": 1841.0,
+      "ttft": 305.602955500035,
+      "tpot": 14.921445799206314,
+      "n_ok": 16,
+      "n_fail": 0,
+      "ctx": 8192
+    },
+    {
+      "conc": 4,
+      "target_L": 1900,
+      "L": 1841.0,
+      "ttft": 645.7908974998645,
+      "tpot": 23.95240146063405,
+      "n_ok": 24,
+      "n_fail": 0,
+      "ctx": 8192
+    },
+    {
+      "conc": 8,
+      "target_L": 1900,
+      "L": 1841.0,
+      "ttft": 665.1035810000394,
+      "tpot": 38.85188082283745,
+      "n_ok": 32,
+      "n_fail": 0,
+      "ctx": 8192
+    },
+    {
+      "conc": 16,
+      "target_L": 1900,
+      "L": 1841.0,
+      "ttft": 711.2662834997536,
+      "tpot": 67.74904701574195,
+      "n_ok": 48,
+      "n_fail": 0,
+      "ctx": 8192
+    }
+  ],
+  "bw": 552.8990152027861,
+  "peak": 12.000000000000002,
+  "peak_prefill": 39.47713371432807,
+  "c_srv": 3.325912785084973,
+  "b_sat": 2.1839888909071994,
+  "ovh_ttft": 15.008322511662712,
+  "residual": {
+    "ttft_mape": 1.0806755289643921,
+    "tpot_mape": 2.096454849550264
+  },
+  "decode_peak_identifiable": false
+}
