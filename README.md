@@ -280,7 +280,7 @@ python code/tc_recompute_steady.py # 稳态口径重算（消除波次污染）
 python code/tc_model.py            # 6 参数拟合 + 留出验证
 python code/tc_recommend.py --ttft 600 --tpot 60
 python code/tc_recommend.py --ttft 600 --tpot 60 --gpu-price a10
-#   ↑ 加上价格就给出「元/百万 token」：本地电费口径 0.35 元，云端 A10 按量 60.80 元
+#   ↑ 加上价格就给出「元/百万 token」：本地电费口径 0.35 元，云端 A10 按量 60.92 元
 #     同一份 GPU·秒，两个价格差 175 倍——所以「多少钱」必须和「什么价」一起说
 python code/tc_verify.py           # 决策后悔值
 python code/tc_decompose_csrv.py   # c_srv 三向分解

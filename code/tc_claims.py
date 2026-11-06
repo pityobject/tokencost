@@ -572,11 +572,17 @@ def build_claims(d):
             "服务进程（部署栈 + 主机 CPU），非 GPU、非模型权重；"
             "同卡换栈差 5.6×，同栈换机器差 2.0×")
 
-    if len(be) >= 2:
-        _a, _b = be[0], be[1]
-        claims["云端标定：A10 + vLLM 的 c_srv"] = f"{_b['c_srv']:.3f} ms"
-        claims["云端标定：c_srv 相对本机的比值"] = f"{_b['c_srv'] / _a['c_srv']:.2f}×"
-        claims["云端标定：A10 的有效带宽占标称"] = f"{_b['bw'] / 600.0 * 100:.0f}%"
+    # 旧版这里用 be[0]/be[1] 假设"本机、云端"两条，加了 A10+llama.cpp 之后
+    # be[1] 变成 llama.cpp，于是把 1.528 ms 标成了 vLLM 的值（错的）。
+    # 改成按标签显式挑选，挑不到就不写这一行——宁可缺，不可错。
+    _local = next((e for e in be if "本机" in str(e.get("label", ""))), None)
+    _a10v = next((e for e in be if "A10" in str(e.get("label", ""))
+                  and "vLLM" in str(e.get("label", ""))), None)
+    if _local and _a10v:
+        claims["云端标定：A10 + vLLM 的 c_srv"] = f"{_a10v['c_srv']:.3f} ms"
+        claims["云端标定：A10+vLLM 相对本机 llama.cpp"] = (
+            f"{_a10v['c_srv'] / _local['c_srv']:.2f}×")
+        claims["云端标定：A10+vLLM 的有效带宽占标称"] = f"{_a10v['bw'] / 600.0 * 100:.0f}%"
 
     cnt = d.get("counts") or {}
     if cnt:

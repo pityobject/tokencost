@@ -70,7 +70,7 @@ _DESIGN = cfg.design_space_cells()
 
 def load_all():
     # 口径标签统一由 cfg 给出（唯一实现）
-    _core_ids = set(cfg.load_population("core")["cell_id"])
+    _core_ids = set(cfg.load_population("valid")["cell_id"])   # 含失效区（长 prompt/高并发/混合）
     _ext_ids = set(cfg.load_population("ext")["cell_id"])
     _valid_ids = set(cfg.load_population("valid")["cell_id"])
 
@@ -228,3 +228,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

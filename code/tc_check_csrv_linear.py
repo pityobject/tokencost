@@ -44,8 +44,12 @@ plt.rcParams["axes.unicode_minus"] = False
 
 
 def load():
-    """口径判定统一来自 tc_config（唯一实现）。core = 设计空间，不含混合/多轮/探针。"""
-    return cfg.load_population("core")
+    """线性性检验必须覆盖**全部并发档**（含 c48–128），所以用 valid 而不是 core。
+
+    core 只含设计网格 1–32；用它会把"上端是否平坦"的数据全部排除，
+    于是结论会从"中段鼓包"退回"超线性"（2026-11-06 重构口径时就是这么退化的）。
+    """
+    return cfg.load_population("valid")
 
 
 def main():
@@ -154,4 +158,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
