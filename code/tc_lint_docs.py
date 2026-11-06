@@ -79,6 +79,9 @@ DEPRECATED = {
 # ---------------------------------------------------------------- 一致性扫描
 PARAM_COUNT = 6      # 唯一真值：六参数模型
 PARAM_PAT = re.compile(r"(\d+)\s*个\s*(?:待定)?参数")
+# 【数字损坏检测】正常中文文档里几乎不会出现"带前导零的整数"（02、008、032、0000、06）。
+# 2026-11-06 一次批量替换把简历稿里所有 1 换成 0，产生的正是这类 token，且所有既有检查都没抓到。
+LEADING_ZERO_PAT = re.compile(r"(?<![\w.：:/\-,])0\d+(?![\w.%/\-,])")
 # 声称 vs 讨论：只有「声称模型有 N 个参数」才必须等于 PARAM_COUNT。
 # 讨论语气里出现任何数字都合法——F16 正是在讲「试过第 7 个参数但失败」。
 DISCUSS_HINTS = ("试了", "试过", "尝试", "失败", "原先", "曾经",
@@ -90,6 +93,11 @@ MUL2_PAT = re.compile(r"(\d+)\s*[×x]\s*(\d+)\s*[=＝]\s*(\d+)")
 def consistent_checks(text, rel, line_no, line):
     """返回 [(级别, 说明)]；只做"能机器判定"的两种。"""
     out = []
+    # 跳过标题行：`# 03 · S2 …` 这类是章节编号，不是被改坏的数字
+    if not line.lstrip().startswith("#"):
+        for m in LEADING_ZERO_PAT.finditer(line):
+            out.append(("前导零", f"疑似数字损坏：{m.group(0)!r}（数字被改过？）"))
+
     for m in PARAM_PAT.finditer(line):
         n = int(m.group(1))
         # 声称 vs 讨论：整行含讨论词就跳过（含「试了 7 个参数但失败」这类叙述）
@@ -168,4 +176,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
 
