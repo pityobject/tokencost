@@ -393,7 +393,17 @@ def cmd_fit(model_name, quant, spec, cells, args):
 # ---------------------------------------------------------------- 自检（不需要服务器）
 def cmd_selftest(args):
     """用仓库标定值合成带噪测量点，再拟合回去：验证整条链路正确。"""
-    fit = json.loads((cfg.RESULTS_DIR / "fit.json").read_text(encoding="utf-8"))
+    # 【自检不该依赖产物】干净机器（云端最小包）上没有 results/fit.json。
+    # 有就用实测拟合值当真值；没有就用已发布参数，并打印来源。
+    _fit_fp = cfg.RESULTS_DIR / "fit.json"
+    if _fit_fp.exists():
+        fit = json.loads(_fit_fp.read_text(encoding="utf-8"))
+        print(f"[自检] 真值来源：{_fit_fp}")
+    else:
+        fit = dict(bw=249.10297621883768, peak=13.151064105756427,
+                   peak_prefill=31.773482152550265, c_srv=0.765718233245005,
+                   b_sat=13.20361320117966, ovh_ttft=15.718611287513967)
+        print("[自检] 未找到 results/fit.json，使用内置的已发布参数作为真值")
     truth = dict(bw_gbs=fit["bw"], peak_tflops=fit["peak"],
                  peak_prefill_tflops=fit.get("peak_prefill", fit["peak"]),
                  c_srv_ms=fit["c_srv"], b_sat=fit["b_sat"],
