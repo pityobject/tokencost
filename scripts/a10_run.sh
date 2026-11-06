@@ -31,7 +31,7 @@ if [ -z "${WORKDIR:-}" ]; then
 fi
 echo "WORKDIR = $WORKDIR"
 export WORKDIR
-MODEL_GGUF_FILE="qwen2.5-3b-instruct-f16.gguf"
+MODEL_GGUF_FILE="qwen2.5-3b-instruct-fp16.gguf"
 
 PER_SLOT=2304
 SLOTS=32
@@ -85,15 +85,21 @@ from modelscope import snapshot_download
 base = os.path.join(os.environ["WORKDIR"], "models")
 snapshot_download('Qwen/Qwen2.5-3B-Instruct', local_dir=os.path.join(base, 'hf'))
 snapshot_download('Qwen/Qwen2.5-3B-Instruct-GGUF',
-                  allow_patterns=['*f16*'], local_dir=os.path.join(base, 'gguf'))
+                  allow_patterns=['*fp16*', '*f16*'], local_dir=os.path.join(base, 'gguf'))
 print("模型下载完成")
 PY
 
 GGUF_PATH="$WORKDIR/models/gguf/${MODEL_GGUF_FILE}"
 if [ ! -f "$GGUF_PATH" ]; then
+  GGUF_PATH=$(find "$WORKDIR/models/gguf" -name '*fp16*.gguf' | head -1)
+fi
+if [ ! -f "$GGUF_PATH" ]; then
   GGUF_PATH=$(find "$WORKDIR/models/gguf" -name '*f16*.gguf' | head -1)
 fi
-[ -f "$GGUF_PATH" ] || die "没找到 F16 的 GGUF"
+if [ ! -f "$GGUF_PATH" ]; then
+  echo "目录里现有的 GGUF："; ls -lh "$WORKDIR/models/gguf" | head -20
+  die "没找到 fp16/f16 的 GGUF（见上面清单；也可手工建软链到 $WORKDIR/models/gguf/${MODEL_GGUF_FILE}）"
+fi
 WEIGHT_BYTES=$(stat -c%s "$GGUF_PATH")
 echo "GGUF: $GGUF_PATH  ($((WEIGHT_BYTES/1024/1024)) MB)"
 
