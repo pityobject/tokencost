@@ -18,7 +18,15 @@
 # =============================================================================
 set -euo pipefail
 
-WORKDIR="${WORKDIR:-$HOME/tc_a10}"
+# DSW 的"工作目录"是 /mnt/systemdisk（`$HOME=/root` 是容器覆盖层，重启即丢）
+if [ -z "${WORKDIR:-}" ]; then
+  if [ -d /mnt/systemdisk ] && [ -w /mnt/systemdisk ]; then
+    WORKDIR=/mnt/systemdisk/tc_a10
+  else
+    WORKDIR="$HOME/tc_a10"
+  fi
+fi
+echo "WORKDIR = $WORKDIR"
 export WORKDIR
 MODEL_GGUF_FILE="qwen2.5-3b-instruct-f16.gguf"
 
@@ -45,6 +53,7 @@ die() { echo -e "\n\033[1;31m❌ $*\033[0m"; exit 1; }
 
 # ---------------------------------------------------------------- 0. 依赖
 log "0. 检查环境与依赖"
+python3 -c "import torch; print('torch', torch.__version__, '| cuda', torch.version.cuda, '| available', torch.cuda.is_available())" 2>&1 || true
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader \
   || die "看不到 GPU。确认实例规格是 gn7i（A10）"
 nvidia-smi --query-gpu=clocks.sm,clocks.max.sm,power.draw,temperature.gpu \
@@ -188,7 +197,10 @@ if [ "$PHASE" = "all" ] || [ "$PHASE" = "vllm" ]; then
     echo "   若下面起不来，属预期——A10 已经拿到 vLLM 数据，这里只跑 llama.cpp 即可。"
   fi
   if ! python3 -c "import vllm" 2>/dev/null; then
-    python3 -m pip install -q vllm
+    # 镜像自带 torch 2.3.1+cu121；最新 vLLM 会强升 torch（几 GB，容易把环境搞坏）
+    python3 -m pip install -q "vllm==0.6.6.post1" \
+      || python3 -m pip install -q "vllm==0.6.3" \
+      || python3 -m pip install -q vllm
   fi
   python3 -c "import vllm, torch; print('vllm', vllm.__version__, '| torch', torch.__version__, '| cuda', torch.cuda.is_available())"
 
