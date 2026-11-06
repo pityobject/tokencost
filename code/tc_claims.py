@@ -286,6 +286,19 @@ def load_inputs():
                 dbound=dbound, cv=cv, cslin=cslin, tflip=tflip, kvcoef=kvcoef)
 
 
+def _pct_fit(fit, key):
+    """从 fit.json 读一个百分比字段；缺失直接报错（不要兜底成固定值）。
+
+    复核抓到过：`fit.get('mape_in_grid', 5.8)` 让 5.8% 活了整整几轮复核——
+    产物里根本没有这个字段，文档却一直报旧值。
+    """
+    if key not in fit or fit[key] is None:
+        raise SystemExit(
+            f"[CLAIMS] fit.json 缺 {key} —— 先跑 `python code/tc.py model`。"
+            f"（不允许用固定值兜底）")
+    return f"{float(fit[key]):.1f}%"
+
+
 def build_claims(d):
     fit, ver = d["fit"], d["verify"]
     pois = d.get("pois", {})          # 泊松/排队产物（第四轮复核后纳入）
@@ -311,7 +324,8 @@ def build_claims(d):
         "单位成本 MAPE（core，稳态口径）": f"{fit['mape_cost']:.2f}%",
         "单点最大误差": f"{fit['max_err']:.2f}%",
         "90% 区间覆盖率": f"{fit['coverage']*100:.1f}%",
-        "标定并发上的 MAPE": f"{fit.get('mape_in_grid', 5.8):.1f}%",
+        "标定并发上的 MAPE": _pct_fit(fit, "mape_in_grid"),
+        "未标定并发上的 MAPE": _pct_fit(fit, "mape_out_grid"),
         "未标定并发上的 MAPE": f"{fit.get('mape_out_grid', 11.5):.1f}%",
         # 标定点数敏感性（tc_calib_curve.py）：回答"12 个点够吗"
         "标定点数 k=7 时的留出 MAPE": _calib_at(7),
@@ -641,6 +655,8 @@ def check(claims, d):
         ("配置格数", str(d["n_cells"]), r"(\d+)\s*个配置格"),
         ("会话级测量次数", str(d["n_rows"]), r"(\d+)\s*次(?:会话级)?测量"),
         ("脚本数", str(d["n_scripts"]), r"(\d+)\s*个脚本"),
+        # 复核 3.1：文档写 68、实际 76，却没有检查项能抓到
+        ("留出集格数", str(d["fit"].get("n_holdout", "")), r"(?:留出|未见)(?:集)?\s*(\d+)\s*(?:个|格)"),
         # 【不能写死期望值】写死等于只认旧数字（复核指出的真实漏洞）。
         # pattern=None 表示"必须出现"模式：核心数字必须在关键文档里出现 ≥1 次。
         ("成本 MAPE", _need(claims, "单位成本 MAPE（core，稳态口径）"), None),

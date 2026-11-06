@@ -362,7 +362,16 @@ def report(pred, params, sigma_noise=0.0, repeats=3, n_params_fit=3):
                 coverage_ok=bool(ok_cov),
                 # 数据规模写进产物：CLAIMS 之前只能靠默认值 68，一旦 --population 变了会静默失配
                 n_holdout=int(len(hold)), n_calib=int(len(cal)),
-                calc_bound_cells=int(active), calc_bound_total=int(len(cal)))
+                calc_bound_cells=int(active), calc_bound_total=int(len(cal)),
+                # 【必须落盘】标定并发 / 未标定并发 两组 MAPE。
+                # 以前只打印在控制台，claims 用 .get(..., 5.8) 兜底，
+                # 于是重拟合后文档里的 5.8% 永远不更新（复核第二轮至今）。
+                mape_in_grid=(float((in_grid["ratio_cost"] - 1).abs().mean() * 100)
+                              if len(in_grid) else None),
+                n_in_grid=int(len(in_grid)),
+                mape_out_grid=(float((out_grid["ratio_cost"] - 1).abs().mean() * 100)
+                               if len(out_grid) else None),
+                n_out_grid=int(len(out_grid)))
 
 
 def plot(pred):
@@ -516,10 +525,22 @@ def main():
     #   all   = 全部 108 格（含台阶/波次/拐点探针，只作参考）
     # ---------------------------------------------------------------
     cid_series = df["cell_id"].astype(str)
-    has_suffix = cid_series.str.contains(r"_(?:w\d+|n\d+|p\d+)$", regex=True)
+    has_suffix = cid_series.str.contains(r"_(?:w\d+|n\d+|p\d+|mt\d+)$", regex=True)
+    is_mix = cid_series.str.contains("_mix", regex=False)
     is_xf = cid_series.str.endswith("_xf")
+
+    # 【白名单判定】是否属于设计空间（只看 model/quant/ctx/conc 四元组）。
+    # 之前用后缀黑名单，导致 _mtN / _mix / c48|64|128 悄悄混进 core——
+    # 那批格里包含《适用域矩阵》自己声明"TTFT 不可用"的混合长度工况。
+    _design = cfg.design_space_cells()
+    _keys = list(zip(df["model"], df["quant"],
+                     df["ctx"].astype(int), df["conc"].astype(int)))
+    in_design = pd.Series([k in _design for k in _keys], index=df.index)
+
+    # 探针（step/wave/knee）+ 新实验（_p 长度、_mt 多轮、_mix 混合）都不进 core
+    probe_like = has_suffix | is_mix
     pops = {
-        "core": df[~has_suffix & ~is_xf],
+        "core": df[in_design & ~probe_like & ~is_xf],
         "valid": df[~has_suffix],
         "all": df,
     }

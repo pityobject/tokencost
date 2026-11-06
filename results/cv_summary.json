@@ -1,12 +1,12 @@
 {
   "trials": 30,
   "k": 12,
-  "designed_mape": 8.9,
-  "random_median": 10.31,
-  "random_p5": 9.07,
-  "random_p95": 13.89,
-  "random_min": 9.01,
-  "random_max": 15.89,
-  "shift_vs_designed": 1.41,
+  "designed_mape": 8.58,
+  "random_median": 9.96,
+  "random_p5": 8.54,
+  "random_p95": 12.28,
+  "random_min": 8.05,
+  "random_max": 12.55,
+  "shift_vs_designed": 1.38,
   "note": "随机重划分（同样 12 个点）对 MAPE 的影响；反映的是'选点'这一层不确定度，而不是测量噪声"
 }

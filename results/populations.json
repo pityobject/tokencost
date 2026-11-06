@@ -1,9 +1,9 @@
 {
   "core": {
-    "n_holdout": 76,
-    "mape_cost": 8.900898527291895,
+    "n_holdout": 68,
+    "mape_cost": 8.581203372479361,
     "max_err": 24.110373172106602,
-    "coverage": 0.8421052631578947
+    "coverage": 0.8676470588235294
   },
   "valid": {
     "n_holdout": 84,

@@ -414,3 +414,20 @@ def preset_cells(name: str):
     else:
         raise SystemExit(f"未知预设：{name}")
     return [c for c in cells if c["feasible"]]
+
+
+# ---------------------------------------------------------------- 设计空间成员判定
+def design_space_cells():
+    """设计网格里**本来就有**的格（core + dense + step/wave/knee 属于探针，不含）。
+
+    返回 {(model, quant, ctx, conc)}。用于把"验证集"限制在设计空间内——
+    新加的扩展实验（多轮 _mtN、混合长度 _mix、高并发 c48/64/128）都**不在其中**。
+    """
+    cells = set()
+    # core：设计网格 45 格（预设里已剔掉不可行）
+    for c in preset_cells("core"):
+        cells.add((c["model"], c["quant"], int(c["ctx"]), int(c["conc"])))
+    # dense：扩展网格 35 格（让后悔值有区分度）
+    for c in preset_cells("dense"):
+        cells.add((c["model"], c["quant"], int(c["ctx"]), int(c["conc"])))
+    return cells
