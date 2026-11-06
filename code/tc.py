@@ -84,6 +84,8 @@ COMMANDS = {
     "csrv":          ("tc_check_csrv_linear.py", []),
     "kvcoef":        ("tc_check_kv_coef.py", []),
     "trybatch":      ("tc_try_batch_term.py", []),
+    "tryinterf":     ("tc_try_interference.py", []),
+    "jitter":        ("tc_analyze_jitter.py", []),
     "tailflip":      ("tc_tail_flip.py", []),
     "datadict":      ("tc_docs_data.py", []),
     "audit":         ("tc_audit.py", []),

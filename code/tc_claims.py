@@ -249,6 +249,14 @@ def load_inputs():
     _p = RESULTS / "csrv_linearity.json"
     if _p.exists():
         cslin = json.loads(_p.read_text(encoding="utf-8"))
+    interf = {}
+    _p = RESULTS / "interference_trial.json"
+    if _p.exists():
+        interf = json.loads(_p.read_text(encoding="utf-8"))
+    jit = {}
+    _p = RESULTS / "jitter_summary.json"
+    if _p.exists():
+        jit = json.loads(_p.read_text(encoding="utf-8"))
     bterm = {}
     _p = RESULTS / "batch_term_trial.json"
     if _p.exists():
@@ -288,7 +296,7 @@ def load_inputs():
                 var=var, tails=tails, byq=byq, counts=counts,
                 clock=clock, bim=bim, mixed=mixed, mt=mt, pops=pops,
                 dbound=dbound, cv=cv, cslin=cslin, tflip=tflip,
-                kvcoef=kvcoef, bterm=bterm)
+                kvcoef=kvcoef, bterm=bterm, interf=interf, jit=jit)
 
 
 def _pops_n(d, name):
@@ -510,6 +518,16 @@ def build_claims(d):
     if bt:
         claims["第 7 参数 Q（批内 token 预算）"] = f"{bt.get('q_batch', float('nan')):.0f} token"
         claims["7 参数模型的结论"] = bt.get("verdict", "—")
+
+    it = d.get("interf") or {}
+    if it:
+        claims["prefill 抢占项 α（预算内最佳）"] = f"{it.get('alpha', float('nan')):.5f}"
+        claims["prefill 抢占项的结论"] = it.get("verdict", "—")
+    jj = d.get("jit") or {}
+    if jj:
+        claims["同格内 TPOT 抖动（b=1 → b=128 的 CV）"] = (
+            f"{jj.get('by_conc', {}).get('1', {}).get('cv', float('nan'))*100:.1f}% → "
+            f"{jj.get('by_conc', {}).get('128', {}).get('cv', float('nan'))*100:.1f}%")
 
     cnt = d.get("counts") or {}
     if cnt:
