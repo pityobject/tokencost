@@ -249,6 +249,10 @@ def load_inputs():
     _p = RESULTS / "csrv_linearity.json"
     if _p.exists():
         cslin = json.loads(_p.read_text(encoding="utf-8"))
+    bterm = {}
+    _p = RESULTS / "batch_term_trial.json"
+    if _p.exists():
+        bterm = json.loads(_p.read_text(encoding="utf-8"))
     kvcoef = {}
     _p = RESULTS / "kv_coef_check.json"
     if _p.exists():
@@ -283,7 +287,8 @@ def load_inputs():
                 fit=fit, verify=ver, n_scripts=len(codes), pois=pois,
                 var=var, tails=tails, byq=byq, counts=counts,
                 clock=clock, bim=bim, mixed=mixed, mt=mt, pops=pops,
-                dbound=dbound, cv=cv, cslin=cslin, tflip=tflip, kvcoef=kvcoef)
+                dbound=dbound, cv=cv, cslin=cslin, tflip=tflip,
+                kvcoef=kvcoef, bterm=bterm)
 
 
 def _pops_n(d, name):
@@ -500,6 +505,11 @@ def build_claims(d):
             f"{kv.get('ratio_median', float('nan')):.2f}×")
         claims["KV 系数检验判定"] = kv.get("verdict", "—")
         claims["ctx 本身对 TPOT 的影响"] = kv.get("ctx_verdict", "—")
+
+    bt = d.get("bterm") or {}
+    if bt:
+        claims["第 7 参数 Q（批内 token 预算）"] = f"{bt.get('q_batch', float('nan')):.0f} token"
+        claims["7 参数模型的结论"] = bt.get("verdict", "—")
 
     cnt = d.get("counts") or {}
     if cnt:

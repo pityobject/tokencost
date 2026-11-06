@@ -1,0 +1,34 @@
+{
+  "q_batch": 11308.2,
+  "at_bound": false,
+  "rows": [
+    {
+      "metric": "失效区 TTFT（标定内）",
+      "base": 81.7,
+      "q7": 37.42,
+      "change_pct": -54.2
+    },
+    {
+      "metric": "同族留出探针 TTFT",
+      "base": 13.76,
+      "q7": 19.13,
+      "change_pct": 39.0
+    },
+    {
+      "metric": "core 留出 成本 MAPE",
+      "base": 8.37,
+      "q7": 9.74,
+      "change_pct": 16.3
+    },
+    {
+      "metric": "混合长度 TTFT",
+      "base": 160.3,
+      "q7": 85.03,
+      "change_pct": -47.0
+    }
+  ],
+  "core_base": 8.371,
+  "core_q7": 9.74,
+  "n_improved": 2,
+  "verdict": "❌ 不成立"
+}
