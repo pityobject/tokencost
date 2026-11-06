@@ -96,6 +96,27 @@ def main():
               f"PEAK_pre {r['peak_prefill']/base['peak_prefill']:>5.2f}×"
               f"   {'（同硬件，只变栈 → 可归因于栈）' if same_hw else '（硬件也变了 → 不可单独归因）'}")
 
+    # 【关键】同硬件、不同栈 —— 只有这一组能单独归因于"部署栈"
+    print("\n同一硬件上换部署栈（可单独归因于栈）：")
+    by_hw = {}
+    for r in rows:
+        by_hw.setdefault(r["hw"], []).append(r)
+    found = False
+    for hw, grp in by_hw.items():
+        if len(grp) < 2:
+            continue
+        found = True
+        grp = sorted(grp, key=lambda x: x["c_srv"] or 0)
+        lo, hi = grp[0], grp[-1]
+        print(f"  {hw}：{lo['label']} vs {hi['label']}")
+        print(f"    c_srv   {lo['c_srv']:.3f} vs {hi['c_srv']:.3f} ms  →  "
+              f"相差 {hi['c_srv']/lo['c_srv']:.2f}×")
+        print(f"    BW      {lo['bw']:.0f} vs {hi['bw']:.0f} GB/s")
+        print(f"    B_SAT   {lo['b_sat']:.1f} vs {hi['b_sat']:.1f}")
+        print(f"    结论：同硬件同模型，仅部署栈不同 → c_srv 的差异**可归因于栈**")
+    if not found:
+        print("  （需要同一硬件上有两个后端才有这一组）")
+
     # 有效带宽占标称比例——判断标定是否合理
     print("\n有效带宽占标称值的比例（应落在 55–95%）：")
     for r in rows:

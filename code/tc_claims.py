@@ -535,6 +535,22 @@ def build_claims(d):
             f"{jj.get('by_conc', {}).get('128', {}).get('cv', float('nan'))*100:.1f}%")
 
     be = (d.get("bemp") or {}).get("entries") or []
+
+    # 同硬件、不同栈（A10 上的 llama.cpp vs vLLM）——唯一可归因于栈的一组
+    def _pick(hw, backend_kw):
+        for e in be:
+            if hw in str(e.get("label", "")) and backend_kw in str(e.get("label", "")):
+                return e
+        return None
+
+    _lc = _pick("A10", "llama.cpp")
+    _vl = _pick("A10", "vLLM")
+    if _lc and _vl:
+        claims["同硬件换栈：llama.cpp 的 c_srv"] = f"{_lc['c_srv']:.3f} ms"
+        claims["同硬件换栈：vLLM 的 c_srv"] = f"{_vl['c_srv']:.3f} ms"
+        claims["同硬件换栈：vLLM / llama.cpp"] = f"{_vl['c_srv'] / _lc['c_srv']:.2f}×"
+        claims["同硬件换栈：B_SAT 对比"] = f"{_lc['b_sat']:.1f} vs {_vl['b_sat']:.1f}"
+
     if len(be) >= 2:
         _a, _b = be[0], be[1]
         claims["云端标定：A10 + vLLM 的 c_srv"] = f"{_b['c_srv']:.3f} ms"

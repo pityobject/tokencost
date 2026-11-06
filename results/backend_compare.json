@@ -13,6 +13,18 @@
       "n": 68
     },
     {
+      "label": "A10 24GB + llama.cpp",
+      "hw": "A10 24GB",
+      "source": "calib_a10_llamacpp.json",
+      "bw": 471.5369,
+      "c_srv": 1.5285,
+      "peak_prefill": 39.7789,
+      "b_sat": 7.1714,
+      "ovh": 13.2148,
+      "mape": 0.9738,
+      "n": 6
+    },
+    {
       "label": "A10 24GB + vLLM",
       "hw": "A10 24GB",
       "source": "calib_a10_vllm.json",
