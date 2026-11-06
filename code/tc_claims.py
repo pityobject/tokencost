@@ -245,6 +245,10 @@ def load_inputs():
     _p = RESULTS / "cv_summary.json"
     if _p.exists():
         cv = json.loads(_p.read_text(encoding="utf-8"))
+    cslin = {}
+    _p = RESULTS / "csrv_linearity.json"
+    if _p.exists():
+        cslin = json.loads(_p.read_text(encoding="utf-8"))
 
     # ---- 三套数据口径（复核第 12 轮提的第 4 条）----
     # 原始行 / 去重行 / 对外口径，三者不同，必须在一处讲清。
@@ -264,7 +268,7 @@ def load_inputs():
                 fit=fit, verify=ver, n_scripts=len(codes), pois=pois,
                 var=var, tails=tails, byq=byq, counts=counts,
                 clock=clock, bim=bim, mixed=mixed, mt=mt, pops=pops,
-                dbound=dbound, cv=cv)
+                dbound=dbound, cv=cv, cslin=cslin)
 
 
 def build_claims(d):
@@ -425,6 +429,17 @@ def build_claims(d):
             f"{cvv.get('random_p95', float('nan')):.2f}%]")
         claims["交叉验证：设计划分的增益"] = (
             f"{-(cvv.get('shift_vs_designed', 0.0)):.2f} pp（相对随机中位）")
+
+    cl = d.get("cslin") or {}
+    if cl:
+        claims["c_srv 线性性（高并发/低并发 隐含值之比）"] = (
+            f"{cl.get('mean_high_over_low', float('nan')):.2f}×")
+        claims["c_srv 线性性判定"] = cl.get("verdict", "—")
+        _m7 = (cl.get("models") or {}).get("7B") or {}
+        if _m7:
+            claims["7B 的隐含 c_srv 最高点（b 扫描）"] = (
+                f"{max(_m7['implied_by_conc'].values()):.2f} ms"
+                f"（最低 {min(_m7['implied_by_conc'].values()):.2f} ms）")
 
     cnt = d.get("counts") or {}
     if cnt:

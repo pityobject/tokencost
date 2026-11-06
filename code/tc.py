@@ -81,6 +81,7 @@ COMMANDS = {
     "multiturn":     ("tc_analyze_multiturn.py", []),
     "decodebound":   ("tc_decode_bound.py", []),
     "cv":            ("tc_cv.py", []),
+    "csrv":          ("tc_check_csrv_linear.py", []),
     "audit":         ("tc_audit.py", []),
     "ci":            ("../scripts/ci.ps1", []),
     "reset":         ("tc_reset_data.py", []),
