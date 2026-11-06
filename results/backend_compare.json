@@ -1,0 +1,29 @@
+{
+  "entries": [
+    {
+      "label": "本机 4060 + llama.cpp",
+      "hw": "RTX 4060 Laptop",
+      "source": "fit.json",
+      "bw": 249.103,
+      "c_srv": 0.7657,
+      "peak_prefill": 31.7735,
+      "b_sat": 13.2036,
+      "ovh": 15.7186,
+      "mape": 8.5812,
+      "n": 68
+    },
+    {
+      "label": "A10 24GB + vLLM",
+      "hw": "A10 24GB",
+      "source": "calib_a10_vllm.json",
+      "bw": 384.903,
+      "c_srv": 0.2729,
+      "peak_prefill": 76.6871,
+      "b_sat": 21.8717,
+      "ovh": 11.8736,
+      "mape": 0.8168,
+      "n": 6
+    }
+  ],
+  "note": "本机与云端改的是「硬件+栈」两个因素，c_srv 的差只能提示不能证明；要证明需 A10 + llama.cpp 这一格"
+}

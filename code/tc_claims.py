@@ -249,6 +249,10 @@ def load_inputs():
     _p = RESULTS / "csrv_linearity.json"
     if _p.exists():
         cslin = json.loads(_p.read_text(encoding="utf-8"))
+    bemp = {}
+    _p = RESULTS / "backend_compare.json"
+    if _p.exists():
+        bemp = json.loads(_p.read_text(encoding="utf-8"))
     interf = {}
     _p = RESULTS / "interference_trial.json"
     if _p.exists():
@@ -296,7 +300,8 @@ def load_inputs():
                 var=var, tails=tails, byq=byq, counts=counts,
                 clock=clock, bim=bim, mixed=mixed, mt=mt, pops=pops,
                 dbound=dbound, cv=cv, cslin=cslin, tflip=tflip,
-                kvcoef=kvcoef, bterm=bterm, interf=interf, jit=jit)
+                kvcoef=kvcoef, bterm=bterm, interf=interf, jit=jit,
+                bemp=bemp)
 
 
 def _pops_n(d, name):
@@ -528,6 +533,13 @@ def build_claims(d):
         claims["同格内 TPOT 抖动（b=1 → b=128 的 CV）"] = (
             f"{jj.get('by_conc', {}).get('1', {}).get('cv', float('nan'))*100:.1f}% → "
             f"{jj.get('by_conc', {}).get('128', {}).get('cv', float('nan'))*100:.1f}%")
+
+    be = (d.get("bemp") or {}).get("entries") or []
+    if len(be) >= 2:
+        _a, _b = be[0], be[1]
+        claims["云端标定：A10 + vLLM 的 c_srv"] = f"{_b['c_srv']:.3f} ms"
+        claims["云端标定：c_srv 相对本机的比值"] = f"{_b['c_srv'] / _a['c_srv']:.2f}×"
+        claims["云端标定：A10 的有效带宽占标称"] = f"{_b['bw'] / 600.0 * 100:.0f}%"
 
     cnt = d.get("counts") or {}
     if cnt:
