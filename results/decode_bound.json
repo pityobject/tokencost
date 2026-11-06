@@ -1,0 +1,112 @@
+{
+  "peak_dec_tflops": 13.15669643299835,
+  "bw_gbs": 249.1297737443015,
+  "ridge_flop_per_byte": 52.8,
+  "all_decode_memory_bound": true,
+  "min_peak_needed_tflops": 0.4,
+  "hardware": {
+    "RTX 4060 Laptop (本机)": [
+      249.1,
+      13.16
+    ],
+    "A10 (云端免费档)": [
+      600.0,
+      125.0
+    ],
+    "A100-40G": [
+      1555.0,
+      312.0
+    ]
+  },
+  "verdict": "decode 在这些 GPU 上结构性访存受限 → PEAK_dec 不可辨识；任何拟合值都只是损失函数的平坦方向",
+  "rows": [
+    {
+      "model": "0.5B",
+      "quant": "q4_k_m",
+      "intensity_flop_per_byte": 1.99,
+      "bytes_per_param": 1.003,
+      "need_peak_tflops": 0.5,
+      "mem_bound": true
+    },
+    {
+      "model": "1.5B",
+      "quant": "q2_k",
+      "intensity_flop_per_byte": 4.09,
+      "bytes_per_param": 0.489,
+      "need_peak_tflops": 1.0,
+      "mem_bound": true
+    },
+    {
+      "model": "1.5B",
+      "quant": "q3_k_m",
+      "intensity_flop_per_byte": 3.33,
+      "bytes_per_param": 0.6,
+      "need_peak_tflops": 0.8,
+      "mem_bound": true
+    },
+    {
+      "model": "1.5B",
+      "quant": "q4_k_m",
+      "intensity_flop_per_byte": 2.76,
+      "bytes_per_param": 0.726,
+      "need_peak_tflops": 0.7,
+      "mem_bound": true
+    },
+    {
+      "model": "1.5B",
+      "quant": "q8_0",
+      "intensity_flop_per_byte": 1.63,
+      "bytes_per_param": 1.23,
+      "need_peak_tflops": 0.4,
+      "mem_bound": true
+    },
+    {
+      "model": "3B",
+      "quant": "q2_k",
+      "intensity_flop_per_byte": 4.49,
+      "bytes_per_param": 0.446,
+      "need_peak_tflops": 1.1,
+      "mem_bound": true
+    },
+    {
+      "model": "3B",
+      "quant": "q3_k_m",
+      "intensity_flop_per_byte": 3.58,
+      "bytes_per_param": 0.558,
+      "need_peak_tflops": 0.9,
+      "mem_bound": true
+    },
+    {
+      "model": "3B",
+      "quant": "q4_k_m",
+      "intensity_flop_per_byte": 2.94,
+      "bytes_per_param": 0.681,
+      "need_peak_tflops": 0.7,
+      "mem_bound": true
+    },
+    {
+      "model": "3B",
+      "quant": "q8_0",
+      "intensity_flop_per_byte": 1.71,
+      "bytes_per_param": 1.17,
+      "need_peak_tflops": 0.4,
+      "mem_bound": true
+    },
+    {
+      "model": "7B",
+      "quant": "q4_k_m",
+      "intensity_flop_per_byte": 3.25,
+      "bytes_per_param": 0.615,
+      "need_peak_tflops": 0.8,
+      "mem_bound": true
+    },
+    {
+      "model": "Llama1B",
+      "quant": "q4_k_m",
+      "intensity_flop_per_byte": 3.07,
+      "bytes_per_param": 0.651,
+      "need_peak_tflops": 0.8,
+      "mem_bound": true
+    }
+  ]
+}

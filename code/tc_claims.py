@@ -237,6 +237,10 @@ def load_inputs():
     _p = RESULTS / "multiturn.json"
     if _p.exists():
         mt = json.loads(_p.read_text(encoding="utf-8"))
+    dbound = {}
+    _p = RESULTS / "decode_bound.json"
+    if _p.exists():
+        dbound = json.loads(_p.read_text(encoding="utf-8"))
 
     # ---- 三套数据口径（复核第 12 轮提的第 4 条）----
     # 原始行 / 去重行 / 对外口径，三者不同，必须在一处讲清。
@@ -255,7 +259,8 @@ def load_inputs():
     return dict(rows=rows, ok=ok, n_cells=n_cells, n_rows=len(ok),
                 fit=fit, verify=ver, n_scripts=len(codes), pois=pois,
                 var=var, tails=tails, byq=byq, counts=counts,
-                clock=clock, bim=bim, mixed=mixed, mt=mt, pops=pops)
+                clock=clock, bim=bim, mixed=mixed, mt=mt, pops=pops,
+                dbound=dbound)
 
 
 def build_claims(d):
@@ -397,6 +402,15 @@ def build_claims(d):
         claims["多轮对话：TPOT MAPE（≤6 轮）"] = f"{mt.get('tpot_mape', float('nan')):.1f}%"
         claims["多轮对话：TTFT MAPE（≤6 轮）"] = f"{mt.get('ttft_mape', float('nan')):.1f}%"
         claims["多轮对话：观测轮数"] = f"{mt.get('n_turns', 0)} 轮 / {mt.get('n_cells', 0)} 格"
+
+    db = d.get("dbound") or {}
+    if db:
+        claims["decode 算力可辨识性"] = (
+            f"结构性不可辨识（算术强度 ≈4 FLOP/byte ＜ 脊点 "
+            f"{db.get('ridge_flop_per_byte', float('nan')):.0f}）")
+        claims["PEAK_dec 的临界算力"] = (
+            f"{db.get('min_peak_needed_tflops', float('nan')):.2f} TFLOP/s"
+            f"（本机 {db.get('peak_dec_tflops', float('nan')):.1f}）")
 
     cnt = d.get("counts") or {}
     if cnt:

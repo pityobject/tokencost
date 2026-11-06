@@ -48,6 +48,9 @@ Write-Host ""
 Write-Host "[CI] 3/7 unit tests ..."
 & $py "tests\test_core.py"
 if ($LASTEXITCODE -ne 0) { $fail = 1 }
+& $py "tests\test_guardrails.py"
+if ($LASTEXITCODE -ne 0) { Write-Host "[FAIL] 护栏测试未通过"; $fail = 1 }
+if ($LASTEXITCODE -ne 0) { $fail = 1 }
 
 Write-Host ""
 Write-Host "[CI] 4/7 doc number lint (warning only) ..."
