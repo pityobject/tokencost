@@ -485,6 +485,24 @@ def build_claims(d):
         claims[_label] = (f"{_r['n_holdout']} 格 · MAPE {_r['mape_cost']:.2f}% · "
                           f"覆盖率 {_r['coverage']*100:.1f}%")
 
+    a10r = {}
+    _p = RESULTS / "a10_repeat_longprompt_summary.json"
+    if _p.exists():
+        a10r = json.loads(_p.read_text(encoding="utf-8"))
+    if a10r:
+        _r = a10r.get("csrv_ratio_range") or []
+        if len(_r) == 2:
+            claims["栈间 c_srv 比值（重复性区间）"] = f"{_r[0]:.1f}–{_r[1]:.1f}×"
+        _rep = a10r.get("repeatability") or {}
+        if "c_srv" in _rep:
+            claims["c_srv 重复性（llama.cpp / vLLM）"] = (
+                f"±{abs(_rep['c_srv']['llamacpp_change_pct']):.0f}% / "
+                f"±{abs(_rep['c_srv']['vllm_change_pct']):.0f}%")
+        _sat = a10r.get("saturation_c16_over_c1") or {}
+        if _sat:
+            claims["长 prompt TTFT 放大（c16/c1，llama.cpp / vLLM）"] = (
+                f"{_sat.get('llamacpp', float('nan')):.2f}× / {_sat.get('vllm', float('nan')):.2f}×")
+
     cvv = d.get("cv") or {}
     if cvv:
         claims["交叉验证：设计划分的 MAPE"] = f"{cvv.get('designed_mape', float('nan')):.2f}%"

@@ -1,0 +1,27 @@
+{
+  "note": "2026-11-06 云端 A10 补测：两栈各重复一次（重复性）+ 长 prompt×高并发（失效区跨栈）",
+  "hardware": "A10 24GB",
+  "calibration": {
+    "llamacpp_run1": {"c_srv": 1.5285488873302522, "bw": 471.536866098183, "peak_prefill": 39.778863482849495, "b_sat": 7.17138524453656, "ovh_ttft": 13.214845342146432, "source": "calib_a10_llamacpp.json"},
+    "llamacpp_run2": {"c_srv": 1.963, "bw": 487.805, "peak_prefill": 39.042, "b_sat": 7.088, "ovh_ttft": 17.525, "source": "云端 rep2 运行（原始输出）"},
+    "vllm_run1": {"c_srv": 0.2729086935109363, "bw": 384.90298254513255, "peak_prefill": 76.6870596041356, "b_sat": 21.871706202456874, "ovh_ttft": 11.873574205888797, "source": "calib_a10_vllm.json"},
+    "vllm_run2": {"c_srv": 0.290, "bw": 382.0, "peak_prefill": 65.1, "b_sat": 14.3, "ovh_ttft": 10.53, "source": "云端 rep2 运行（原始输出）"}
+  },
+  "longprompt": {
+    "L_tokens": 1841,
+    "llamacpp": [
+      {"conc": 1, "ttft": 305.6, "tpot": 14.92},
+      {"conc": 4, "ttft": 645.8, "tpot": 23.95},
+      {"conc": 8, "ttft": 665.1, "tpot": 38.85},
+      {"conc": 16, "ttft": 711.3, "tpot": 67.75}
+    ],
+    "vllm": [
+      {"conc": 1, "ttft": 187.4, "tpot": 16.55},
+      {"conc": 4, "ttft": 467.2, "tpot": 20.49},
+      {"conc": 8, "ttft": 841.6, "tpot": 24.80},
+      {"conc": 16, "ttft": 1591.4, "tpot": 33.65}
+    ],
+    "note": "这两组标定只用 4 个同长度点，参数退化（c_srv/b_sat 不可分），因此只取实测值，不引用其拟合参数"
+  },
+  "spec": {"weight_bytes": 6178317312, "n_params": 3080000000}
+}

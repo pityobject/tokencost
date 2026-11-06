@@ -1,0 +1,97 @@
+{
+  "repeatability": {
+    "c_srv": {
+      "llamacpp_change_pct": 28.4,
+      "vllm_change_pct": 6.3
+    },
+    "bw": {
+      "llamacpp_change_pct": 3.5,
+      "vllm_change_pct": -0.8
+    },
+    "peak_prefill": {
+      "llamacpp_change_pct": -1.9,
+      "vllm_change_pct": -15.1
+    },
+    "b_sat": {
+      "llamacpp_change_pct": -1.2,
+      "vllm_change_pct": -34.6
+    },
+    "ovh_ttft": {
+      "llamacpp_change_pct": 32.6,
+      "vllm_change_pct": -11.3
+    }
+  },
+  "csrv_ratio_range": [
+    5.27,
+    7.19
+  ],
+  "csrv_ratio_pairs": [
+    5.6,
+    5.27,
+    7.19,
+    6.77
+  ],
+  "longprompt_rows": [
+    {
+      "stack": "llama.cpp",
+      "conc": 1,
+      "ttft_meas": 305.6,
+      "ttft_pred": 299.8,
+      "ttft_err_pct": -1.9
+    },
+    {
+      "stack": "llama.cpp",
+      "conc": 4,
+      "ttft_meas": 645.8,
+      "ttft_pred": 1159.7,
+      "ttft_err_pct": 79.6
+    },
+    {
+      "stack": "llama.cpp",
+      "conc": 8,
+      "ttft_meas": 665.1,
+      "ttft_pred": 2069.9,
+      "ttft_err_pct": 211.2
+    },
+    {
+      "stack": "llama.cpp",
+      "conc": 16,
+      "ttft_meas": 711.3,
+      "ttft_pred": 2082.2,
+      "ttft_err_pct": 192.7
+    },
+    {
+      "stack": "vLLM",
+      "conc": 1,
+      "ttft_meas": 187.4,
+      "ttft_pred": 160.0,
+      "ttft_err_pct": -14.6
+    },
+    {
+      "stack": "vLLM",
+      "conc": 4,
+      "ttft_meas": 467.2,
+      "ttft_pred": 604.5,
+      "ttft_err_pct": 29.4
+    },
+    {
+      "stack": "vLLM",
+      "conc": 8,
+      "ttft_meas": 841.6,
+      "ttft_pred": 1197.1,
+      "ttft_err_pct": 42.2
+    },
+    {
+      "stack": "vLLM",
+      "conc": 16,
+      "ttft_meas": 1591.4,
+      "ttft_pred": 2382.3,
+      "ttft_err_pct": 49.7
+    }
+  ],
+  "saturation_c16_over_c1": {
+    "llamacpp": 2.33,
+    "vllm": 8.49
+  },
+  "verdict": "长 prompt × 高并发：两栈都被模型高估（偏保守），因此该失效区属于**模型形式**，不是某个栈的实现问题"
+}
