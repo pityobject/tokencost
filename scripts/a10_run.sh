@@ -20,7 +20,10 @@ set -euo pipefail
 
 # DSW 的"工作目录"是 /mnt/systemdisk（`$HOME=/root` 是容器覆盖层，重启即丢）
 if [ -z "${WORKDIR:-}" ]; then
-  if [ -d /mnt/systemdisk ] && [ -w /mnt/systemdisk ]; then
+  # DSW 实际把工作目录挂在 /mnt/workspace（控制台里可能显示为"系统盘"）
+  if [ -d /mnt/workspace ] && [ -w /mnt/workspace ]; then
+    WORKDIR=/mnt/workspace/tc_a10
+  elif [ -d /mnt/systemdisk ] && [ -w /mnt/systemdisk ]; then
     WORKDIR=/mnt/systemdisk/tc_a10
   else
     WORKDIR="$HOME/tc_a10"
