@@ -384,6 +384,10 @@ def show_kv_cliff():
     for (m, q, c), rs in sorted(groups.items()):
         by_ctx = {}
         for r in rs:
+            # 【守卫】新加的高并发格或失败行可能缺 throughput_tps，
+            # 直接下标会 KeyError 把整个 analyze 打断（历史上返回过退出码 1）。
+            if "throughput_tps" not in r or pd.isna(r["throughput_tps"]):
+                continue
             by_ctx.setdefault(r["ctx"], []).append(r["throughput_tps"])
         if 512 not in by_ctx or len(by_ctx) < 2:
             continue

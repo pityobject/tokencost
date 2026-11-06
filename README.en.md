@@ -33,11 +33,11 @@ TTFT(L) = max( W/BW , 2·P·L·min(b, B_SAT)/PEAK_pre ) + c_srv·b + ovh
 
 | metric | value |
 |---|---|
-| Held-out cost MAPE (core, 12 calib → 68 unseen cells) | **8.59%** |
+| Held-out cost MAPE (core, 12 calib → 68 unseen cells) | **8.90%** |
 | — same, at the calibrated concurrencies | **5.8%** |
 | — at uncalibrated concurrencies | 11.5% |
-| — random 12-point re-splits (30 runs, 5–95%) | **8.5%–12.3%** |
-| Prediction-interval coverage (target 90%) | 86.8% |
+| — random 12-point re-splits (30 runs, 5–95%) | **9.1%–13.9%** |
+| Prediction-interval coverage (target 90%) | 84.2% |
 | Decision regret vs oracle (16 scenarios) | **0.0%** (random baseline 274%) |
 | Cross-family transfer (Llama-3.2-1B, zero recalibration) | 11.6% |
 
@@ -120,3 +120,4 @@ scripts/   ci.ps1 (8-step CI) and remote-GPU runbook
 ## License
 
 MIT. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+

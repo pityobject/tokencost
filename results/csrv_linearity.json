@@ -1,12 +1,23 @@
 {
   "fitted_csrv": 0.766,
-  "mean_high_over_low": 1.361,
-  "verdict": "**超线性**：高并发的每步开销更大，线性项会低估",
+  "mean_high_over_low": 1.206,
+  "verdict": "**中段鼓包**：b≈4–12 的隐含开销比两端高 1.61×，而 48–128 与低并发几乎持平（0.98×）→ 线性形式在**中段**失效",
   "models": {
+    "0.5B": {
+      "implied_by_conc": {
+        "1": 0.895
+      },
+      "intercept_ms": 0.447,
+      "slope_ms": 0.447,
+      "r2": NaN,
+      "low_conc_csrv": 0.895,
+      "high_conc_csrv": null,
+      "high_over_low": null
+    },
     "1.5B": {
       "implied_by_conc": {
         "1": 0.77,
-        "2": 0.539,
+        "2": 0.538,
         "4": 0.69,
         "8": 0.782,
         "12": 0.674,
@@ -17,45 +28,48 @@
       "intercept_ms": 0.268,
       "slope_ms": 0.647,
       "r2": 0.969,
-      "low_conc_csrv": 0.611,
+      "low_conc_csrv": 0.61,
       "high_conc_csrv": 0.653,
       "high_over_low": 1.07
     },
     "3B": {
       "implied_by_conc": {
-        "1": 0.523,
-        "2": 0.655,
-        "4": 0.725,
-        "8": 1.019,
+        "1": 0.513,
+        "2": 0.654,
+        "4": 1.059,
+        "8": 1.342,
         "12": 0.907,
-        "16": 0.842,
+        "16": 0.778,
         "24": 0.772,
-        "32": 0.794
+        "32": 0.794,
+        "48": 0.71,
+        "64": 0.723,
+        "128": 0.839
       },
-      "intercept_ms": 0.223,
-      "slope_ms": 0.814,
-      "r2": 0.953,
-      "low_conc_csrv": 0.655,
-      "high_conc_csrv": 0.791,
-      "high_over_low": 1.208
+      "intercept_ms": 0.445,
+      "slope_ms": 0.802,
+      "r2": 0.985,
+      "low_conc_csrv": 0.818,
+      "high_conc_csrv": 0.774,
+      "high_over_low": 0.946
     },
     "7B": {
       "implied_by_conc": {
-        "1": 0.395,
-        "2": 0.549,
-        "4": 1.161,
+        "1": 0.393,
+        "2": 0.548,
+        "4": 1.164,
         "8": 2.407,
         "12": 1.384,
         "16": 1.181,
         "24": 0.802,
         "32": 0.766
       },
-      "intercept_ms": 2.843,
-      "slope_ms": 0.851,
+      "intercept_ms": 2.851,
+      "slope_ms": 0.85,
       "r2": 0.729,
-      "low_conc_csrv": 0.549,
-      "high_conc_csrv": 0.991,
-      "high_over_low": 1.805
+      "low_conc_csrv": 0.548,
+      "high_conc_csrv": 0.99,
+      "high_over_low": 1.808
     }
   }
 }

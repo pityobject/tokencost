@@ -117,8 +117,26 @@ def main():
 
     ratios = [v for v in best if np.isfinite(v)]
     mean_ratio = float(np.mean(ratios)) if ratios else float("nan")
-    verdict = ("线性成立（高低并发比值 ≈1）" if mean_ratio < 1.15
-               else "**超线性**：高并发的每步开销更大，线性项会低估")
+    # 【判定要区分"上端翘"和"中段鼓包"】
+    # 补到 c48/c64/c128 后发现：上端是平的（0.71–0.84），鼓包只在 b≈4–12。
+    # 所以不能只用"高/低并发均值比"，要看中间段是否显著高于两端。
+    mid, ends = [], []
+    for m, g in t.groupby("model"):
+        by = g.groupby("conc")["implied_csrv"].median()
+        for b, v in by.items():
+            (mid if 4 <= b <= 12 else ends).append(float(v))
+    mid_ratio = (sum(mid) / len(mid)) / (sum(ends) / len(ends)) if mid and ends else float("nan")
+    top = t[t["conc"] >= 48]["implied_csrv"].median()
+    low = t[t["conc"] <= 4]["implied_csrv"].median()
+    top_ratio = (top / low) if low else float("nan")
+
+    if mid_ratio > 1.2 and top_ratio < 1.1:
+        verdict = (f"**中段鼓包**：b≈4–12 的隐含开销比两端高 {mid_ratio:.2f}×，"
+                   f"而 48–128 与低并发几乎持平（{top_ratio:.2f}×）→ 线性形式在**中段**失效")
+    elif mean_ratio >= 1.15:
+        verdict = "**超线性**：并发越高每步越贵，线性项在高并发会低估"
+    else:
+        verdict = "线性成立（各段隐含值接近）"
     print(f"\n  平均比值 {mean_ratio:.2f}× → {verdict}")
 
     ax.axhline(float(fit["c_srv"]), color="crimson", ls="--", lw=1.2,
@@ -143,3 +161,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
