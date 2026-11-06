@@ -57,6 +57,11 @@ def run_cell(model, quant, ctx, conc, repeats=None, save_requests=True,
     repeats = repeats or cfg.REPEATS
     # requests 显式给定时用它：做"波次对照"和"固定波次"实验必须绕开默认值
     n_req = requests if requests else cfg.requests_per_repeat(conc)
+    # 【守卫】请求数少于并发数 = 数组不满一波，测到的是启动瞬间
+    if n_req < conc:
+        raise SystemExit(
+            f"[无效实验] requests={n_req} < 并发={conc}：连一波都填不满，"
+            f"测到的是启动瞬间而非稳态。至少给 --requests {max(2 * conc, conc)}。")
     # 提示长度可覆盖：TTFT 的 prefill 项随 L 线性增长，而原数据集只有一种长度，
     # 不做这个维度就永远在把"长文档场景"当外推。
     prompt_tokens = int(prompt_tokens or cfg.PROMPT_TOKENS)
@@ -325,6 +330,9 @@ def main():
     ap.add_argument("ctx", type=int)
     ap.add_argument("conc", type=int)
     ap.add_argument("--repeats", type=int, default=1, help="调试时用 1 轮")
+    ap.add_argument("--requests", type=int, default=None,
+                    help="该格发出的请求总数（默认按并发自适应；高并发必须 ≥ 并发数，"
+                         "否则测不到稳态）")
     ap.add_argument("--turns", type=int, default=0,
                     help="多轮对话的轮数；>1 时每轮产出一行（repeat=轮次）")
     ap.add_argument("--length-mix", default=None,
@@ -338,11 +346,12 @@ def main():
     print(f"=== 单格实验：{args.model} {args.quant} ctx={args.ctx} 并发={args.conc} ===")
     if args.turns and args.turns > 1:
         rows = run_cell_turns(args.model, args.quant, args.ctx, args.conc,
-                              args.turns, prompt_tokens=args.prompt_tokens)
+                              args.turns, prompt_tokens=args.prompt_tokens,
+                              requests=args.requests)
     else:
         rows = run_cell(args.model, args.quant, args.ctx, args.conc,
                         repeats=args.repeats, prompt_tokens=args.prompt_tokens,
-                        length_mix=args.length_mix)
+                        length_mix=args.length_mix, requests=args.requests)
     print("\n结果：")
     for r in rows:
         for k, v in r.items():
