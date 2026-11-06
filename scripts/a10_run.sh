@@ -28,6 +28,10 @@ GEN=128
 REPO_URL="https://gitee.com/pityobject/tokencost.git"
 
 PHASE="${1:-all}"
+# 硬件标签：在 A10 与 V100 上用同一脚本时，用于区分文件名与报告里的 hardware 字段
+HW_LABEL="${HW_LABEL:-A10 24GB}"
+# GPU 层数：99 = 全部卸载到 GPU。**必须显式给**，否则可能测到 CPU 推理而不报错。
+NGL="${NGL:-99}"
 mkdir -p "$WORKDIR"/{models,logs,results}
 cd "$WORKDIR"
 
@@ -131,7 +135,7 @@ if [ "$PHASE" = "all" ] || [ "$PHASE" = "llamacpp" ]; then
 
   log "3. 起 llama.cpp（--ctx-size = $PER_SLOT × $SLOTS = $((PER_SLOT*SLOTS))）"
   "$WORKDIR/llama.cpp/build/bin/llama-server" \
-    -m "$GGUF_PATH" \
+    -m "$GGUF_PATH" -ngl "$NGL" \
     --ctx-size $((PER_SLOT*SLOTS)) --parallel "$SLOTS" \
     --host 127.0.0.1 --port 8090 \
     > "$WORKDIR/logs/llamacpp.log" 2>&1 &
@@ -146,13 +150,21 @@ if [ "$PHASE" = "all" ] || [ "$PHASE" = "llamacpp" ]; then
   # 【必须校验 ctx 语义】不同 build 的 -c 含义不同（本项目踩过，见 F8）：
   #   切成并发：n_ctx_slot = -c / --parallel   → 传 PER_SLOT*SLOTS
   #   不切分  ：n_ctx_slot = -c                → 必须传 PER_SLOT，否则显存爆
+  # 【必须校验】模型是否真的卸载到 GPU。llama.cpp 在显存放不下或参数缺失时会回退 CPU，
+  # 而 CPU 推理的数字"看起来正常"，只是慢一个数量级——不报错，只换机器。
+  if ! grep -qiE "offload|CUDA0 model|using device CUDA" "$WORKDIR/logs/llamacpp.log"; then
+    tail -30 "$WORKDIR/logs/llamacpp.log"
+    die "日志里看不到 CUDA 卸载迹象——可能跑在 CPU 上，拒绝继续"
+  fi
+  echo "GPU 卸载确认：$(grep -iE 'offload|CUDA0 model' "$WORKDIR/logs/llamacpp.log" | tail -1)"
+
   SLOT_CTX=$(grep -oE "n_ctx_slot *= *[0-9]+" "$WORKDIR/logs/llamacpp.log" | grep -oE "[0-9]+" | head -1)
   echo "日志里的 n_ctx_slot = ${SLOT_CTX:-（未找到）}，期望 ≈ $PER_SLOT"
   if [ -n "${SLOT_CTX:-}" ] && [ "$SLOT_CTX" -gt $((PER_SLOT * 2)) ]; then
     echo "⚠️ 该 build 不按并发切分 ctx → 用 -c $PER_SLOT 重启"
     kill $SRV 2>/dev/null || true; sleep 3
     "$WORKDIR/llama.cpp/build/bin/llama-server" \
-      -m "$GGUF_PATH" --ctx-size "$PER_SLOT" --parallel "$SLOTS" \
+      -m "$GGUF_PATH" -ngl "$NGL" --ctx-size "$PER_SLOT" --parallel "$SLOTS" \
       --host 127.0.0.1 --port 8090 > "$WORKDIR/logs/llamacpp.log" 2>&1 &
     SRV=$!
     for _ in $(seq 1 120); do curl -sf http://127.0.0.1:8090/health >/dev/null && break; sleep 2; done
@@ -160,9 +172,9 @@ if [ "$PHASE" = "all" ] || [ "$PHASE" = "llamacpp" ]; then
 
   log "4. 标定 llama.cpp（约 5–10 分钟）"
   run_profile "http://127.0.0.1:8090/v1" "$WORKDIR/spec_gguf.json" \
-              "$WORKDIR/results/calib_a10_llamacpp.json" \
+              "$WORKDIR/results/calib_llamacpp.json" \
               "$WORKDIR/logs/profile_llamacpp.log" \
-              --hardware "A10 24GB / llama.cpp"
+              --hardware "$HW_LABEL / llama.cpp"
 
   kill $SRV 2>/dev/null || true
   sleep 5
@@ -171,6 +183,10 @@ fi
 # ---------------------------------------------------------------- 3. vLLM
 if [ "$PHASE" = "all" ] || [ "$PHASE" = "vllm" ]; then
   log "5. 检查 vLLM（PAI 镜像常已预装）"
+  if [ "$HW_LABEL" != "A10 24GB" ]; then
+    echo "⚠️ 当前硬件标签是「$HW_LABEL」。V100(sm70) 不被新版 vLLM 支持，"
+    echo "   若下面起不来，属预期——A10 已经拿到 vLLM 数据，这里只跑 llama.cpp 即可。"
+  fi
   if ! python3 -c "import vllm" 2>/dev/null; then
     python3 -m pip install -q vllm
   fi
@@ -196,9 +212,9 @@ if [ "$PHASE" = "all" ] || [ "$PHASE" = "vllm" ]; then
 
   log "7. 标定 vLLM（约 5–10 分钟）"
   run_profile "http://127.0.0.1:8081/v1" "$WORKDIR/spec_hf.json" \
-              "$WORKDIR/results/calib_a10_vllm.json" \
+              "$WORKDIR/results/calib_vllm.json" \
               "$WORKDIR/logs/profile_vllm.log" \
-              --wire-model qwen3b --hardware "A10 24GB / vLLM"
+              --wire-model qwen3b --hardware "$HW_LABEL / vLLM"
 
   kill $SRV 2>/dev/null || true
 fi
@@ -209,8 +225,8 @@ python3 - <<'PY'
 import json, os, pathlib
 d = pathlib.Path(os.environ["WORKDIR"]) / "results"
 rows = []
-for name, tag in (("calib_a10_llamacpp.json", "llama.cpp"),
-                  ("calib_a10_vllm.json", "vLLM")):
+for name, tag in (("calib_llamacpp.json", "llama.cpp"),
+                  ("calib_vllm.json", "vLLM")):
     p = d / name
     if p.exists():
         rows.append((tag, json.loads(p.read_text(encoding="utf-8"))))
