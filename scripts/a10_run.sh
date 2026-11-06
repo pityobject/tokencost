@@ -12,7 +12,7 @@
 #   bash a10_run.sh vllm         # 只跑 vLLM
 #
 # 约定（两个后端必须一致，改一处就要改另一处）：
-#   每槽上下文 PER_SLOT=2112   （够 2048 prompt + 128 生成）
+#   每槽上下文 PER_SLOT=2304   （2048 prompt + 128 生成 + 128 余量；2112 会截断 2048 点）
 #   槽位上限   SLOTS=32        （llama.cpp --parallel / vLLM --max-num-seqs）
 #   生成长度   GEN=128         （模型的设计点，见 失败与修复记录 F10）
 # =============================================================================
@@ -22,7 +22,7 @@ WORKDIR="${WORKDIR:-$HOME/tc_a10}"
 export WORKDIR
 MODEL_GGUF_FILE="qwen2.5-3b-instruct-f16.gguf"
 
-PER_SLOT=2112
+PER_SLOT=2304
 SLOTS=32
 GEN=128
 REPO_URL="https://gitee.com/pityobject/tokencost.git"
@@ -43,6 +43,8 @@ die() { echo -e "\n\033[1;31m❌ $*\033[0m"; exit 1; }
 log "0. 检查环境与依赖"
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader \
   || die "看不到 GPU。确认实例规格是 gn7i（A10）"
+nvidia-smi --query-gpu=clocks.sm,clocks.max.sm,power.draw,temperature.gpu \
+  --format=csv,noheader | tee "$WORKDIR/logs/clock_start.txt"
 
 if [ ! -d "$WORKDIR/tokencost" ]; then
   git clone "$REPO_URL" "$WORKDIR/tokencost"
@@ -57,6 +59,9 @@ python3 -m pip install -q --upgrade pip
 python3 -m pip install -q modelscope
 
 # ---------------------------------------------------------------- 1. 下模型
+log "0.5 链路自检（不连服务器，验证 tc_profile 本身可用）"
+( cd "$WORKDIR/tokencost/code" && python3 tc_profile.py --selftest )   || die "tc_profile 自检失败——后面所有数字都不可信，先修环境"
+
 log "1. 下载模型（HF fp16 与 GGUF F16 各一份，精度相同）"
 python3 - <<'PY'
 import os
@@ -76,25 +81,38 @@ fi
 WEIGHT_BYTES=$(stat -c%s "$GGUF_PATH")
 echo "GGUF: $GGUF_PATH  ($((WEIGHT_BYTES/1024/1024)) MB)"
 
-# 两个后端共用同一份 spec（同模型同精度 → weight_bytes 相同）
-cat > "$WORKDIR/spec_fp16.json" <<JSON
+# 【不要共用】GGUF 文件含对齐/元数据，比 HF safetensors 大几个百分点；
+# 两个后端各用自己那份 weight_bytes，否则 BW 会把封装开销算进去。
+HF_BYTES=$(python3 - <<'PY'
+import glob, os
+files = glob.glob(os.path.join(os.environ["WORKDIR"], "models", "hf", "*.safetensors"))
+print(sum(os.path.getsize(f) for f in files))
+PY
+)
+echo "GGUF F16: $((WEIGHT_BYTES/1024/1024)) MB | HF safetensors: $((HF_BYTES/1024/1024)) MB"
+
+make_spec() {  # $1=out $2=weight_bytes
+  cat > "$1" <<JSON
 {
   "model": {
     "name": "Qwen3B", "quant": "fp16",
-    "weight_bytes": ${WEIGHT_BYTES},
+    "weight_bytes": $2,
     "n_params": 3080000000,
     "n_layers": 36, "n_kv_heads": 2, "head_dim": 128
   }
 }
 JSON
-echo "spec: $WORKDIR/spec_fp16.json"
+}
+make_spec "$WORKDIR/spec_gguf.json" "$WEIGHT_BYTES"
+make_spec "$WORKDIR/spec_hf.json"   "$HF_BYTES"
+echo "spec: $WORKDIR/spec_gguf.json（llama.cpp） / $WORKDIR/spec_hf.json（vLLM）"
 
 # 跑一条标定：失败就打印日志尾部并退出（不要静默通过）
 run_profile() {
-  local url="$1" out="$2" logf="$3"; shift 3
+  local url="$1" spec="$2" out="$3" logf="$4"; shift 4
   ( cd "$WORKDIR/tokencost/code" && \
     python3 tc_profile.py --base-url "$url" \
-      --spec-json "$WORKDIR/spec_fp16.json" \
+      --spec-json "$spec" \
       --slots "$SLOTS" --per-slot-ctx "$PER_SLOT" --gen "$GEN" \
       --out "$out" "$@" > "$logf" 2>&1 ) || {
     echo "❌ 标定失败，日志尾部："; tail -40 "$logf"; exit 1; }
@@ -125,8 +143,23 @@ if [ "$PHASE" = "all" ] || [ "$PHASE" = "llamacpp" ]; then
   done
   [ "$ok" = 1 ] || { kill $SRV 2>/dev/null || true; tail -30 "$WORKDIR/logs/llamacpp.log"; die "llama.cpp 没起来"; }
 
+  # 【必须校验 ctx 语义】不同 build 的 -c 含义不同（本项目踩过，见 F8）：
+  #   切成并发：n_ctx_slot = -c / --parallel   → 传 PER_SLOT*SLOTS
+  #   不切分  ：n_ctx_slot = -c                → 必须传 PER_SLOT，否则显存爆
+  SLOT_CTX=$(grep -oE "n_ctx_slot *= *[0-9]+" "$WORKDIR/logs/llamacpp.log" | grep -oE "[0-9]+" | head -1)
+  echo "日志里的 n_ctx_slot = ${SLOT_CTX:-（未找到）}，期望 ≈ $PER_SLOT"
+  if [ -n "${SLOT_CTX:-}" ] && [ "$SLOT_CTX" -gt $((PER_SLOT * 2)) ]; then
+    echo "⚠️ 该 build 不按并发切分 ctx → 用 -c $PER_SLOT 重启"
+    kill $SRV 2>/dev/null || true; sleep 3
+    "$WORKDIR/llama.cpp/build/bin/llama-server" \
+      -m "$GGUF_PATH" --ctx-size "$PER_SLOT" --parallel "$SLOTS" \
+      --host 127.0.0.1 --port 8090 > "$WORKDIR/logs/llamacpp.log" 2>&1 &
+    SRV=$!
+    for _ in $(seq 1 120); do curl -sf http://127.0.0.1:8090/health >/dev/null && break; sleep 2; done
+  fi
+
   log "4. 标定 llama.cpp（约 5–10 分钟）"
-  run_profile "http://127.0.0.1:8090/v1" \
+  run_profile "http://127.0.0.1:8090/v1" "$WORKDIR/spec_gguf.json" \
               "$WORKDIR/results/calib_a10_llamacpp.json" \
               "$WORKDIR/logs/profile_llamacpp.log" \
               --hardware "A10 24GB / llama.cpp"
@@ -162,7 +195,7 @@ if [ "$PHASE" = "all" ] || [ "$PHASE" = "vllm" ]; then
   [ "$ok" = 1 ] || { kill $SRV 2>/dev/null || true; tail -40 "$WORKDIR/logs/vllm.log"; die "vLLM 没起来"; }
 
   log "7. 标定 vLLM（约 5–10 分钟）"
-  run_profile "http://127.0.0.1:8081/v1" \
+  run_profile "http://127.0.0.1:8081/v1" "$WORKDIR/spec_hf.json" \
               "$WORKDIR/results/calib_a10_vllm.json" \
               "$WORKDIR/logs/profile_vllm.log" \
               --wire-model qwen3b --hardware "A10 24GB / vLLM"
@@ -196,6 +229,9 @@ if rows:
     print("\n判读：bw / peak 应接近（同一张卡）；")
     print("      c_srv 若差 >30% → 证明『每步服务开销是部署栈属性』。")
 PY
+
+nvidia-smi --query-gpu=clocks.sm,clocks.max.sm,power.draw,temperature.gpu \
+  --format=csv,noheader | tee "$WORKDIR/logs/clock_end.txt"
 
 echo -e "\n全部完成。结果在 $WORKDIR/results/，日志在 $WORKDIR/logs/"
 echo "把上面这张表贴回来即可。"

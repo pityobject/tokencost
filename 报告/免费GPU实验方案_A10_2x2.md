@@ -84,6 +84,24 @@ python code/tc_profile.py --base-url http://127.0.0.1:8080/v1 \
 
 ## 四、具体操作（DSW 上）
 
+### 4.0 一条命令跑完（推荐）
+
+仓库里已有对齐好的脚本，**不需要手抄命令**：
+
+```bash
+cd ~ && git clone https://gitee.com/pityobject/tokencost.git
+cd tokencost && bash scripts/a10_run.sh          # 全流程（约 70 分钟）
+#   bash scripts/a10_run.sh llamacpp              # 只跑组 ①
+#   bash scripts/a10_run.sh vllm                  # 只跑组 ②（新信息，额度紧就先跑这个）
+```
+
+脚本会依次：校验 GPU → 跑 `tc_profile --selftest`（链路闸门）→ 下模型 →
+**分别生成 GGUF / HF 两份 spec** → 起服务 → **校验 `n_ctx_slot` 语义并按需重启** →
+标定 → 打印两后端参数对照表。日志在 `logs/`，结果在 `results/`。
+
+---
+
+
 ### 4.1 建实例
 
 1. PAI 控制台 → 工作空间 → 交互式建模（DSW）→ 创建实例
@@ -105,7 +123,8 @@ modelscope download --model Qwen/Qwen2.5-3B-Instruct-GGUF \
 
 # 起服务（注意 -c 与 -np 的语义：本 build 是 n_ctx_slot = ctx）
 ~/llama.cpp/build/bin/llama-server -m ~/models/qwen2.5-3b-instruct-q4_k_m.gguf \
-  -c 8192 -np 8 --host 0.0.0.0 --port 8080 &
+  # 对齐口径：每槽 2304 × 32 槽 = 73728（脚本会自动校验 ctx 语义）
+  -c 73728 --parallel 32 --host 0.0.0.0 --port 8080 &
 
 # 标定
 python code/tc_profile.py --base-url http://127.0.0.1:8080/v1 \
@@ -123,7 +142,8 @@ modelscope download --model Qwen/Qwen2.5-3B-Instruct --local_dir ~/hf/qwen3b
 # 起 OpenAI 兼容服务
 python -m vllm.entrypoints.openai.api_server \
   --model ~/hf/qwen3b --served-model-name qwen3b \
-  --max-model-len 8192 --port 8081 &
+  # 对齐口径：每序列 2304、并发 32（与 llama.cpp 的 --parallel 一致）
+  --max-model-len 2304 --max-num-seqs 32 --port 8081 &
 
 python code/tc_profile.py --base-url http://127.0.0.1:8081/v1 \
   --wire-model qwen3b --spec-json ~/qwen3b_spec.json \
@@ -137,6 +157,13 @@ python code/tc_profile.py --base-url http://127.0.0.1:8081/v1 \
 
 `llama.cpp` 的 `--ctx-size` 语义在**不同 build 之间不一样**（本项目实测是 `n_ctx_slot = ctx`，不按并发切分）。
 vLLM 又是另一套（`--max-model-len` 是每序列上限）。
+
+**脚本已经自动做了这件事**：启动后读日志里的 `n_ctx_slot`，若发现它等于总 ctx
+（大于 `PER_SLOT×2`）就自动用 `-c PER_SLOT` 重启。
+
+另外两条同样重要：
+1. **两个后端不能用同一份 `weight_bytes`**——GGUF 文件含对齐/元数据，比 HF safetensors 大几个百分点；脚本会分别生成 `spec_gguf.json` / `spec_hf.json`。
+2. **先跑 `tc_profile.py --selftest`**：不连服务器的链路自检，不过就别开始测。
 
 **所以每次都要先看日志确认**，并且：
 - `tc_profile` 会用**服务端返回的 `prompt_tokens`** 作为真实 L（不信任名义值）；
