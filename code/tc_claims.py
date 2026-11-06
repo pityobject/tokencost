@@ -286,6 +286,13 @@ def load_inputs():
                 dbound=dbound, cv=cv, cslin=cslin, tflip=tflip, kvcoef=kvcoef)
 
 
+def _pops_n(d, name):
+    """从 populations.json 取格数（"68 格"），便于在文档里做 must-contain。"""
+    r = (d.get("pops") or {}).get(name)
+    if not r:
+        return ""
+    return f"{int(r['n_holdout'])}"
+
 def _pct_fit(fit, key):
     """从 fit.json 读一个百分比字段；缺失直接报错（不要兜底成固定值）。
 
@@ -678,10 +685,10 @@ def check(claims, d):
         # 复核 3.1：文档写 68、实际 76，却没有检查项能抓到
         ("留出集格数", _need(d["fit"], "n_holdout"),
          r"(?:留出|未见)(?:集)?\s*(\d+)\s*(?:个|格)"),
-        # 三套非默认口径也必须能在文档里核对（复核两轮都抓到 valid/all 漂移）。
-        # 只要求"格数"这个 token 出现——文档里是表格行，整串不可能逐字一致。
-        ("valid 口径格数", _pops_n(d, "valid"), None),
-        ("all 口径格数", _pops_n(d, "all"), None),
+        # 三套非默认口径：**按表格行抓数**（文档里是 "| `valid`（…） | 84 | 9.22% |…"）。
+        # must-contain 用整串或 "84 格" 都匹配不上——那是复核两轮都漏掉 valid/all 漂移的原因。
+        ("valid 口径格数", _pops_n(d, "valid"), r"`valid`[^\n]*?\|\s*(\d+)\s*\|"),
+        ("all 口径格数", _pops_n(d, "all"), r"`all`[^\n]*?\|\s*(\d+)\s*\|"),
         # 【不能写死期望值】写死等于只认旧数字（复核指出的真实漏洞）。
         # pattern=None 表示"必须出现"模式：核心数字必须在关键文档里出现 ≥1 次。
         ("成本 MAPE", _need(claims, "单位成本 MAPE（core，稳态口径）"), None),
@@ -772,9 +779,7 @@ def check(claims, d):
             text = doc.read_text(encoding="utf-8", errors="replace")
 
             for m in re.finditer(pat, text):
-
-                if m.group(1) != want:
-
+                if str(m.group(1)).strip() != str(want).strip():
                     bad.append((doc.name, name, m.group(1), want))
 
 
@@ -850,6 +855,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
