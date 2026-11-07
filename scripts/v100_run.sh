@@ -56,7 +56,10 @@ which nvcc || ls /usr/local/cuda/bin/nvcc || die "缺 nvcc，换带 CUDA 的镜�
 
 log "0.5 装依赖（阿里云源，实测比清华源稳）"
 python3 -m pip install -q -i "$MIRROR" --upgrade pip
-python3 -m pip install -q -i "$MIRROR" numpy pandas httpx modelscope gguf sentencepiece transformers
+python3 -m pip install -q -i "$MIRROR" numpy pandas scipy httpx \
+  modelscope gguf sentencepiece transformers matplotlib
+
+python3 "$WORKDIR/code/tc_profile.py" --deps 2>/dev/null || true
 
 log "0.6 取仓库代码（只拉需要的 4 个文件，避免整仓克隆）"
 for f in tc_config.py tc_loadgen.py tc_model.py tc_profile.py; do

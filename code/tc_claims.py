@@ -485,6 +485,22 @@ def build_claims(d):
         claims[_label] = (f"{_r['n_holdout']} 格 · MAPE {_r['mape_cost']:.2f}% · "
                           f"覆盖率 {_r['coverage']*100:.1f}%")
 
+    lad = {}
+    _p = RESULTS / "bandwidth_ladder.json"
+    if _p.exists():
+        lad = json.loads(_p.read_text(encoding="utf-8"))
+    if lad:
+        _m = {r["hardware"]: r for r in lad["ladder"] if r["stack"] == "llama.cpp"}
+        _v = _m.get("V100 16GB")
+        if _v:
+            claims["V100 的反推带宽（标称 900）"] = (
+                f"{_v['measured_gbs']:.1f} GB/s（{_v['fraction']*100:.0f}%）")
+            claims["三点带宽阶梯（占比范围）"] = (
+                f"{min(r['fraction'] for r in _m.values())*100:.0f}%–"
+                f"{max(r['fraction'] for r in _m.values())*100:.0f}%")
+            _cs = [r["c_srv_ms"] for r in _m.values()]
+            claims["同栈换卡的 c_srv 极差"] = (
+                f"{max(_cs)/min(_cs):.1f}×（{min(_cs):.3f} → {max(_cs):.3f} ms）")
     hconc = {}
     _p = RESULTS / "high_conc_analysis.json"
     if _p.exists():

@@ -93,6 +93,7 @@ COMMANDS = {
     "highconc":      ("tc_analyze_high_conc.py", []),
     "mixedprobe":    ("tc_measure_mixed.py", []),
     "turnsprobe":    ("tc_measure_turns.py", []),
+    "ladder":        ("tc_bandwidth_ladder.py", []),
     "tailflip":      ("tc_tail_flip.py", []),
     "datadict":      ("tc_docs_data.py", []),
     "audit":         ("tc_audit.py", []),

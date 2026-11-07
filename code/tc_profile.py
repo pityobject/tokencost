@@ -461,6 +461,28 @@ def cmd_selftest(args):
     return 1
 
 
+
+def check_deps():
+    """一次性列出缺失的依赖（云端最小镜像上跑一次崩一个，太费时间）。"""
+    need = [("numpy", "numpy"), ("pandas", "pandas"), ("scipy", "scipy"),
+            ("httpx", "httpx"), ("matplotlib", "matplotlib")]
+    missing = []
+    for mod, pkg in need:
+        try:
+            __import__(mod)
+        except Exception:
+            missing.append(pkg)
+    if missing:
+        print("[依赖] 缺少:", ", ".join(missing))
+        print("  安装（阿里云源最快）：")
+        print(f"  pip3 install -q -i https://mirrors.aliyun.com/pypi/simple/ "
+              f"{' '.join(missing)}")
+        print("  注：matplotlib 只影响作图，标定本身不需要（已改为可选导入）")
+    else:
+        print("[依赖] numpy/pandas/scipy/httpx/matplotlib 全部可用 ✅")
+    return not [m for m in missing if m != "matplotlib"]
+
+
 def main():
     ap = argparse.ArgumentParser(description="一条命令在任意 OpenAI 兼容服务上标定")
     ap.add_argument("--base-url", default=None, help="如 http://127.0.0.1:8080/v1")
@@ -492,7 +514,10 @@ def main():
     ap.add_argument("--hardware", default="（未填）")
     ap.add_argument("--out", default=None)
     ap.add_argument("--selftest", action="store_true", help="不连服务器，验证链路")
+    ap.add_argument("--deps", action="store_true", help="只检查依赖是否齐全")
     args = ap.parse_args()
+    if getattr(args, 'deps', False):
+        sys.exit(0 if check_deps() else 1)
 
     if args.selftest:
         return cmd_selftest(args)

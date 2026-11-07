@@ -1,0 +1,41 @@
+{
+  "ladder": [
+    {
+      "hardware": "RTX 4060 Laptop",
+      "stack": "llama.cpp",
+      "nominal_gbs": 272.0,
+      "measured_gbs": 249.1,
+      "fraction": 0.916,
+      "c_srv_ms": 0.766,
+      "tpot_mape_pct": 8.6
+    },
+    {
+      "hardware": "A10 24GB",
+      "stack": "llama.cpp",
+      "nominal_gbs": 600.0,
+      "measured_gbs": 471.5,
+      "fraction": 0.786,
+      "c_srv_ms": 1.529,
+      "tpot_mape_pct": 1.0
+    },
+    {
+      "hardware": "V100 16GB",
+      "stack": "llama.cpp",
+      "nominal_gbs": 900.0,
+      "measured_gbs": 775.5,
+      "fraction": 0.862,
+      "c_srv_ms": 3.848,
+      "tpot_mape_pct": 1.9
+    },
+    {
+      "hardware": "A10 24GB",
+      "stack": "vLLM",
+      "nominal_gbs": 600.0,
+      "measured_gbs": 384.9,
+      "fraction": 0.642,
+      "c_srv_ms": 0.273,
+      "tpot_mape_pct": 0.8
+    }
+  ],
+  "note": "反推 BW 来自各自独立标定；标称值为厂商规格"
+}
