@@ -53,7 +53,7 @@ if ($LASTEXITCODE -ne 0) { Write-Host "[FAIL] 护栏测试未通过"; $fail = 1 
 if ($LASTEXITCODE -ne 0) { $fail = 1 }
 
 Write-Host ""
-Write-Host "[CI] 4/8 doc number lint (warning only) ..."
+Write-Host "[CI] 4/8 doc number lint + README coverage ..."
 & $py "code\tc_lint_docs.py"
 $lintExit = $LASTEXITCODE
 if ($lintExit -ne 0) {

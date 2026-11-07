@@ -78,6 +78,23 @@ DEPRECATED = {
 
 # ---------------------------------------------------------------- 一致性扫描
 PARAM_COUNT = 6      # 唯一真值：六参数模型
+
+# 【覆盖度】外部复核连续两轮指出同一个问题：新结论只落在附录/CLAIMS，
+# 没有进"读者最先打开的文档"。这里把必须露出的数字写死，缺一个就失败。
+# 每项：(说明, [可接受的写法...])，出现在 README.md 即可。
+COVERAGE = [
+    ("留出集成本 MAPE", ["8.58%"]),
+    ("90% 区间覆盖率", ["86.8%"]),
+    ("同卡换栈的 c_srv 比值", ["5.3–7.2×", "5.3-7.2×"]),
+    ("三点带宽阶梯占比", ["79–92%", "79-92%"]),
+    ("单流离物理下界", ["1.2–1.8×", "1.2-1.8×"]),
+    ("模型比较的 BIC 差", ["−133", "-133", "133"]),
+    ("前缀命中率 h", ["0.32"]),
+    ("高并发 TTFT 的 ubatch 效应", ["2464", "438"]),
+    ("真实 trace 的到达间隔 CV", ["9.77"]),
+    ("容量折减（真实 vs 泊松）", ["0.85"]),
+]
+
 PARAM_PAT = re.compile(r"(\d+)\s*个\s*(?:待定)?参数")
 # 【数字损坏检测】正常中文文档里几乎不会出现"带前导零的整数"（02、008、032、0000、06）。
 # 2026-11-06 一次批量替换把简历稿里所有 1 换成 0，产生的正是这类 token，且所有既有检查都没抓到。
@@ -149,6 +166,23 @@ def main():
 
     hits = []
     consistency = []
+    # 覆盖度：关键结论必须出现在 README.md
+    readme = ROOT / "README.md"
+    cov_missing = []
+    if readme.exists():
+        text = readme.read_text(encoding="utf-8")
+        for label, options in COVERAGE:
+            if not any(o in text for o in options):
+                cov_missing.append((label, options[0]))
+
+    # 覆盖度缺失是硬失败（不受 --strict 影响）：这些是对外卖点，不能只躺在附录里
+    if cov_missing:
+        print(f"[LINT][FAIL] README 缺少 {len(cov_missing)} 条关键结论：")
+        for label, want in cov_missing:
+            print(f"    · {label}（README 里应出现 {want}）")
+        print("    修法：在 README 的结论表里补上，然后重跑。")
+        sys.exit(1)
+
     for rel in TARGETS:
         p = ROOT / rel
         if not p.exists():
