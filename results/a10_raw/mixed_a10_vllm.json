@@ -1,0 +1,40 @@
+{
+  "hardware": "A10 24GB / vLLM",
+  "backend": "vllm",
+  "model": "qwen3b",
+  "distribution": {
+    "p_long": 0.25,
+    "long": 1800,
+    "short": 200
+  },
+  "cells": {
+    "1": {
+      "n": 16,
+      "mean_target_len": 600.0,
+      "mean_actual_len": 626.2,
+      "ttft_p50": 29.9,
+      "tpot_p50": 16.92,
+      "err_mean_len_pct": 101.8,
+      "err_per_request_pct": 10.9
+    },
+    "4": {
+      "n": 16,
+      "mean_target_len": 600.0,
+      "mean_actual_len": 626.2,
+      "ttft_p50": 220.8,
+      "tpot_p50": 18.55,
+      "err_mean_len_pct": 6.8,
+      "err_per_request_pct": 87.6
+    },
+    "8": {
+      "n": 32,
+      "mean_target_len": 600.0,
+      "mean_actual_len": 626.2,
+      "ttft_p50": 249.8,
+      "tpot_p50": 20.57,
+      "err_mean_len_pct": 60.0,
+      "err_per_request_pct": 121.0
+    }
+  },
+  "note": "均值口径 = 用该格平均长度预测后与实测中位比；逐请求口径 = 每个请求用自己的真实长度预测后与自身实测比"
+}

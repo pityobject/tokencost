@@ -1,0 +1,33 @@
+{
+  "hardware": "A10 24GB / llama.cpp (cache off)",
+  "backend": "llamacpp",
+  "model": "models/gguf/qwen3b-fp16.gguf",
+  "cache_prompt": "off",
+  "length": 1600,
+  "same_prompt": {
+    "n": 4,
+    "ttft_first": 541.4,
+    "ttft_median_rest": 372.6,
+    "ttft_all": [
+      541.4,
+      371.9,
+      373.6,
+      372.6
+    ]
+  },
+  "diff_prompt": {
+    "n": 4,
+    "ttft_first": 402.2,
+    "ttft_median_rest": 400.1,
+    "ttft_all": [
+      402.2,
+      401.0,
+      400.1,
+      399.3
+    ]
+  },
+  "drop_same_pct": 31.2,
+  "drop_control_pct": 0.5,
+  "verdict": "存在前缀复用：同 prompt 重复下降 31%，而对照组只下降 1%",
+  "note": "对照组用不重叠的新 prompt，用来排除'第二次都变快'的干扰"
+}

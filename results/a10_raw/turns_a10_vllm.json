@@ -1,0 +1,62 @@
+{
+  "hardware": "A10 24GB / vLLM",
+  "backend": "vllm",
+  "model": "qwen3b",
+  "turns": 6,
+  "gen": 128,
+  "conc": 1,
+  "rows": [
+    {
+      "turn": 1,
+      "prompt_tokens": 252,
+      "ttft_ms": 33.31,
+      "tpot_ms": 16.992,
+      "pred_ttft_ms": 32.4,
+      "pred_tpot_ms": 16.34
+    },
+    {
+      "turn": 2,
+      "prompt_tokens": 533,
+      "ttft_ms": 59.5,
+      "tpot_ms": 16.87,
+      "pred_ttft_ms": 55.0,
+      "pred_tpot_ms": 16.37
+    },
+    {
+      "turn": 3,
+      "prompt_tokens": 814,
+      "ttft_ms": 87.112,
+      "tpot_ms": 16.8,
+      "pred_ttft_ms": 77.5,
+      "pred_tpot_ms": 16.39
+    },
+    {
+      "turn": 4,
+      "prompt_tokens": 1095,
+      "ttft_ms": 106.59,
+      "tpot_ms": 16.801,
+      "pred_ttft_ms": 100.1,
+      "pred_tpot_ms": 16.42
+    },
+    {
+      "turn": 5,
+      "prompt_tokens": 1376,
+      "ttft_ms": 141.335,
+      "tpot_ms": 16.797,
+      "pred_ttft_ms": 122.7,
+      "pred_tpot_ms": 16.45
+    },
+    {
+      "turn": 6,
+      "prompt_tokens": 1657,
+      "ttft_ms": 162.903,
+      "tpot_ms": 16.59,
+      "pred_ttft_ms": 145.2,
+      "pred_tpot_ms": 16.47
+    }
+  ],
+  "tpot_slope_meas_pct_per_turn": -0.375,
+  "tpot_slope_pred_pct_per_turn": 0.161,
+  "slope_ratio": -2.33,
+  "note": "多轮 KV 增长斜率；与本机 E3 的 4.6× 对比（未复现）"
+}

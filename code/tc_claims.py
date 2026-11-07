@@ -485,6 +485,17 @@ def build_claims(d):
         claims[_label] = (f"{_r['n_holdout']} 格 · MAPE {_r['mape_cost']:.2f}% · "
                           f"覆盖率 {_r['coverage']*100:.1f}%")
 
+    _pf = RESULTS / "a10_raw" / "prefix_a10_llamacpp_off.json"
+    if _pf.exists():
+        _d = json.loads(_pf.read_text(encoding="utf-8"))
+        claims["前缀复用（cache_prompt=false，同 prompt 重复）"] = (
+            f"TTFT 下降 {_d['drop_same_pct']:.0f}%（对照组 {_d['drop_control_pct']:.1f}%）")
+    _pn = RESULTS / "a10_raw" / "prefix_a10_llamacpp_on.json"
+    if _pn.exists():
+        _d = json.loads(_pn.read_text(encoding="utf-8"))
+        claims["前缀复用（cache_prompt=true）"] = (
+            f"TTFT 下降 {_d['drop_same_pct']:.0f}%"
+            f"（{_d['same_prompt']['ttft_first']:.0f} → {_d['same_prompt']['ttft_median_rest']:.0f} ms）")
     _mx = RESULTS / "a10_raw" / "mixed_v100_llamacpp.json"
     if _mx.exists():
         _d = json.loads(_mx.read_text(encoding="utf-8"))
@@ -492,6 +503,19 @@ def build_claims(d):
         if _c8:
             claims["混合长度在 V100 的 TTFT 误差（c8，均值/逐请求）"] = (
                 f"{_c8['err_mean_len_pct']:.0f}% / {_c8['err_per_request_pct']:.0f}%")
+    _mt = RESULTS / "a10_raw" / "mixed_a10_vllm.json"
+    if _mt.exists():
+        _d = json.loads(_mt.read_text(encoding="utf-8"))
+        _c8 = (_d.get("cells") or {}).get("8") or {}
+        if _c8:
+            claims["混合长度在 vLLM 的逐请求误差（c8）"] = (
+                f"{_c8['err_per_request_pct']:.0f}%")
+    _tt = RESULTS / "a10_raw" / "turns_a10_vllm.json"
+    if _tt.exists():
+        _d = json.loads(_tt.read_text(encoding="utf-8"))
+        claims["多轮在 vLLM 的 TTFT 误差范围"] = (
+            f"{min(r['ttft_ms'] and (r['pred_ttft_ms']/r['ttft_ms']-1)*100 for r in _d['rows']):+.0f}%"
+            f" ~ {max((r['pred_ttft_ms']/r['ttft_ms']-1)*100 for r in _d['rows']):+.0f}%")
     _tp = RESULTS / "a10_raw" / "turns_v100_llamacpp.json"
     if _tp.exists():
         _d = json.loads(_tp.read_text(encoding="utf-8"))
