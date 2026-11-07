@@ -35,25 +35,54 @@ TTFT(L) = max( W/BW , 2·P·L·min(b, B_SAT)/PEAK_pre ) + c_srv·b + ovh
 |---|---|
 | Held-out cost MAPE (core, 12 calib → 68 unseen cells) | **8.58%** |
 | — same, at the calibrated concurrencies | **5.5%** |
-| — at uncalibrated concurrencies | 11.5% |
+| — at uncalibrated concurrencies | 11.4% |
 | — random 12-point re-splits (30 runs, 5–95%) | **9.1%–13.9%** |
 | Prediction-interval coverage (target 90%) | 86.8% |
 | Decision regret vs oracle (16 scenarios) | **0.0%** (random baseline 274%) |
 | Cross-family transfer (Llama-3.2-1B, zero recalibration) | 11.6% |
+| **Same-parameter form on a second stack** (A10 + vLLM, independent calibration) | TPOT error **0.8%** |
+| **Serving overhead is a property of the serving *process*** | `c_srv` vLLM / llama.cpp = **5.3–7.2×** on the same A10 |
+| Calibration repeatability (same config, two runs) | `bw` **±3%** · `c_srv` **±28%** (llama.cpp) / **±6%** (vLLM) |
 
-Data: **115 configuration cells / 385 session-level runs**, 0 silent failures
+Data: **118 configuration cells / 388 session-level runs**, 0 silent failures
 (11 recorded port-conflict failures are kept in the raw data).
 
 ## Where the model does **not** work (measured boundaries)
 
 | condition | status | evidence |
 |---|---|---|
-| long prompt (>1000 tok) × high concurrency (≥8) | ❌ unusable | TTFT error up to **224%** |
+| long prompt (>1000 tok) × high concurrency (≥8) | ❌ unusable | **both stacks overestimate TTFT** (llama.cpp 2.33×, vLLM 8.49× growth at c16/c1) and underestimate TPOT by 20–40% → a model-form defect, not a stack defect |
 | mixed prompt lengths (long+short interleaved) | ❌ TTFT unusable | +45…+109% vs measured; TPOT still fine (17%) |
 | middle concurrency (8/12) TPOT | ⚠️ 20–25% low | serving overhead has a step at b≈8 (7B: 6× peak) |
 | SLA tail (p90) at concurrency ≥10 | ⚠️ optimistic ~2× | 28/132 cells flip from pass to fail at TTFT≤2000 ms |
-| different hardware / different backend | ❌ untested | use the self-calibration guide |
+| different hardware / different backend | ⚠️ **attributable, not yet predictive** | `c_srv` measured on 2 GPUs × 2 stacks; `bw` 249→472 GB/s is only two points, so `TPOT ∝ W/BW` is not yet shown to be linear (V100 point pending) |
 | `PEAK_dec` | ❌ unidentifiable | decode arithmetic intensity ≈4 FLOP/byte vs GPU ridge ≈53 |
+
+## Cross-hardware and cross-stack (2026-11-06, free A10 trial)
+
+The six-parameter form was re-fitted from scratch on a **second stack** (vLLM 0.5.5)
+on a **second GPU** (A10 24 GB), same model, same request protocol, 6 probes each.
+
+| parameter | RTX 4060 + llama.cpp | **A10 + llama.cpp** | **A10 + vLLM** |
+|---|---|---|---|
+| `BW` (GB/s) | 249.1 (92% of nominal) | 471.5 (79%) | 384.9 (64%) |
+| `PEAK_pre` (TFLOP/s) | 31.8 | 39.8 | 76.7 |
+| **`c_srv` (ms)** | 0.766 | **1.529 / 1.963** (two runs) | **0.273 / 0.290** |
+| `B_SAT` | 13.2 | 7.2 | 21.9 |
+| fit error | — | TTFT 3.7% / TPOT 1.0% | TTFT 9.5% / TPOT 0.8% |
+
+**Three claims this supports**
+
+1. **The parameter form transfers across stacks** — TPOT error 0.8% on vLLM, with no
+   structural change to the model.
+2. **`c_srv` belongs to the serving *process*** (stack + host CPU), not to the GPU or the
+   weights: same A10, swapping only the stack changes it by **5.3–7.2×**; the same stack on a
+   different machine still changes it by **2.0×**.
+3. **Repeatability must be quoted**: two runs of the same configuration move `c_srv` by
+   **±28%** (llama.cpp) and **±6%** (vLLM), while `BW` only moves **±3%** —
+   because `BW` is a physical quantity and `c_srv` is a sum of implementation details.
+
+Raw calibration files (6 × JSON, unmodified) are archived under `results/a10_raw/`.
 
 ## Quickstart
 
