@@ -117,10 +117,19 @@ startup flag: on one A10 with identical weights, c32 TTFT goes from **2464 ms** 
 The catch: `c_srv` (−26%) and `b_sat` (−66%) also move with `-ub`, so **any published
 parameter set is meaningless without the server configuration** (slots, `-ub`, `-b`, cache flags).
 
+## Three ways in
+
+| time you spend | do this | what you get |
+|---|---|---|
+| **30 s** | `python code/tc_demo.py` | TTFT/TPOT/cost and the distance to the physical floor for a realistic scenario — no calibration, no GPU |
+| **10 min** | start a server + `python code/tc_profile.py --base-url ...` | your own 6 parameters, plus `tc.py diagnose` self-check |
+| **one command** | `scripts/reproduce.ps1` (Windows) or `scripts/reproduce.sh` | `REPRODUCE PASS` over 8 groups of checks |
+
 ## Quickstart
 
 ```bash
-bash scripts/reproduce.sh        # ~60 s, 8 groups of checks
+powershell -ExecutionPolicy Bypass -File scripts/reproduce.ps1   # Windows, no bash needed
+bash scripts/reproduce.sh        # Linux/macOS
 bash scripts/reproduce.sh --fast # skip refit, ~20 s
 ```
 

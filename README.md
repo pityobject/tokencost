@@ -105,6 +105,14 @@ prefill 是一次大 GEMM。用后端基准反推，两者差 2.4 倍（9 与 31
 
 ---
 
+## 三条进入路径（按你花的时间选）
+
+| 你愿意花 | 做什么 | 会得到什么 |
+|---|---|---|
+| **30 秒** | `python code/tc_demo.py` | 一个真实场景的 TTFT/TPOT/成本/离物理下界倍数，用已验证的先验，**不用标定、不用 GPU** |
+| **10 分钟** | 起服务 + `python code/tc_profile.py --base-url ...` | 你自己机器上的 6 参数（含 `tc.py diagnose` 自检） |
+| **一条命令** | Windows：`powershell -ExecutionPolicy Bypass -File scripts/reproduce.ps1`<br>Linux/macOS：`bash scripts/reproduce.sh` | 8 组检查全绿的 `REPRODUCE PASS`，证明这个仓库能被复现 |
+
 ## 快速开始
 
 ```powershell
@@ -316,7 +324,8 @@ python code/tc_audit.py --fast   # 跳过裸克隆
 ## 复现
 
 ```bash
-bash scripts/reproduce.sh        # 约 60 秒，8 组检查
+powershell -ExecutionPolicy Bypass -File scripts/reproduce.ps1   # Windows（无需 bash）
+bash scripts/reproduce.sh        # Linux/macOS
 bash scripts/reproduce.sh --fast # 跳过重拟合，约 20 秒
 ```
 
@@ -359,7 +368,7 @@ python code/tc_decompose_csrv.py   # c_srv 三向分解
 ## 目录
 
 ```
-code/          89 个脚本（采集 / 分析 / 拟合 / 推荐 / 探针 / 对账）
+code/          90 个脚本（采集 / 分析 / 拟合 / 推荐 / 探针 / 对账）
 data/          原始数据（raw_cells.jsonl 300 行、raw_requests.jsonl 逐请求明细）
 results/       fit.json（6 参数）、predictions.csv、recommendation.csv
 figures/       fig1–fig5（吞吐、成本、带宽、预测vs实测、Pareto）
