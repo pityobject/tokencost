@@ -614,7 +614,6 @@ def build_claims(d):
             claims["c_srv 随槽位数变化（32→128 槽，不是漂移）"] = (
                 f"{_base:.3f} → {_c128:.3f} ms（**+{(_c128/_base-1)*100:.0f}%**，配置不同）")
 
-    _ub = RESULTS / "a10_raw" / "ubatch_sweep_a10.json"
     _ph = RESULTS / "prefix_hit.json"
     if _ph.exists():
         _d = json.loads(_ph.read_text(encoding="utf-8"))

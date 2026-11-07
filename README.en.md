@@ -147,7 +147,7 @@ cd tokencost
 
 # 2) get a recommendation
 & $py code/tc.py recommend --ttft 600 --tpot 45 --gpu-price a10
-#   → 7B_q4_k_m_ctx2048_c1 · 20847 GPU·s/1M tok · 60.8 CNY/1M tok @ 10.5 CNY/h
+#   → 7B_q4_k_m_ctx2048_c1 · 20852 GPU·s/1M tok · 60.8 CNY/1M tok @ 10.5 CNY/h
 
 # 3) open the calculator
 start site/index.html
