@@ -485,6 +485,21 @@ def build_claims(d):
         claims[_label] = (f"{_r['n_holdout']} 格 · MAPE {_r['mape_cost']:.2f}% · "
                           f"覆盖率 {_r['coverage']*100:.1f}%")
 
+    _ub = RESULTS / "a10_raw" / "ubatch_sweep_a10.json"
+    if _ub.exists():
+        _d = json.loads(_ub.read_text(encoding="utf-8"))
+        _r = _d["runs"]
+        _lo, _hi = _r[0], _r[-1]
+        claims["ubatch 对参数的影响（64→512）"] = (
+            f"c_srv {( _hi['c_srv']/_lo['c_srv']-1)*100:+.0f}%、"
+            f"b_sat {( _hi['b_sat']/_lo['b_sat']-1)*100:+.0f}%、"
+            f"peak_prefill {( _hi['peak_prefill']/_lo['peak_prefill']-1)*100:+.0f}%、"
+            f"bw {( _hi['bw']/_lo['bw']-1)*100:+.0f}%")
+        _b = _d.get("baseline_morning_same_slots") or {}
+        if _b.get("c_srv"):
+            claims["c_srv 的跨会话漂移（同日同配置）"] = (
+                f"{_b['c_srv']:.2f} → {_lo['c_srv']:.2f}–{_hi['c_srv']:.2f} ms"
+                f"（{(_lo['c_srv']/_b['c_srv']-1)*100:+.0f}%）")
     _ph = RESULTS / "prefix_hit.json"
     if _ph.exists():
         _d = json.loads(_ph.read_text(encoding="utf-8"))

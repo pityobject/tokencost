@@ -1,0 +1,50 @@
+{
+  "hardware": "A10 24GB / llama.cpp",
+  "sweep_param": "ubatch (-ub / -b)",
+  "slots": 32,
+  "ctx_total": 73728,
+  "provenance": "数值由终端输出转录（原始 calib_ub*.json 在已停止的实例持久盘 /mnt/workspace/tc_a10/results/ 下，重启实例可取回）",
+  "runs": [
+    {
+      "ubatch": 64,
+      "c_srv": 3.043,
+      "bw": 512.2,
+      "peak_prefill": 17.14,
+      "b_sat": 13.4,
+      "ttft_mape": 23.4,
+      "tpot_mape": 8.3
+    },
+    {
+      "ubatch": 128,
+      "c_srv": 2.645,
+      "bw": 495.9,
+      "peak_prefill": 24.46,
+      "b_sat": 10.1,
+      "ttft_mape": 29.5,
+      "tpot_mape": 8.1
+    },
+    {
+      "ubatch": 256,
+      "c_srv": 2.371,
+      "bw": 485.3,
+      "peak_prefill": 26.04,
+      "b_sat": 5.6,
+      "ttft_mape": 14.8,
+      "tpot_mape": 7.0
+    },
+    {
+      "ubatch": 512,
+      "c_srv": 2.249,
+      "bw": 480.6,
+      "peak_prefill": 27.38,
+      "b_sat": 4.6,
+      "ttft_mape": 10.6,
+      "tpot_mape": 6.9
+    }
+  ],
+  "baseline_morning_same_slots": {
+    "c_srv": 1.529,
+    "note": "同日早间 32 槽标定"
+  },
+  "note": "ubatch 是配置旋钮，不是物理量；它同时改变 c_srv、b_sat、peak_prefill。c_srv 单调降 26%（方向支持调度记账假设），b_sat 降 66%（说明它是配置产物）"
+}
