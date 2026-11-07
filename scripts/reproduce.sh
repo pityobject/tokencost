@@ -25,8 +25,14 @@ FAST=0
 [ "${1:-}" = "--fast" ] && FAST=1
 
 PY=""
-for c in python3 python "D:/llm/venv/Scripts/python.exe"; do
-  if command -v "$c" >/dev/null 2>&1; then PY="$c"; break; fi
+# Windows 上 `python3` 常常是应用商店的占位符（运行会弹商店而不是执行），
+# 所以优先用 python，并**验证它能真正打印版本**再采用。
+for c in python python3 "D:/llm/venv/Scripts/python.exe"; do
+  if command -v "$c" >/dev/null 2>&1; then
+    if "$c" -c "import sys;print(sys.version_info[0])" >/dev/null 2>&1; then
+      PY="$c"; break
+    fi
+  fi
 done
 [ -z "$PY" ] && { echo "❌ 找不到 python"; exit 1; }
 
