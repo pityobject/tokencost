@@ -39,3 +39,5 @@ raw_cells_备份_*.jsonl
 results/calib_*.json
 a10_results.tar.gz
 
+# 外部 trace 数据（M1 用；仓库只放处理后的统计）
+data/traces/

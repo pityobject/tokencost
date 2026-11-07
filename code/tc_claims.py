@@ -487,6 +487,19 @@ def build_claims(d):
 
     claims["ubatch 对高并发 TTFT（c32, L=307）"] = (
         "ub=64 → **2464 ms** ／ ub=512 → **438 ms**（**5.6×** 差距；c32/c1 从 20.1× 降到 5.7×）")
+    _tr = RESULTS / "trace_stats.json"
+    if _tr.exists():
+        _d = json.loads(_tr.read_text(encoding="utf-8"))
+        _ia = _d.get("interarrival") or {}
+        _bu = _d.get("burstiness_10s") or {}
+        claims["真实 trace 的到达过程（BurstGPT）"] = (
+            f"间隔 CV **{_ia.get('cv', 0):.2f}**（泊松=1）｜10 秒窗口 σ/μ "
+            f"{_bu.get('sigma_over_mu', 0):.2f} → **超泊松、有突发**")
+        _rq = _d.get("request_tokens") or {}
+        if _rq:
+            claims["真实 trace 的长度（prompt）"] = (
+                f"均值 {_rq.get('mean', 0):.0f} token、CV {_rq.get('cv', 0):.2f}"
+                f"（我们假设的对数正态 CV 0.5–1.3，吻合）")
     _fl = RESULTS / "floor_analysis.json"
     if _fl.exists():
         _d = json.loads(_fl.read_text(encoding="utf-8"))

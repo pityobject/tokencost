@@ -1,0 +1,29 @@
+{
+  "trace": "BurstGPT_1.csv",
+  "rows": 1429737,
+  "span_s": 5269968.0,
+  "mean_rate_rps": 0.2713,
+  "interarrival": {
+    "mean_s": 6.78,
+    "median_s": 1.0,
+    "cv": 9.77,
+    "ks_D": 0.4591,
+    "ks_p": 0.0,
+    "verdict": "突发性强（CV>1.25，重尾间隔）"
+  },
+  "burstiness_10s": {
+    "mean": 2.713,
+    "sigma_over_mu": 3.021,
+    "verdict": "存在突发（超泊松）"
+  },
+  "request_tokens": {
+    "n": 1404310,
+    "mean": 621.6,
+    "cv": 1.262,
+    "p95": 2466.0,
+    "p99": 3389.0,
+    "lognormal_sigma": 1.134,
+    "lognormal_cv": 1.619
+  },
+  "note": "真实生产 trace（ChatGPT/GPT-4）；由 GitHub API 获取，仅存于 data/traces/（已 gitignore），仓库只放统计结果"
+}
