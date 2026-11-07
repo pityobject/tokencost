@@ -348,7 +348,10 @@ def build_claims(d):
         "留出集格数（core 口径）": f"{fit.get('n_holdout', 68)} 格",
         "单位成本 MAPE（core，稳态口径）": f"{fit['mape_cost']:.2f}%",
         "单点最大误差": f"{fit['max_err']:.2f}%",
-        "90% 区间覆盖率（TPOT 口径；成本 80.9%、TTFT 67.7% 未达标）": f"{fit['coverage']*100:.1f}%",
+        # 【v10】覆盖率分口径：只写 86.8% 会让人以为是整体覆盖率
+        "90% 区间覆盖率": (f"{fit['coverage']*100:.1f}%（TPOT 口径；"
+                          f"成本 {fit.get('coverage_cost', 0):.1f}%、"
+                          f"TTFT {fit.get('coverage_ttft_under_tpot_half', 0):.1f}%）"),
         "标定并发上的 MAPE": _pct_fit(fit, "mape_in_grid"),
         "未标定并发上的 MAPE": _pct_fit(fit, "mape_out_grid"),
         "未标定并发上的 MAPE": f"{fit.get('mape_out_grid', 11.5):.1f}%",
@@ -1112,7 +1115,9 @@ def check(claims, d):
         # pattern=None 表示"必须出现"模式：核心数字必须在关键文档里出现 ≥1 次。
         ("成本 MAPE", _need(claims, "单位成本 MAPE（core，稳态口径）"), None),
         ("最大误差", _need(claims, "单点最大误差"), None),
-        ("区间覆盖率", _need(claims, "90% 区间覆盖率（TPOT 口径；成本 80.9%、TTFT 67.7% 未达标）"), None),
+        # 覆盖率的值现在带口径后缀（"86.8%（TPOT 口径；成本 80.9%…）"），
+        # 文档里只要求出现**数字本身**；口径是否有说明由 lint 的"裸覆盖率"规则管。
+        ("区间覆盖率", _need(claims, "90% 区间覆盖率").split("（")[0], None),
     ]
     # 曾经对外用过、现已作废的数字；留在文档里就是漂移
     stale = ["100 个配置格", "300 次会话级", "21 个脚本", "6.13%", "19.46%",
