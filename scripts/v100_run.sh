@@ -36,8 +36,22 @@ mkdir -p "$WORKDIR"/{models,gguf,logs,results,code}
 
 # ---------------------------------------------------------------- 0. 环境
 log "0. 检查 GPU"
-nvidia-smi --query-gpu=name,memory.total --format=csv,noheader \
+GPU_INFO=$(nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv,noheader) \
   || die "看不到 GPU。确认规格是 ecs.gn6v（V100）"
+echo "$GPU_INFO"
+
+# 【必须断言型号】脚本名是 V100，在 A10 上跑会白费 20 分钟编译（实测发生过一次）
+GPU_NAME=$(echo "$GPU_INFO" | cut -d, -f1 | xargs)
+GPU_FREE_MB=$(echo "$GPU_INFO" | cut -d, -f3 | grep -oE "[0-9]+" | head -1)
+if ! echo "$GPU_NAME" | grep -qi "V100"; then
+  if [ "${ALLOW_OTHER_GPU:-0}" != "1" ]; then
+    die "当前 GPU 是「$GPU_NAME」，不是 V100。要跑带宽阶梯请新建 ecs.gn6v 实例；
+        若只是想在别的卡上跑同一套标定，加 ALLOW_OTHER_GPU=1 重跑。"
+  fi
+  echo "⚠️ 非 V100（$GPU_NAME），已按 ALLOW_OTHER_GPU=1 继续"
+fi
+[ "${GPU_FREE_MB:-0}" -ge 9000 ] || die "空闲显存只有 ${GPU_FREE_MB} MB（需 ≥9000）。先停掉占显存的进程：
+        pkill -f api_server; pkill -f vllm; sleep 5; nvidia-smi"
 which nvcc || ls /usr/local/cuda/bin/nvcc || die "缺 nvcc，换带 CUDA 的镜像"
 
 log "0.5 装依赖（阿里云源，实测比清华源稳）"
@@ -93,8 +107,11 @@ ls -lh gguf/
 
 # ---------------------------------------------------------------- 4. 起服务
 log "5. 起 llama-server（--ctx-size 是总上下文 = $TOTAL_CTX）"
+# 清掉所有可能占显存的服务（vLLM 是上一轮实验最容易残留的）
 pkill -f llama-server 2>/dev/null || true
-sleep 2
+pkill -f api_server 2>/dev/null || true
+sleep 4
+nvidia-smi --query-gpu=memory.free --format=csv,noheader | sed 's/^/  起服务前空闲显存: /' 
 setsid nohup "$WORKDIR/llama.cpp/build/bin/llama-server" \
   -m "$WORKDIR/gguf/qwen3b-fp16.gguf" -ngl 99 \
   --ctx-size "$TOTAL_CTX" --parallel "$SLOTS" \
