@@ -105,6 +105,8 @@ COMMANDS = {
     "prefixh":       ("tc_fit_prefix_hit.py", []),
     "jitterresid":   ("tc_jitter_explains_residual.py", []),
     "ubatchrule":    ("tc_ubatch_rule.py", []),
+    "priors":        ("tc_priors.py", []),
+    "diagnose":      ("tc_diagnose.py", []),
     "tailflip":      ("tc_tail_flip.py", []),
     "datadict":      ("tc_docs_data.py", []),
     "audit":         ("tc_audit.py", []),

@@ -487,6 +487,18 @@ def build_claims(d):
 
     claims["ubatch 对高并发 TTFT（c32, L=307）"] = (
         "ub=64 → **2464 ms** ／ ub=512 → **438 ms**（**5.6×** 差距；c32/c1 从 20.1× 降到 5.7×）")
+    _pr = RESULTS / "params_prior.json"
+    if _pr.exists():
+        _d = json.loads(_pr.read_text(encoding="utf-8"))
+        _g = {g["scenario"]: g for g in _d.get("groups") or []}
+        if "vLLM + 现代数据中心 GPU" in _g:
+            _v = _g["vLLM + 现代数据中心 GPU"]
+            claims["参数先验：vLLM 的 c_srv"] = (
+                f"{_v['c_srv_min']:.2f}–{_v['c_srv_max']:.2f} ms（预期成本误差 {_v['expected_cost_error']}）")
+        if "llama.cpp + 云端 GPU" in _g:
+            _c = _g["llama.cpp + 云端 GPU"]
+            claims["参数先验：llama.cpp 云端的 c_srv"] = (
+                f"{_c['c_srv_min']:.2f}–{_c['c_srv_max']:.2f} ms（预期成本误差 {_c['expected_cost_error']}）")
     _ur = RESULTS / "ubatch_rule.json"
     if _ur.exists():
         _d = json.loads(_ur.read_text(encoding="utf-8"))

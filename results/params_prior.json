@@ -1,0 +1,111 @@
+{
+  "points": [
+    {
+      "stack": "llama.cpp",
+      "hw": "RTX 4060",
+      "source": "fit.json",
+      "c_srv": 0.765718233245005,
+      "bw": 249.10297621883768,
+      "b_sat": 13.20361320117966,
+      "nominal": 272.0,
+      "bw_frac": 0.9158197655104326
+    },
+    {
+      "stack": "llama.cpp",
+      "hw": "A10",
+      "source": "a10_raw/calib_a10_llamacpp.json",
+      "c_srv": 1.5285488873302522,
+      "bw": 471.536866098183,
+      "b_sat": 7.17138524453656,
+      "nominal": 600.0,
+      "bw_frac": 0.785894776830305
+    },
+    {
+      "stack": "llama.cpp",
+      "hw": "A10",
+      "source": "a10_raw/calib_a10_llamacpp_rep2.json",
+      "c_srv": 1.9630651723027916,
+      "bw": 487.80509689145424,
+      "b_sat": 7.088300295704501,
+      "nominal": 600.0,
+      "bw_frac": 0.8130084948190904
+    },
+    {
+      "stack": "llama.cpp",
+      "hw": "A10",
+      "source": "a10_raw/calib_a10_llamacpp_rep3.json",
+      "c_srv": 2.5116048351656826,
+      "bw": 499.5645809260882,
+      "b_sat": 10.32746919343675,
+      "nominal": 600.0,
+      "bw_frac": 0.8326076348768137
+    },
+    {
+      "stack": "llama.cpp",
+      "hw": "V100",
+      "source": "a10_raw/calib_v100_llamacpp.json",
+      "c_srv": 3.847713252335218,
+      "bw": 775.5214517900863,
+      "b_sat": 7.240247645516267,
+      "nominal": 900.0,
+      "bw_frac": 0.8616905019889848
+    },
+    {
+      "stack": "vLLM",
+      "hw": "A10",
+      "source": "a10_raw/calib_a10_vllm.json",
+      "c_srv": 0.2729086935109363,
+      "bw": 384.90298254513255,
+      "b_sat": 21.871706202456874,
+      "nominal": 600.0,
+      "bw_frac": 0.6415049709085543
+    },
+    {
+      "stack": "vLLM",
+      "hw": "A10",
+      "source": "a10_raw/calib_a10_vllm_rep2.json",
+      "c_srv": 0.28961416272714907,
+      "bw": 381.8730098109546,
+      "b_sat": 14.282974719630582,
+      "nominal": 600.0,
+      "bw_frac": 0.6364550163515911
+    },
+    {
+      "stack": "vLLM",
+      "hw": "A10",
+      "source": "a10_raw/calib_a10_vllm_rep3.json",
+      "c_srv": 0.2853017202941571,
+      "bw": 380.5138592930477,
+      "b_sat": 14.02109135715375,
+      "nominal": 600.0,
+      "bw_frac": 0.6341897654884128
+    }
+  ],
+  "groups": [
+    {
+      "scenario": "vLLM + 现代数据中心 GPU",
+      "n": 3,
+      "c_srv_min": 0.273,
+      "c_srv_max": 0.29,
+      "bw_frac": 0.636,
+      "expected_cost_error": "±15%"
+    },
+    {
+      "scenario": "llama.cpp + 桌面/笔记本 GPU",
+      "n": 1,
+      "c_srv_min": 0.766,
+      "c_srv_max": 0.766,
+      "bw_frac": 0.916,
+      "expected_cost_error": "±15%"
+    },
+    {
+      "scenario": "llama.cpp + 云端 GPU",
+      "n": 4,
+      "c_srv_min": 1.529,
+      "c_srv_max": 3.848,
+      "bw_frac": 0.823,
+      "expected_cost_error": "±25%"
+    }
+  ],
+  "note": "先验来自 8 份实测标定；bw_frac = 实测/标称。c_srv 同场景内可差 1.5–3×，所以给的是范围不是点"
+}

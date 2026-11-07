@@ -133,6 +133,22 @@ python tests/test_core.py
 覆盖三件事：`predict` 的黄金值、`aggregate` 的分位数口径、
 以及 `fit` 的**恢复实验**（用已知参数生成合成数据再拟合回去）。
 
+### 没 GPU？先查先验；标定完？让它自检
+
+```bash
+# 1) 只想先估个数（不用标定）
+python code/tc_priors.py                      # 打印三块 GPU × 两栈的实测先验
+python code/tc_priors.py --stack vllm --nominal 600   # 给某场景一组参数
+
+# 2) 已经标定完，检查有没有踩坑（会自动提示 -ub / -ngl / 漂移）
+python code/tc_diagnose.py --calib results/a10_raw/calib_a10_vllm.json \
+    --nominal 600 --stack vllm
+```
+
+`diagnose` 会报三类最常见的问题：`bw` 只有标称 40%（`-ngl` 没给满）、
+c32 的 TTFT 是 c1 的 20 倍（`-ub` 太小）、`c_srv` 落在先验之外（配置变了或跨会话漂移）。
+
+
 ## 这个模型能信到哪（适用边界）
 
 这是本仓库最重要的表——**知道哪里能信，比多一个漂亮数字有用**。
@@ -332,7 +348,7 @@ python code/tc_decompose_csrv.py   # c_srv 三向分解
 ## 目录
 
 ```
-code/          83 个脚本（采集 / 分析 / 拟合 / 推荐 / 探针 / 对账）
+code/          85 个脚本（采集 / 分析 / 拟合 / 推荐 / 探针 / 对账）
 data/          原始数据（raw_cells.jsonl 300 行、raw_requests.jsonl 逐请求明细）
 results/       fit.json（6 参数）、predictions.csv、recommendation.csv
 figures/       fig1–fig5（吞吐、成本、带宽、预测vs实测、Pareto）
