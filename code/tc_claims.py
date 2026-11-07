@@ -487,6 +487,13 @@ def build_claims(d):
 
     claims["ubatch 对高并发 TTFT（c32, L=307）"] = (
         "ub=64 → **2464 ms** ／ ub=512 → **438 ms**（**5.6×** 差距；c32/c1 从 20.1× 降到 5.7×）")
+    _ur = RESULTS / "ubatch_rule.json"
+    if _ur.exists():
+        _d = json.loads(_ur.read_text(encoding="utf-8"))
+        claims["ubatch 选择规则（c32 达标的 -ub）"] = (
+            "≤2000ms→128 ／ ≤1000ms→256 ／ ≤700ms→512（R²=%.3f）" % _d["r2"])
+        claims["ubatch 的权衡"] = (
+            "**无权衡**：ub 64→512 使 c32 的 TTFT 好 5.6×，同时 c_srv −26%，两者同向")
     _jr = RESULTS / "jitter_residual_test.json"
     if _jr.exists():
         _d = json.loads(_jr.read_text(encoding="utf-8"))
