@@ -261,6 +261,13 @@ python code/tc_audit.py --fast   # 跳过裸克隆
 
 ## 复现
 
+```bash
+bash scripts/reproduce.sh        # 约 60 秒，8 组检查
+bash scripts/reproduce.sh --fast # 跳过重拟合，约 20 秒
+```
+
+最后一行必须是 `REPRODUCE PASS`。它不需要 GPU、不需要联网、不写任何被跟踪文件。
+
 ```powershell
 # 环境
 python code/tc_env_check.py        # 依赖/显存/llama.cpp 自检

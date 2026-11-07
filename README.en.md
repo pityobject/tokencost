@@ -43,6 +43,9 @@ TTFT(L) = max( W/BW , 2·P·L·min(b, B_SAT)/PEAK_pre ) + c_srv·b + ovh
 | **Same-parameter form on a second stack** (A10 + vLLM, independent calibration) | TPOT error **0.8%** |
 | **Serving overhead is a property of the serving *process*** | `c_srv` vLLM / llama.cpp = **5.3–7.2×** on the same A10 |
 | Calibration repeatability (same config, two runs) | `bw` **±3%** · `c_srv` **±28%** (llama.cpp) / **±6%** (vLLM) |
+| **`BW` is a physical quantity** (three GPUs, same stack) | measured/nominal = **79–92%** — 249 / 472 / 776 GB/s vs 272 / 600 / 900 |
+| **Price of quality** (400-question benchmark) | **+10% cost per +1 pp** (cheapest segment 3.6%/pp, dearest 24.4%/pp) |
+| One quality tier is strictly dominated | `3B-q4_k_m` = `1.5B-q4_k_m` in accuracy (82.2%) but **48% pricier** |
 
 Data: **118 configuration cells / 388 session-level runs**, 0 silent failures
 (11 recorded port-conflict failures are kept in the raw data).
@@ -52,11 +55,14 @@ Data: **118 configuration cells / 388 session-level runs**, 0 silent failures
 | condition | status | evidence |
 |---|---|---|
 | long prompt (>1000 tok) × high concurrency (≥8) | ❌ unusable | **both stacks overestimate TTFT** (llama.cpp 2.33×, vLLM 8.49× growth at c16/c1) and underestimate TPOT by 20–40% → a model-form defect, not a stack defect |
-| mixed prompt lengths (long+short interleaved) | ❌ TTFT unusable | +45…+109% vs measured; TPOT still fine (17%) |
+| mixed prompt lengths (long+short interleaved) | ❌ TTFT unusable — **confirmed on both stacks** | per-request error **121%** (llama.cpp 4060), **146%** (llama.cpp V100), **121%** (vLLM A10) |
 | middle concurrency (8/12) TPOT | ⚠️ 20–25% low | serving overhead has a step at b≈8 (7B: 6× peak) |
 | SLA tail (p90) at concurrency ≥10 | ⚠️ optimistic ~2× | 28/132 cells flip from pass to fail at TTFT≤2000 ms |
-| different hardware / different backend | ⚠️ **attributable, not yet predictive** | `c_srv` measured on 2 GPUs × 2 stacks; `bw` 249→472 GB/s is only two points, so `TPOT ∝ W/BW` is not yet shown to be linear (V100 point pending) |
-| `PEAK_dec` | ❌ unidentifiable | decode arithmetic intensity ≈4 FLOP/byte vs GPU ridge ≈53 |
+| different hardware / different backend | ⚠️ **attributable, not yet predictive** | now 3 GPUs × 2 stacks: `bw` 249 / 472 / 776 GB/s against 272 / 600 / 900 nominal (79–92%); `c_srv` spans **5.0×** across GPUs for one stack |
+| `PEAK_dec` | ❌ unidentifiable | arithmetic intensity ≈4 FLOP/byte vs ridge ≈53; **three independent designs all failed** (see appendix §5.28) |
+| TTFT p90 tail | ❌ **must be measured** | no power law fits: R² = 0.46 pooled, 0.58 vLLM, 0.52 llama.cpp; at c32 the stack gap is **9.34× vs 1.74×** |
+| TPOT p90 tail | ✅ **predictable** | `CV = 1.09% + 1.21e-4·(b-1)^0.52·L^0.78` (R²=0.994); lognormal shape error 0.8% |
+| multi-turn TTFT | ⚠️ overestimated 30–47% on llama.cpp only | cause: **prefix KV reuse even with `cache_prompt=false`** (TTFT −31%; with cache on −94%); vLLM has no prefix cache → error only −3…−13% |
 
 ## Cross-hardware and cross-stack (2026-11-06, free A10 trial)
 
@@ -82,9 +88,35 @@ on a **second GPU** (A10 24 GB), same model, same request protocol, 6 probes eac
    **±28%** (llama.cpp) and **±6%** (vLLM), while `BW` only moves **±3%** —
    because `BW` is a physical quantity and `c_srv` is a sum of implementation details.
 
-Raw calibration files (6 × JSON, unmodified) are archived under `results/a10_raw/`.
+A third point (**V100 16 GB**) was added the next day: `BW` = **775.5 GB/s** (86% of nominal 900).
+
+| GPU (all llama.cpp) | nominal | measured | ratio | `c_srv` |
+|---|---|---|---|---|
+| RTX 4060 Laptop | 272 | 249.1 | 92% | 0.766 |
+| A10 24 GB | 600 | 471.5 | 79% | 1.529 |
+| **V100 16 GB** | **900** | **775.5** | **86%** | **3.848** |
+
+**Per-request jitter is cross-stack** (500+ tracked requests per cell, TPOT CV):
+
+| concurrency | 1 | 4 | 8 | 16 | 32 | r(log b) |
+|---|---|---|---|---|---|---|
+| llama.cpp | 1.5% | 7.0% | 13.7% | 18.0% | **20.8%** | **+0.989** |
+| vLLM | 1.1% | 7.9% | 13.2% | 19.4% | **25.9%** | **+0.989** |
+
+And it scales with prompt length: at c32 the CV goes **3.3% (L=64) → 7.2% (L=256) → 25.9% (L=1900)**.
+That single law explains why our earlier 136-cell local dataset (mostly L≈297) saw no trend.
+
+Raw calibration files (unmodified JSON) are archived under `results/a10_raw/`.
 
 ## Quickstart
+
+```bash
+bash scripts/reproduce.sh        # ~60 s, 8 groups of checks
+bash scripts/reproduce.sh --fast # skip refit, ~20 s
+```
+
+The last line must read `REPRODUCE PASS`. No GPU, no network, and it never
+modifies a tracked file (the refit is compared and then restored).
 
 ```powershell
 $py = "D:\llm\venv\Scripts\python.exe"     # this repo's venv
