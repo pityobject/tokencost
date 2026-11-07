@@ -1,0 +1,159 @@
+{
+  "conc": 8,
+  "ctx": 512,
+  "points": [
+    {
+      "label": "0.5B-q4_k_m",
+      "acc": 0.5725,
+      "cost": 979.6247802711378,
+      "dominated": false
+    },
+    {
+      "label": "1.5B-q8_0",
+      "acc": 0.8025,
+      "cost": 1796.79624023521,
+      "dominated": false
+    },
+    {
+      "label": "1.5B-q4_k_m",
+      "acc": 0.8225,
+      "cost": 1993.4112792938663,
+      "dominated": false
+    },
+    {
+      "label": "3B-q4_k_m",
+      "acc": 0.8225,
+      "cost": 2945.2309570245916,
+      "dominated": true
+    },
+    {
+      "label": "3B-q8_0",
+      "acc": 0.8425,
+      "cost": 2966.878613285928,
+      "dominated": false
+    },
+    {
+      "label": "7B-q4_k_m",
+      "acc": 0.91,
+      "cost": 5717.729687503947,
+      "dominated": false
+    }
+  ],
+  "frontier": [
+    {
+      "label": "0.5B-q4_k_m",
+      "acc": 0.5725,
+      "cost": 979.6247802711378
+    },
+    {
+      "label": "1.5B-q8_0",
+      "acc": 0.8025,
+      "cost": 1796.79624023521
+    },
+    {
+      "label": "1.5B-q4_k_m",
+      "acc": 0.8225,
+      "cost": 1993.4112792938663
+    },
+    {
+      "label": "3B-q8_0",
+      "acc": 0.8425,
+      "cost": 2966.878613285928
+    },
+    {
+      "label": "7B-q4_k_m",
+      "acc": 0.91,
+      "cost": 5717.729687503947
+    }
+  ],
+  "marginal": [
+    {
+      "from_": "1.5B-q4_k_m",
+      "to": "3B-q8_0",
+      "dq": 2.0,
+      "cost_ratio": 1.49,
+      "pct_per_pp": 24.4
+    },
+    {
+      "from_": "3B-q8_0",
+      "to": "7B-q4_k_m",
+      "dq": 6.8,
+      "cost_ratio": 1.93,
+      "pct_per_pp": 13.7
+    },
+    {
+      "from_": "1.5B-q8_0",
+      "to": "1.5B-q4_k_m",
+      "dq": 2.0,
+      "cost_ratio": 1.11,
+      "pct_per_pp": 5.5
+    },
+    {
+      "from_": "0.5B-q4_k_m",
+      "to": "1.5B-q8_0",
+      "dq": 23.0,
+      "cost_ratio": 1.83,
+      "pct_per_pp": 3.6
+    }
+  ],
+  "median_pct_cost_per_pp": 9.6,
+  "picks": [
+    {
+      "loss_pct": 0,
+      "pick": "7B-q4_k_m",
+      "pick_cost": 5717.729687503947,
+      "hard": "7B-q4_k_m",
+      "hard_cost": 5717.729687503947,
+      "hard_over_pick_pct": 0.0
+    },
+    {
+      "loss_pct": 2,
+      "pick": "7B-q4_k_m",
+      "pick_cost": 5717.729687503947,
+      "hard": "7B-q4_k_m",
+      "hard_cost": 5717.729687503947,
+      "hard_over_pick_pct": 0.0
+    },
+    {
+      "loss_pct": 4,
+      "pick": "7B-q4_k_m",
+      "pick_cost": 5717.729687503947,
+      "hard": "7B-q4_k_m",
+      "hard_cost": 5717.729687503947,
+      "hard_over_pick_pct": 0.0
+    },
+    {
+      "loss_pct": 6,
+      "pick": "7B-q4_k_m",
+      "pick_cost": 5717.729687503947,
+      "hard": "7B-q4_k_m",
+      "hard_cost": 5717.729687503947,
+      "hard_over_pick_pct": 0.0
+    },
+    {
+      "loss_pct": 8,
+      "pick": "3B-q8_0",
+      "pick_cost": 2966.878613285928,
+      "hard": "3B-q8_0",
+      "hard_cost": 2966.878613285928,
+      "hard_over_pick_pct": 0.0
+    },
+    {
+      "loss_pct": 10,
+      "pick": "1.5B-q4_k_m",
+      "pick_cost": 1993.4112792938663,
+      "hard": "1.5B-q4_k_m",
+      "hard_cost": 1993.4112792938663,
+      "hard_over_pick_pct": 0.0
+    },
+    {
+      "loss_pct": 12,
+      "pick": "1.5B-q8_0",
+      "pick_cost": 1796.79624023521,
+      "hard": "1.5B-q4_k_m",
+      "hard_cost": 1993.4112792938663,
+      "hard_over_pick_pct": 10.9
+    }
+  ],
+  "note": "成本用稳态 cost_gpu_s_per_1m；质量用 400 题准确率"
+}

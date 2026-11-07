@@ -101,6 +101,7 @@ COMMANDS = {
     "peakb":         ("tc_measure_peak_pair.py", []),
     "tailvar":       ("tc_tail_variance.py", []),
     "tailpredict":   ("tc_tail_predict.py", []),
+    "pareto":        ("tc_pareto_quality.py", []),
     "tailflip":      ("tc_tail_flip.py", []),
     "datadict":      ("tc_docs_data.py", []),
     "audit":         ("tc_audit.py", []),

@@ -485,6 +485,19 @@ def build_claims(d):
         claims[_label] = (f"{_r['n_holdout']} 格 · MAPE {_r['mape_cost']:.2f}% · "
                           f"覆盖率 {_r['coverage']*100:.1f}%")
 
+    _pq = RESULTS / "pareto_quality.json"
+    if _pq.exists():
+        _d = json.loads(_pq.read_text(encoding="utf-8"))
+        _lbl = [p["label"] for p in _d["points"] if p["dominated"]]
+        claims["质量-成本前沿：被支配的组合"] = (
+            "、".join(_lbl) if _lbl else "无")
+        claims["质量的价格（中位，每 1 pp）"] = (
+            f"+{_d['median_pct_cost_per_pp']:.0f}% 成本")
+        _cheap = min(_d["marginal"], key=lambda r: r["pct_per_pp"])
+        _dear = max(_d["marginal"], key=lambda r: r["pct_per_pp"])
+        claims["质量价格的最便宜段 / 最贵段"] = (
+            f"{_cheap['from_']}→{_cheap['to']} +{_cheap['pct_per_pp']:.1f}% / "
+            f"{_dear['from_']}→{_dear['to']} +{_dear['pct_per_pp']:.1f}%")
     claims["TTFT 尾部律的拟合度（两栈合并 / 单栈）"] = (
         "R²=0.46（合并）／0.58（vLLM）／0.52（llama.cpp）→ 不可用幂律预测")
     claims["TTFT 尾部的栈差异（c32, L≈1900）"] = (
