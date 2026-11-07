@@ -103,7 +103,10 @@ def evaluate(params, fit, cell, prompt_mean=256.0, prompt_sigma=0.5,
     need_ctx = int(prompt_mean * np.exp(1.645 * prompt_sigma) + cfg.GEN_TOKENS)
     sim = simulate(params, cell["model"], cell["quant"], int(cell["conc"]),
                    prompt_mean, prompt_sigma, ctx=int(cell["ctx"]))
-    ttft_hi = sim["ttft_cvar90"] * np.exp(hl)
+    # 【P1-1】TTFT 与 TPOT 的残差分布不同，不能共用同一个半宽。
+    # 以前拿 TPOT 的半宽去卡 TTFT，会让 SLA 判定偏乐观（TTFT 实际覆盖率只有 ~68%）。
+    hl_ttft = float(fit.get("half_width_log_ttft", hl))
+    ttft_hi = sim["ttft_cvar90"] * np.exp(hl_ttft)
     tpot_hi = sim["tpot_cvar90"] * np.exp(hl)
     return dict(
         cell_id=cfg.cell_id(cell["model"], cell["quant"], cell["ctx"], cell["conc"],

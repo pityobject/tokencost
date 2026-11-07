@@ -647,6 +647,14 @@ def build_claims(d):
             f"logprobs {_dd.get('logprobs', 0):+.2f} ms/步、"
             f"推流 {_d.get('sse_overhead_total_ms', 0):+.1f} ms/请求（负=流式更快）")
     # v8 复核 P0-4：这些数字以前只在散文里，claims 抓不到 → 漂移不报警。
+    _fit_fp0 = RESULTS / "fit.json"
+    if _fit_fp0.exists():
+        _f0 = json.loads(_fit_fp0.read_text(encoding="utf-8"))
+        if _f0.get("coverage_cost") is not None:
+            claims["分口径覆盖率（TPOT / 成本 / TTFT）"] = (
+                f"{_f0['coverage']*100:.1f}% / {_f0['coverage_cost']:.1f}% / {_f0['coverage_ttft']:.1f}%")
+            claims["TTFT 的 90% 半宽（与 TPOT 分开）"] = (
+                f"{_f0.get('half_width_log_ttft', 0):.4f}（TPOT 为 {_f0['half_width_log']:.4f}）")
     _fit_fp = RESULTS / "fit.json"
     if _fit_fp.exists():
         _f = json.loads(_fit_fp.read_text(encoding="utf-8"))

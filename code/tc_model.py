@@ -239,6 +239,15 @@ def report(pred, params, sigma_noise=0.0, repeats=3, n_params_fit=3):
     t_90 = float(st.t.ppf(0.95, df))
     half = t_90 * sigma_pred
     inside = float(np.mean(np.abs(hold["log_resid"]) <= half)) if len(hold) else float("nan")
+
+    # 【P1-1】同一半宽套到成本/TTFT 上是错的：它们残差分布不同。
+    # 分别算各自的覆盖率，并单独给 TTFT 一个半宽（SLA 主要看 TTFT）。
+    hl_cost = np.log(hold["ratio_cost"]) if "ratio_cost" in hold else None
+    hl_ttft = (np.log(hold["meas_ttft"] / hold["pred_ttft_ms"])
+               if {"meas_ttft", "pred_ttft_ms"} <= set(hold.columns) else None)
+    cov_cost = float(np.mean(np.abs(hl_cost) <= half) * 100) if hl_cost is not None else float("nan")
+    cov_ttft = float(np.mean(np.abs(hl_ttft) <= half) * 100) if hl_ttft is not None else float("nan")
+    half_ttft = float(np.quantile(np.abs(hl_ttft), 0.90)) if hl_ttft is not None else float("nan")
     # 把"是否落在 90% 区间内"写成列，方便按不同口径重算覆盖率
     # （第三轮审计要求三套口径并报，覆盖率也必须能分口径算）
     hold = hold.copy()
@@ -269,7 +278,9 @@ def report(pred, params, sigma_noise=0.0, repeats=3, n_params_fit=3):
     print(f"  单位成本 MAPE        {mape_cost:6.2f} %     （目标 ≤ 8%）")
     print(f"  TPOT MAPE            {mape_tpot:6.2f} %")
     print(f"  单点最大误差         {max_err:6.2f} %     （目标 ≤ 20%）")
-    print(f"  90% 预测区间覆盖率    {inside*100:6.1f} %   （目标 82%–96%）")
+    print(f"  90% 预测区间覆盖率    {inside*100:6.1f} %   （目标 82%–96%，**口径 = TPOT**）")
+    print(f"    分口径：成本 {cov_cost:5.1f} %｜TTFT {cov_ttft:5.1f} %"
+          f"（同一半宽套三处；TTFT 自有的 90% 半宽 {half_ttft:.4f}）")
 
     # 按"并发是否在标定网格内"分组报告 —— 这是模型的适用边界
     calib_concs = {c[3] for c in cfg.CALIB_CELLS}
@@ -364,7 +375,10 @@ def report(pred, params, sigma_noise=0.0, repeats=3, n_params_fit=3):
                 ovh_ttft=params["ovh_ttft_ms"],
                 mape_cost=mape_cost, mape_tpot=mape_tpot, max_err=max_err,
                 coverage=inside, sigma_log=sigma_pred, sigma_noise=sigma_noise,
-                half_width_log=half, passed=bool(ok_mape and ok_max),
+                half_width_log=half, coverage_cost=round(cov_cost, 2),
+            coverage_ttft=round(cov_ttft, 2),
+            half_width_log_ttft=round(half_ttft, 5),
+            passed=bool(ok_mape and ok_max),
                 coverage_ok=bool(ok_cov),
                 # 数据规模写进产物：CLAIMS 之前只能靠默认值 68，一旦 --population 变了会静默失配
                 n_holdout=int(len(hold)), n_calib=int(len(cal)),
@@ -573,7 +587,8 @@ def main():
     sigma_noise = estimate_noise_sigma(calib_ids, cfg.REPEATS)
     print(f"格内重复的测量噪声 σ_noise = {sigma_noise:.4f}（对数尺度）")
     pred = evaluate(df, params, calib_ids)
-    summary = report(pred, params, sigma_noise=sigma_noise, repeats=cfg.REPEATS)
+    summary = report(pred, params, sigma_noise=sigma_noise, repeats=cfg.REPEATS,
+                     n_params_fit=6)   # v8 复核 P1-2：模型有 6 个参数，不是 3
 
     if args.bootstrap:
         ci, n_ok = bootstrap_params(calib, n_boot=args.bootstrap)

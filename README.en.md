@@ -39,7 +39,7 @@ TTFT(L) = max( W/BW , 2·P·L·min(b, B_SAT)/PEAK_pre ) + c_srv·b + ovh
 | — random 12-point re-splits (30 runs, 5–95%) | **9.1%–13.9%** |
 | Prediction-interval coverage (target 90%) | 86.8% |
 | Decision regret vs oracle (16 scenarios) | **0.0%** (random baseline 274%) |
-| Cross-family transfer (Llama-3.2-1B, zero recalibration) | 11.6% |
+| Cross-family transfer (Llama-3.2-1B, zero recalibration) | **12.3%** (steady-basis cost MAPE; 11.6% on wall-clock) |
 | **Same-parameter form on a second stack** (A10 + vLLM, independent calibration) | TPOT error **0.8%** |
 | **Serving overhead is a property of the serving *process*** | `c_srv` vLLM / llama.cpp = **5.3–7.2×** on the same A10 |
 | Calibration repeatability (same config, two runs) | `bw` **±3%** · `c_srv` **±28%** (llama.cpp) / **±6%** (vLLM) |

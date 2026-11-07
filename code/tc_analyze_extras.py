@@ -99,7 +99,8 @@ def xfamily():
     cost_err, other_err = [], []
     for _, r in xf.iterrows():
         pr = tm.predict(params, r)
-        ec = pr["pred_cost_gpu_s_per_1m"] / r["cost_gpu_s_per_1m"] - 1
+        # 【P1-3】主指标是稳态口径；这里原来读的是墙钟列，导致"与主指标同口径"的说法不成立。
+        ec = pr["pred_cost_gpu_s_per_1m"] / r["steady_cost_gpu_s_per_1m"] - 1
         e1 = pr["pred_tpot_ms"] / r["tpot_p50_ms"] - 1
         e2 = pr["pred_ttft_ms"] / r["ttft_p50_ms"] - 1
         cost_err.append(abs(ec))
