@@ -487,6 +487,16 @@ def build_claims(d):
 
     claims["ubatch 对高并发 TTFT（c32, L=307）"] = (
         "ub=64 → **2464 ms** ／ ub=512 → **438 ms**（**5.6×** 差距；c32/c1 从 20.1× 降到 5.7×）")
+    _jr = RESULTS / "jitter_residual_test.json"
+    if _jr.exists():
+        _d = json.loads(_jr.read_text(encoding="utf-8"))
+        _a = _d.get("a10") or {}
+        claims["抖动与 TPOT 残差的相关（A10 / 本机）"] = (
+            f"A10 r={_a.get('corr_cv', 0):+.2f}（CV 中位 7.6%）／"
+            f"本机 r={_d.get('corr_cv', 0):+.2f}（CV 中位 1.5%，无信号）")
+        claims["抖动修正的跨栈迁移（每栈 k）"] = (
+            "vLLM→llama.cpp k=1.16（改善 21%）／llama.cpp→vLLM k=2.24（变差 4%）"
+            " → k 随栈变，不可当通用修正项")
     _ub = RESULTS / "a10_raw" / "ubatch_sweep_a10.json"
     if _ub.exists():
         _d = json.loads(_ub.read_text(encoding="utf-8"))
