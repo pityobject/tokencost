@@ -44,7 +44,10 @@ def load_grid():
                 L=float(m.get("L") or 0),
                 ttft=float(m["ttft"]),
                 tpot=float(m["tpot"]),
-                throughput=float(m.get("throughput") or float("nan")),
+                # tc_profile 不写 throughput：用稳态定义从 ttft/tpot 推
+                throughput=float(m.get("throughput") or
+                                 (int(m["conc"]) * int(m.get("gen") or 128) /
+                                  ((float(m["ttft"]) + int(m.get("gen") or 128) * float(m["tpot"])) / 1e3))),
                 gen=int(m.get("gen") or 128),
             ))
     df = pd.DataFrame(rows)
