@@ -308,6 +308,41 @@ def audit_contract(files):
 
 
 # ---------------------------------------------------------------- 主流程
+
+
+def audit_discoverability(files):
+    """反向契约：code/ 下的脚本必须**可被发现**（注册进 tc.py、被 import、或文档提到）。
+
+    历史上"两套实现"的坑多来自这里：某个脚本没人引用，被当成"权威实现"复制一遍。
+    这条不判失败，只报告"没人引用"的脚本清单，逼着每次新增脚本时想一下入口。
+    """
+    code_dir = ROOT / "code"
+    scripts = sorted(p for p in code_dir.glob("tc_*.py"))
+    cli_src = (code_dir / "tc.py").read_text(encoding="utf-8", errors="replace")
+    # 收集全仓对脚本名的引用（tc.py、其他脚本、文档）
+    corpus = []
+    for f in list(ROOT.glob("*.md")) + list((ROOT / "报告").glob("*.md")) + \
+            list(code_dir.glob("*.py")) + list((ROOT / "docs").rglob("*.md")):
+        try:
+            corpus.append(f.read_text(encoding="utf-8", errors="replace"))
+        except Exception:
+            pass
+    blob = "\n".join(corpus)
+    orphans = []
+    for sc in scripts:
+        name = sc.stem
+        if name == "tc":
+            continue
+        in_cli = f'"{name}"' in cli_src or f"{name}." in cli_src
+        n_imports = sum(1 for f in code_dir.glob("*.py")
+                        if f != sc and f"import {name}" in f.read_text(encoding="utf-8", errors="replace"))
+        n_docs = blob.count(f"{name}.")
+        if not in_cli and n_imports == 0 and n_docs <= 1:
+            orphans.append(name)
+    ok = len(orphans) == 0
+    return ok, f"{len(scripts)} 个脚本，{len(orphans)} 个既未接入 tc.py 也无人引用", orphans
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--fast", action="store_true", help="跳过裸克隆模拟")
@@ -325,6 +360,15 @@ def main():
         audit_selfcontained(files)
     audit_data(files)
     audit_contract(files)
+
+    # 【反向契约】脚本可发现性：报告但不判失败（一次性分析脚本是合理的），
+    # 目的是让"新增了脚本但没接入任何入口"这件事每次都可见。
+    _ok, _msg, _orphans = audit_discoverability(files)
+    print(f"\n[脚本可发现性] {_msg}")
+    if _orphans:
+        print("  既未接入 tc.py 也无人引用（按需运行即可，确认不是\u201c另一套实现\u201d）：")
+        for _n in _orphans:
+            print(f"    · {_n}.py")
 
     n_ok = sum(1 for r in RESULTS if r["ok"])
     n = len(RESULTS)

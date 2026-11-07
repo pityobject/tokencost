@@ -171,6 +171,42 @@ def consistent_checks(text, rel, line_no, line):
     return out
 
 
+
+
+def check_table_index(rel, text):
+    """表格首列若全为整数，必须严格递增。
+
+    为什么需要：结论表编号乱过三次（1,2,3,4,5,8,7,6 → 修好 → 又变 9,12,11,10）。
+    每次都是"新增一条结论"时手工插入导致的，而没有任何检查在守。
+    """
+    problems = []
+    lines = text.splitlines()
+    i = 0
+    while i < len(lines):
+        if not lines[i].lstrip().startswith("|"):
+            i += 1
+            continue
+        start = i
+        block = []
+        while i < len(lines) and lines[i].lstrip().startswith("|"):
+            block.append(lines[i])
+            i += 1
+        if len(block) < 3:
+            continue
+        rows = block[2:]          # 跳过表头与分隔行
+        nums = []
+        for r in rows:
+            cells = [c.strip() for c in r.strip().strip("|").split("|")]
+            if not cells or not re.fullmatch(r"\d+", cells[0] or ""):
+                nums = []
+                break
+            nums.append(int(cells[0]))
+        if len(nums) >= 3:
+            if any(b <= a for a, b in zip(nums, nums[1:])):
+                problems.append((rel, start + 1, "表格编号不递增", str(nums[:14])))
+    return problems
+
+
 def main():
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser()
@@ -179,6 +215,13 @@ def main():
 
     hits = []
     consistency = []
+    # 表格编号递增（结论表编号乱过三次）
+    idx_bad = []
+    for rel in TARGETS:
+        p = ROOT / rel
+        if p.exists():
+            idx_bad += check_table_index(rel, p.read_text(encoding="utf-8"))
+
     # 覆盖度：关键结论必须出现在 README.md
     readme = ROOT / "README.md"
     cov_missing = []
@@ -187,6 +230,12 @@ def main():
         for label, options in COVERAGE:
             if not any(o in text for o in options):
                 cov_missing.append((label, options[0]))
+
+    if idx_bad:
+        print(f"[LINT][FAIL] {len(idx_bad)} 处表格编号不递增（新增行时手工插入的典型后遗症）：")
+        for rel, ln, kind, nums in idx_bad:
+            print(f"    {rel}:{ln}  {kind}  {nums}")
+        sys.exit(1)
 
     # 覆盖度缺失是硬失败（不受 --strict 影响）：这些是对外卖点，不能只躺在附录里
     if cov_missing:
