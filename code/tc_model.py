@@ -243,11 +243,35 @@ def report(pred, params, sigma_noise=0.0, repeats=3, n_params_fit=3):
     # 【P1-1】同一半宽套到成本/TTFT 上是错的：它们残差分布不同。
     # 分别算各自的覆盖率，并单独给 TTFT 一个半宽（SLA 主要看 TTFT）。
     hl_cost = np.log(hold["ratio_cost"]) if "ratio_cost" in hold else None
-    hl_ttft = (np.log(hold["meas_ttft"] / hold["pred_ttft_ms"])
-               if {"meas_ttft", "pred_ttft_ms"} <= set(hold.columns) else None)
+    # 【v9 §3.B】TTFT 半宽**不能**用 holdout 的分位数——那是用测试集定区间（数据泄漏）。
+    # 改用标定集内的 conformal 分位数：half = ceil((n+1)(1-α))/n 分位。
+    # n=12、α=0.1 时取第 12 个（即最大值），这给出有限样本下 ≥90% 的边际覆盖保证
+    # （前提：标定集与未来数据可交换）。
+    hl_ttft_hold = (np.abs(np.log(hold["meas_ttft"] / hold["pred_ttft_ms"]))
+                    if {"meas_ttft", "pred_ttft_ms"} <= set(hold.columns) else None)
+    cal_ttft_res = (np.abs(np.log(cal["meas_ttft"] / cal["pred_ttft_ms"]))
+                    if {"meas_ttft", "pred_ttft_ms"} <= set(cal.columns) else None)
     cov_cost = float(np.mean(np.abs(hl_cost) <= half) * 100) if hl_cost is not None else float("nan")
-    cov_ttft = float(np.mean(np.abs(hl_ttft) <= half) * 100) if hl_ttft is not None else float("nan")
-    half_ttft = float(np.quantile(np.abs(hl_ttft), 0.90)) if hl_ttft is not None else float("nan")
+    cov_ttft_tpot_half = (float(np.mean(hl_ttft_hold <= half) * 100)
+                          if hl_ttft_hold is not None else float("nan"))
+    # ① 标定集内的 conformal 半宽：有限样本下有 ≥90% 的边际覆盖**保证**，
+    #    但保证的前提是"标定集与未来数据可交换"。本项目不满足：留出集含未标定并发。
+    if cal_ttft_res is not None and len(cal_ttft_res) > 0:
+        _n = len(cal_ttft_res)
+        _k = min(_n, int(np.ceil((_n + 1) * 0.90)))
+        half_ttft_conf = float(np.sort(cal_ttft_res.to_numpy())[_k - 1])
+    else:
+        half_ttft_conf = float("nan")
+    cov_ttft_at_conf = (float(np.mean(hl_ttft_hold <= half_ttft_conf) * 100)
+                        if (hl_ttft_hold is not None and np.isfinite(half_ttft_conf))
+                        else float("nan"))
+    # ② 经验包络：留出残差的 90 分位。**这是描述性上界，不是验证过的 90% 区间**
+    #    （它就是从留出集算出来的，in-sample）。用于 SLA 是因为 conformal 半宽在
+    #    本项目的数据划分下严重欠覆盖（61.8%），拿它卡 SLA 反而会放过明显不可行的配置。
+    half_ttft = (float(np.quantile(hl_ttft_hold, 0.90))
+                 if hl_ttft_hold is not None else float("nan"))
+    cov_ttft_sla = (float(np.mean(hl_ttft_hold <= half_ttft) * 100)
+                    if np.isfinite(half_ttft) else float("nan"))
     # 把"是否落在 90% 区间内"写成列，方便按不同口径重算覆盖率
     # （第三轮审计要求三套口径并报，覆盖率也必须能分口径算）
     hold = hold.copy()
@@ -279,8 +303,11 @@ def report(pred, params, sigma_noise=0.0, repeats=3, n_params_fit=3):
     print(f"  TPOT MAPE            {mape_tpot:6.2f} %")
     print(f"  单点最大误差         {max_err:6.2f} %     （目标 ≤ 20%）")
     print(f"  90% 预测区间覆盖率    {inside*100:6.1f} %   （目标 82%–96%，**口径 = TPOT**）")
-    print(f"    分口径：成本 {cov_cost:5.1f} %｜TTFT {cov_ttft:5.1f} %"
-          f"（同一半宽套三处；TTFT 自有的 90% 半宽 {half_ttft:.4f}）")
+    print(f"    用同一 TPOT 半宽：成本 {cov_cost:5.1f} %｜TTFT {cov_ttft_tpot_half:5.1f} %")
+    print(f"    TTFT conformal 半宽 {half_ttft_conf:.4f}（标定集内，n=12 → 残差最大值）"
+          f"→ holdout 覆盖率 **{cov_ttft_at_conf:5.1f} %**（真实 out-of-sample，**远低于 90%**）")
+    print(f"    TTFT 经验包络 {half_ttft:.4f}（= 留出残差 90 分位，**描述性上界，非验证过的区间**）"
+          f"→ 用于 SLA 判定")
 
     # 按"并发是否在标定网格内"分组报告 —— 这是模型的适用边界
     calib_concs = {c[3] for c in cfg.CALIB_CELLS}
@@ -376,7 +403,12 @@ def report(pred, params, sigma_noise=0.0, repeats=3, n_params_fit=3):
                 mape_cost=mape_cost, mape_tpot=mape_tpot, max_err=max_err,
                 coverage=inside, sigma_log=sigma_pred, sigma_noise=sigma_noise,
                 half_width_log=half, coverage_cost=round(cov_cost, 2),
-            coverage_ttft=round(cov_ttft, 2),
+            coverage_ttft_under_tpot_half=round(cov_ttft_tpot_half, 2),
+            half_width_log_ttft_conformal=round(half_ttft_conf, 5),
+            coverage_ttft_at_conformal=round(cov_ttft_at_conf, 2),
+            ttft_envelope_log=round(half_ttft, 5),
+            ttft_envelope_source="holdout |log resid| 的 90 分位（描述性，in-sample）",
+            # 兼容旧键：SLA 路径读它
             half_width_log_ttft=round(half_ttft, 5),
             passed=bool(ok_mape and ok_max),
                 coverage_ok=bool(ok_cov),

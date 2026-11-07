@@ -60,6 +60,8 @@ def build_grid():
                   c_srv_ms=fit["c_srv"], b_sat=fit["b_sat"],
                   ovh_ttft_ms=fit["ovh_ttft"])
     half_log = float(fit.get("half_width_log", 0.0))
+    # 【v9 §3.A】TTFT 用独立包络，别再拿 TPOT 半宽卡首字延迟
+    half_ttft = float(fit.get("ttft_envelope_log", half_log))
     quality = load_quality()
     best_acc = max(quality.values()) if quality else None
 
@@ -75,7 +77,7 @@ def build_grid():
                 m=c["model"], q=c["quant"], ctx=c["ctx"], b=c["conc"], pm=pm,
                 need=round(need_ctx),
                 vram=round(float(c["vram_est_gb"]), 2),
-                ttft=round(sim["ttft_cvar90"] * np.exp(half_log), 1),
+                ttft=round(sim["ttft_cvar90"] * np.exp(half_ttft), 1),
                 tpot=round(sim["tpot_cvar90"] * np.exp(half_log), 2),
                 tps=round(sim["throughput_tps"], 1),
                 cost=round(sim["cost_gpu_s_per_1m"], 0),

@@ -25,15 +25,19 @@ FAST=0
 [ "${1:-}" = "--fast" ] && FAST=1
 
 PY=""
-# Windows 上 `python3` 常常是应用商店的占位符（运行会弹商店而不是执行），
-# 所以优先用 python，并**验证它能真正打印版本**再采用。
-for c in python python3 "D:/llm/venv/Scripts/python.exe"; do
-  if command -v "$c" >/dev/null 2>&1; then
-    if "$c" -c "import sys;print(sys.version_info[0])" >/dev/null 2>&1; then
-      PY="$c"; break
-    fi
+# 选解释器不能只看"能打印版本"：系统里可能有个 3.14 但 numpy DLL 坏掉。
+# 顺序：仓库约定的 venv → 系统 python → python3；并且**验证依赖能 import**。
+for c in "D:/llm/venv/Scripts/python.exe" python python3; do
+  command -v "$c" >/dev/null 2>&1 || continue
+  if "$c" -c "import sys, numpy, pandas, scipy, httpx; assert sys.version_info>=(3,9)" >/dev/null 2>&1; then
+    PY="$c"; break
   fi
 done
+if [ -z "$PY" ]; then
+  echo "找不到装有 numpy/pandas/scipy/httpx 的 Python（>=3.9）。"
+  echo "Windows 推荐改跑 PowerShell 版：powershell -ExecutionPolicy Bypass -File scripts/reproduce.ps1"
+  exit 1
+fi
 [ -z "$PY" ] && { echo "❌ 找不到 python"; exit 1; }
 
 PASS=0; FAIL=0

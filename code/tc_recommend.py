@@ -225,6 +225,11 @@ def main():
         half_log = Z_90 * args.sigma_log
     else:
         half_log = fit.get("half_width_log", Z_90 * fit.get("sigma_log", 0.1))
+    # 【v9 §3.A】TTFT 与 TPOT 残差分布不同，不能共用半宽。
+    # TTFT 用 fit.json 的"经验包络"（holdout |残差| 的 90 分位；**描述性上界**，
+    # 不是验证过的 90% 区间——真实 out-of-sample 覆盖率见 fit.json 的
+    # coverage_ttft_at_conformal）。缺字段时退回 TPOT 半宽（旧行为）。
+    half_ttft = float(fit.get("ttft_envelope_log", half_log))
     tails = load_measured_tails() if args.tail == "measured" else {}
     if args.tail == "measured" and not tails:
         # 缺产物时不要静默退回假设口径——明确告警并说明后果
@@ -241,7 +246,8 @@ def main():
     print(f"请求长度：均值 {args.prompt_mean:.0f} token，对数标准差 {args.prompt_sigma}")
     print(f"模型参数：带宽 {params['bw_gbs']:.0f} GB/s，算力 {params['peak_tflops']:.0f} TFLOP/s，"
           f"服务开销 {params['c_srv_ms']:.2f} ms/流，prefill 饱和 {params['b_sat']:.0f}，"
-          f"首字固定 {params['ovh_ttft_ms']:.1f} ms；90% 预测区间 ±{half_log*100:.1f}%")
+          f"首字固定 {params['ovh_ttft_ms']:.1f} ms；"
+          f"误差半宽：TPOT ±{half_log*100:.1f}%、TTFT ±{half_ttft*100:.1f}%（经验包络）")
     print("=" * 78)
 
     # 请求长度的 95 分位：用来检查"这一格的每槽位上下文装不装得下这种请求"。
@@ -255,7 +261,7 @@ def main():
         sim = simulate(params, c["model"], c["quant"], c["conc"],
                        args.prompt_mean, args.prompt_sigma, ctx=c["ctx"])
         # 把模型自身的不确定性加到延迟上：90% 预测区间的上界
-        ttft_hi = sim["ttft_cvar90"] * np.exp(half_log)
+        ttft_hi = sim["ttft_cvar90"] * np.exp(half_ttft)
         tpot_hi = sim["tpot_cvar90"] * np.exp(half_log)
         acc = quality.get((c["model"], c["quant"]), float("nan"))
         ok_quality = True if best_acc is None else (acc >= best_acc - args.min_acc_drop / 100.0)

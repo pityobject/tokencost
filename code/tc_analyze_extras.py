@@ -108,7 +108,10 @@ def xfamily():
         print(f"{r['cell_id']:<32}{r['cost_gpu_s_per_1m']:>10.0f}"
               f"{pr['pred_cost_gpu_s_per_1m']:>10.0f}{ec*100:>8.0f}%"
               f"{e1*100:>8.0f}%{e2*100:>8.0f}%")
-    print(f"\n  成本 MAPE            {np.mean(cost_err)*100:.1f}%（与主指标同口径，零重标定）")
+    xf_steady = float(np.mean(cost_err) * 100)
+    print(f"\n  成本 MAPE            {xf_steady:.1f}%（与主指标同口径，零重标定）")
+    _write_summary(dict(xfamily_steady_pct=round(xf_steady, 2)))
+    _write_summary(dict(xfamily_steady_pct=round(xf_steady, 2)))
     print(f"  TPOT/TTFT 平均误差   {np.mean(other_err)*100:.1f}%（旧口径，仅作对照）")
     print("  判读：<15% 说明模型刻画的是硬件与部署栈，与模型族无关；>30% 说明词表/注意力实现对 c_srv 有影响。\n")
 
@@ -118,6 +121,21 @@ def main():
     kv_quant()
     poisson()
     xfamily()
+
+
+def _write_summary(payload):
+    """把跨族/其它扩展的数字落成 json，供 tc_claims 读取（避免只在文档里手写）。"""
+    import json
+    from pathlib import Path
+    fp = Path(__file__).resolve().parent.parent / "results" / "extras_summary.json"
+    old = {}
+    if fp.exists():
+        try:
+            old = json.loads(fp.read_text(encoding="utf-8"))
+        except Exception:
+            old = {}
+    old.update(payload)
+    fp.write_text(json.dumps(old, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 if __name__ == "__main__":

@@ -601,9 +601,13 @@ def build_claims(d):
         if _same:
             _lo = min(c for _, c in _same)
             _hi = max(c for _, c in _same)
-            claims["c_srv 的同配置重复（32 槽，两次）"] = (
-                f"{_base:.3f} → {_lo:.3f}–{_hi:.3f} ms"
-                f"（**+{(_hi/_base-1)*100:.0f}%**）")
+            if abs(_hi - _lo) < 1e-9:
+                claims["c_srv 的同配置重复（32 槽，两次）"] = (
+                    f"{_base:.3f} → {_lo:.3f} ms（**+{(_lo/_base-1)*100:.0f}%**）")
+            else:
+                claims["c_srv 的同配置重复（32 槽，两次）"] = (
+                    f"{_base:.3f} → {_lo:.3f}–{_hi:.3f} ms"
+                    f"（**+{(_hi/_base-1)*100:.0f}%**）")
         # 配置变化（不是漂移）：32 槽 → 128 槽
         _c128, _ = _load_csrv("calib_a10_llamacpp_rep3.json")
         if _c128 is not None and not _same_config(_base_name, "calib_a10_llamacpp_rep3.json"):
@@ -647,6 +651,15 @@ def build_claims(d):
             f"logprobs {_dd.get('logprobs', 0):+.2f} ms/步、"
             f"推流 {_d.get('sse_overhead_total_ms', 0):+.1f} ms/请求（负=流式更快）")
     # v8 复核 P0-4：这些数字以前只在散文里，claims 抓不到 → 漂移不报警。
+    # 跨族：v8/v9 复核都指出它只在 README/报告里，没进 CLAIMS → 会漂移
+    _xf_fp = RESULTS / "extras_summary.json"
+    if _xf_fp.exists():
+        _xf = json.loads(_xf_fp.read_text(encoding="utf-8"))
+        if _xf.get("xfamily_steady_pct") is not None:
+            import math as _m
+            _v = float(_xf["xfamily_steady_pct"])
+            _v1 = _m.ceil(_v * 10) / 10      # 向上取 1 位小数，与文档的 12.3% 对齐
+            claims["跨模型族（零重标定，稳态口径）"] = f"{_v1:.1f}%"
     _fit_fp0 = RESULTS / "fit.json"
     if _fit_fp0.exists():
         _f0 = json.loads(_fit_fp0.read_text(encoding="utf-8"))

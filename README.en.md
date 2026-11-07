@@ -36,8 +36,8 @@ TTFT(L) = max( W/BW , 2·P·L·min(b, B_SAT)/PEAK_pre ) + c_srv·b + ovh
 | Held-out cost MAPE (core, 12 calib → 68 unseen cells) | **8.58%** |
 | — same, at the calibrated concurrencies | **5.5%** |
 | — at uncalibrated concurrencies | 11.4% |
-| — random 12-point re-splits (30 runs, 5–95%) | **9.1%–13.9%** |
-| Prediction-interval coverage (target 90%) | 86.8% |
+| — random 12-point re-splits (30 runs, 5–95%) | **8.54%–12.28%** (median 9.96%; this split 8.58% ranks ~7th pct) |
+| Prediction-interval coverage (target 90%) | **TPOT 86.8%**, cost 80.9%, TTFT 67.7% (same half-width) |
 | Decision regret vs oracle (16 scenarios) | **0.0%** (random baseline 274%) |
 | Cross-family transfer (Llama-3.2-1B, zero recalibration) | **12.3%** (steady-basis cost MAPE; 11.6% on wall-clock) |
 | **Same-parameter form on a second stack** (A10 + vLLM, independent calibration) | TPOT error **0.8%** |
