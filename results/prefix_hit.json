@@ -1,0 +1,93 @@
+{
+  "fits": {
+    "llama.cpp (V100)": {
+      "h": 0.32,
+      "err_before_pct": 38.0,
+      "err_after_pct": 3.6,
+      "detail": [
+        {
+          "turn": 2,
+          "L": 533,
+          "measured": 87.2,
+          "pred": 93.5,
+          "err_pct": 7.3
+        },
+        {
+          "turn": 3,
+          "L": 815,
+          "measured": 129.3,
+          "pred": 124.8,
+          "err_pct": -3.4
+        },
+        {
+          "turn": 4,
+          "L": 1098,
+          "measured": 158.3,
+          "pred": 156.3,
+          "err_pct": -1.3
+        },
+        {
+          "turn": 5,
+          "L": 1382,
+          "measured": 177.4,
+          "pred": 187.9,
+          "err_pct": 5.9
+        },
+        {
+          "turn": 6,
+          "L": 1664,
+          "measured": 219.3,
+          "pred": 219.3,
+          "err_pct": -0.0
+        }
+      ]
+    },
+    "vLLM (A10)": {
+      "h": 0.0,
+      "err_before_pct": 9.8,
+      "err_after_pct": 9.8,
+      "detail": [
+        {
+          "turn": 2,
+          "L": 533,
+          "measured": 59.5,
+          "pred": 55.0,
+          "err_pct": -7.6
+        },
+        {
+          "turn": 3,
+          "L": 814,
+          "measured": 87.1,
+          "pred": 77.5,
+          "err_pct": -11.0
+        },
+        {
+          "turn": 4,
+          "L": 1095,
+          "measured": 106.6,
+          "pred": 100.1,
+          "err_pct": -6.1
+        },
+        {
+          "turn": 5,
+          "L": 1376,
+          "measured": 141.3,
+          "pred": 122.7,
+          "err_pct": -13.2
+        },
+        {
+          "turn": 6,
+          "L": 1657,
+          "measured": 162.9,
+          "pred": 145.2,
+          "err_pct": -10.8
+        }
+      ]
+    }
+  },
+  "reference": {
+    "cache_off_h": 0.31,
+    "cache_on_h": 0.94
+  },
+  "note": "h = 有效前缀命中率，写成 (1-h)·L 的 prefill；它是部署属性（有无前缀缓存 + 请求重叠度），不是模型常数"
+}

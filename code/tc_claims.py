@@ -485,6 +485,16 @@ def build_claims(d):
         claims[_label] = (f"{_r['n_holdout']} 格 · MAPE {_r['mape_cost']:.2f}% · "
                           f"覆盖率 {_r['coverage']*100:.1f}%")
 
+    _ph = RESULTS / "prefix_hit.json"
+    if _ph.exists():
+        _d = json.loads(_ph.read_text(encoding="utf-8"))
+        _f = _d.get("fits") or {}
+        _l = _f.get("llama.cpp (V100)") or {}
+        _v = _f.get("vLLM (A10)") or {}
+        if _l:
+            claims["前缀命中率 h（llama.cpp / vLLM）"] = (
+                f"{_l['h']:.2f} / {_v.get('h', 0):.2f}"
+                f"（TTFT 误差 {_l['err_before_pct']:.0f}% → {_l['err_after_pct']:.0f}%）")
     _pq = RESULTS / "pareto_quality.json"
     if _pq.exists():
         _d = json.loads(_pq.read_text(encoding="utf-8"))
