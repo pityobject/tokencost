@@ -91,6 +91,46 @@ CODE_TASKS = [
      [([3, 1, 2], (1, 3)), ([7], (7, 7)), ([-1, -5], (-5, -1))]),
     ("remove_spaces", "删除字符串中所有空格", "s",
      [("a b c", "abc"), ("   ", ""), ("xy", "xy")]),
+    ("last_element", "返回列表最后一个元素（列表非空）", "xs",
+     [([1, 2, 3], 3), ([9], 9), ([-1, -2], -2)]),
+    ("unique_sorted", "返回升序去重后的列表", "xs",
+     [([3, 1, 3], [1, 3]), ([], []), ([5], [5])]),
+    ("str_len_no_space", "返回去掉空格后的字符串长度", "s",
+     [("a b", 2), ("   ", 0), ("abc", 3)]),
+    ("abs_sum", "返回列表元素绝对值之和", "xs",
+     [([-1, 2, -3], 6), ([], 0), ([4], 4)]),
+    ("first_upper", "返回字符串首字母大写后的结果（其余不变）", "s",
+     [("abc", "Abc"), ("", ""), ("Xy", "Xy")]),
+    ("count_word", "返回子串出现次数（第二参数为子串）", "pair",
+     [(["ababab", "ab"], 3), (["abc", "z"], 0), (["", "a"], 0)]),
+    ("half_floor", "返回 n 整除 2 的结果（n>=0）", "n",
+     [(5, 2), (0, 0), (8, 4)]),
+    ("is_even", "判断整数是否为偶数", "n",
+     [(2, True), (3, False), (0, True)]),
+    ("mean_int", "返回列表均值向下取整（空列表返回 0）", "xs",
+     [([1, 2], 1), ([], 0), ([6], 6)]),
+    ("range_list", "返回 0 到 n-1 的列表", "n",
+     [(3, [0, 1, 2]), (0, []), (1, [0])]),
+    ("concat", "拼接两个字符串（第二参数为字符串）", "pair",
+     [(["a", "b"], "ab"), (["", "x"], "x"), (["q", ""], "q")]),
+    ("dict_keys_sorted", "返回字典键的升序列表（参数是 dict）", "d",
+     [({"b": 1, "a": 2}, ["a", "b"]), ({}, []), ({"z": 0}, ["z"])]),
+    ("square_list", "返回列表中每个元素的平方", "xs",
+     [([2, 3], [4, 9]), ([], []), ([-1], [1])]),
+    ("sum_str_digits", "返回字符串中所有数字字符之和", "s",
+     [("a1b2", 3), ("xyz", 0), ("99", 18)]),
+    ("truncate", "截断字符串到前 n 个字符（第二参数 n）", "pair",
+     [(["abcdef", 3], "abc"), (["ab", 5], "ab"), (["", 2], "")]),
+    ("min_index", "返回最小值第一次出现的下标", "xs",
+     [([3, 1, 1], 1), ([5], 0), ([2, 2], 0)]),
+    ("swap_case", "交换字符串大小写", "s",
+     [("AbC", "aBc"), ("", ""), ("xyz", "XYZ")]),
+    ("all_positive", "判断列表是否全部为正数", "xs",
+     [([1, 2], True), ([-1], False), ([], True)]),
+    ("join_with_dash", "用 '-' 连接字符串列表", "xs",
+     [(["a", "b"], "a-b"), ([], ""), (["x"], "x")]),
+    ("digits_count", "返回整数的位数（n>=0）", "n",
+     [(0, 1), (123, 3), (9, 1)]),
     ("to_upper_first", "把每个单词首字母大写、其余小写", "s",
      [("hello world", "Hello World"), ("ABC", "Abc"), ("", "")]),
 ]
@@ -154,18 +194,25 @@ def build():
                          tests=json.dumps(rule, ensure_ascii=False), expected=None))
     # ③ longdoc：埋事实 + 抽取问答（材料 ~600 token，确定性生成）
     rng = np.random.default_rng(7)
+    # v1 版材料里只有一个编号 → 全员 100%，没有区分度。
+    # 现在放 3 个编号，每个对应不同动作，问"哪个设备需要换滤芯"（需要比较）
+    ACTIONS = [("更换滤芯", 0), ("补充润滑", 1), ("校准传感器", 2)]
     for i in range(40):
-        code = f"DEV-{1000 + i}"
         day = int(rng.integers(1, 29))
-        filler = (
-            f"第 {day} 日，例行巡检完成，未发现异常。记录人：值班工程师。\n" * 12
-        )
-        planted = f"第 {day} 日的关键记录：设备编号 {code} 的滤芯需要更换。\n"
-        body = filler[: len(filler) // 2] + planted + filler[len(filler) // 2:]
+        codes = [f"DEV-{1000 + 3 * i + k}" for k in range(3)]
+        order = rng.permutation(3)          # 哪个动作落在哪个编号上是随机的
+        target = codes[int(order[0])]
+        lines = []
+        for k in range(3):
+            mk = codes[int(order[k])]
+            act = ACTIONS[k][0]
+            lines.append(f"第 {day} 日记录：设备 {mk} 需要{act}。\n")
+        filler = f"第 {day} 日，例行巡检完成，未发现其它异常。记录人：值班工程师。\n" * 14
+        body = filler[: len(filler) // 2] + "".join(lines) + filler[len(filler) // 2:]
         rows.append(dict(family="longdoc", iid=f"longdoc_{i}",
                          prompt=LONG_FACT_TEMPLATE.format(
-                             body=body, q=f"第 {day} 日需要更换滤芯的设备编号是什么？"),
-                         tests=None, expected=code))
+                             body=body, q="第 {} 日需要更换滤芯的设备编号是什么？只回答编号。".format(day)),
+                         tests=None, expected=target))
     OUT.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in rows) + "\n",
                    encoding="utf-8")
     fam = {}
@@ -314,7 +361,15 @@ def run(base_url, models, max_tokens=256, timeout=120):
                 fam_acc.setdefault(r["family"], []).append(k)
             print(f"  {name:<18} " + " | ".join(
                 f"{f} {np.mean(v)*100:5.1f}%" for f, v in fam_acc.items()))
-    DETAILS.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in out) + "\n",
+    # 追加而不是覆盖：多组合要分开跑（每个组合换一次模型）
+    prev = []
+    if DETAILS.exists():
+        prev = [l for l in DETAILS.read_text(encoding="utf-8").splitlines() if l.strip()]
+    # 同一个 (model,quant) 重跑时，先删掉旧记录，避免重复计数
+    done = {(r["model"], r["quant"]) for r in out}
+    prev = [l for l in prev
+            if (json.loads(l)["model"], json.loads(l)["quant"]) not in done]
+    DETAILS.write_text("\n".join(prev + [json.dumps(r, ensure_ascii=False) for r in out]) + "\n",
                        encoding="utf-8")
     print(f"→ {DETAILS}")
 
@@ -324,7 +379,7 @@ def report():
         print("先跑 run")
         return
     import pandas as pd
-    d = pd.read_csv(DETAILS)
+    d = pd.read_json(DETAILS, lines=True)   # 这是 jsonl，不是 csv（原来读错导致 KeyError）
     piv = d.groupby(["model", "quant", "family"])["ok"].mean().unstack() * 100
     print("=" * 74)
     print("质量扩展基准（代码 / 对话 / 长文）")
