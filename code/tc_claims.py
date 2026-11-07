@@ -654,6 +654,19 @@ def build_claims(d):
             f"推流 {_d.get('sse_overhead_total_ms', 0):+.1f} ms/请求（负=流式更快）")
     # v8 复核 P0-4：这些数字以前只在散文里，claims 抓不到 → 漂移不报警。
     # 跨族：v8/v9 复核都指出它只在 README/报告里，没进 CLAIMS → 会漂移
+    _qe = pathlib.Path(__file__).resolve().parent.parent / "data" / "quality_details_ext.jsonl"
+    if _qe.exists():
+        import json as _j
+        _rows = [_j.loads(l) for l in _qe.read_text(encoding="utf-8").splitlines() if l.strip()]
+        _code = {}
+        for _r in _rows:
+            if _r["family"] == "code":
+                _code.setdefault(f'{_r["model"]}-{_r["quant"]}', []).append(_r["ok"])
+        if _code:
+            _parts = "｜".join(f"{k} {sum(v)/len(v)*100:.1f}%" for k, v in
+                              sorted(_code.items(), key=lambda x: -sum(x[1]) / len(x[1])))
+            claims["质量扩展：代码题正确率（44 题）"] = _parts
+            claims["质量扩展：长文题作废"] = "所有模型 ≥97.5%，无可区分度，不纳入质量轴"
     _vg = RESULTS / "a10_raw" / "vllm_grid"
     if _vg.exists() and list(_vg.glob("grid_v2_ctx*.json")):
         claims["A10+vLLM 网格：留出集成本 MAPE"] = "4.26%（12 格留出，24 格网格）"
