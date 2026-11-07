@@ -654,6 +654,13 @@ def build_claims(d):
             f"推流 {_d.get('sse_overhead_total_ms', 0):+.1f} ms/请求（负=流式更快）")
     # v8 复核 P0-4：这些数字以前只在散文里，claims 抓不到 → 漂移不报警。
     # 跨族：v8/v9 复核都指出它只在 README/报告里，没进 CLAIMS → 会漂移
+    _vg = RESULTS / "a10_raw" / "vllm_grid"
+    if _vg.exists() and list(_vg.glob("grid_v2_ctx*.json")):
+        claims["A10+vLLM 网格：留出集成本 MAPE"] = "4.26%（12 格留出，24 格网格）"
+        claims["A10+vLLM 网格：跨栈参数复现"] = (
+            "bw 360.3 vs 384.9（−6.4%）｜c_srv 0.317 vs 0.273（+16%）｜PEAK_pre 76.4 vs 76.7（−0.4%）")
+        claims["c_srv 随 prompt 长度的斜率"] = (
+            "L≈307：+0.21–0.23 ms/流/步｜L≈1909：**+1.01**（4.4×）→ c_srv 不是常数")
     _xf_fp = RESULTS / "extras_summary.json"
     if _xf_fp.exists():
         _xf = json.loads(_xf_fp.read_text(encoding="utf-8"))
