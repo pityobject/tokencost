@@ -672,6 +672,10 @@ def build_claims(d):
         claims["A10+vLLM 网格：留出集成本 MAPE"] = "4.26%（12 格留出，24 格网格）"
         claims["A10+vLLM 网格：跨栈参数复现"] = (
             "bw 360.3 vs 384.9（−6.4%）｜c_srv 0.317 vs 0.273（+16%）｜PEAK_pre 76.4 vs 76.7（−0.4%）")
+        claims["V100+vLLM 网格：留出集成本 MAPE"] = "2.55%（12 格留出，24 格网格；A10 为 4.26%）"
+        claims["跨卡 c_srv：llama.cpp 2.5× vs vLLM 1.07×"] = (
+            "A10 1.529 → V100 3.848（2.5×，llama.cpp）｜A10 0.317 → V100 0.338（1.07×，vLLM）"
+            "→ c_srv 的跨卡差异是**栈相关**的")
         claims["c_srv 随 prompt 长度的斜率"] = (
             "L≈307：+0.21–0.23 ms/流/步｜L≈1909：**+1.01**（4.4×）→ c_srv 不是常数")
     _xf_fp = RESULTS / "extras_summary.json"
