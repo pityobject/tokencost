@@ -174,6 +174,16 @@ assumption** — including three times the checker itself was silently broken
 
 > Verifiability is not "the results look good" — it is **errors being visible**.
 
+### Two traps we hit ourselves (measured 2026-11)
+
+| symptom | measurement | what to do |
+|---|---|---|
+| Re-calibrating the same machine hours later | `c_srv` 1.53 → 2.25–3.04 (**+47–99%**) | always publish parameters together with the server config; recalibrate across sessions |
+| Changing a startup flag such as `-ub` | `c_srv` −26%, `b_sat` **−66%**, `peak_prefill` **+60%**, but `bw` only −6% | estimate `bw` from hardware; measure the other three per deployment |
+
+> Only `bw` is a hardware property. `c_srv`, `b_sat` and `peak_prefill` describe
+> *this serving process under this configuration* — without the config they mean nothing.
+
 ## Repository layout
 
 ```
