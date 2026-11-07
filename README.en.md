@@ -108,6 +108,15 @@ That single law explains why our earlier 136-cell local dataset (mostly L≈297)
 
 Raw calibration files (unmodified JSON) are archived under `results/a10_raw/`.
 
+### Deployment knob with the largest effect (measured 2026-11)
+
+For high-concurrency TTFT, **`-ub` (ubatch) dominates every other knob** — and it is just a
+startup flag: on one A10 with identical weights, c32 TTFT goes from **2464 ms** (`-ub 64`) to
+**438 ms** (`-ub 512`), a **5.6× gap**, while c1 only moves 122 → 77 ms.
+
+The catch: `c_srv` (−26%) and `b_sat` (−66%) also move with `-ub`, so **any published
+parameter set is meaningless without the server configuration** (slots, `-ub`, `-b`, cache flags).
+
 ## Quickstart
 
 ```bash
