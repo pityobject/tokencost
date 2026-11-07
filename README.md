@@ -386,7 +386,7 @@ python code/tc_decompose_csrv.py   # c_srv 三向分解
 ## 目录
 
 ```
-code/          91 个脚本（采集 / 分析 / 拟合 / 推荐 / 探针 / 对账）
+code/          93 个脚本（采集 / 分析 / 拟合 / 推荐 / 探针 / 对账）
 data/          原始数据（raw_cells.jsonl 300 行、raw_requests.jsonl 逐请求明细）
 results/       fit.json（6 参数）、predictions.csv、recommendation.csv
 figures/       fig1–fig5（吞吐、成本、带宽、预测vs实测、Pareto）
@@ -406,6 +406,11 @@ docs/notes/     指标口径与核心问题的随手笔记（学习痕迹，非�
 
 > 换句话说：**只有 `bw` 是硬件属性**。`c_srv` / `b_sat` / `peak_prefill` 描述的是
 > "这个服务进程在这套配置下"的行为——离开配置就没有意义。
+
+> **两个待跑的实验（脚本已备好，结果还没进仓库）**：
+> `python code/tc.py vllmgrid`（A10+vLLM 24 格全网格，补跨栈结论的统计强度）与
+> `python code/tc.py qualityext`（代码/对话/长文 80 题，补"质量轴只测算术"）。
+> 在拿到数据之前，文档里**没有**这两项的结论——这是有意的。
 
 ## 真实负载对照（2026-11，BurstGPT）
 

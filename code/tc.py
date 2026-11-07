@@ -115,6 +115,8 @@ COMMANDS = {
     "promptconc":    ("tc_analyze_prompt_conc.py", []),
     "cpu":           ("tc_analyze_cpu.py", []),
     "robust":        ("tc_decision_robust.py", []),
+    "qualityext":    ("tc_quality_ext.py", []),
+    "vllmgrid":      ("tc_vllm_grid_analyze.py", []),
     "tailflip":      ("tc_tail_flip.py", []),
     "datadict":      ("tc_docs_data.py", []),
     "audit":         ("tc_audit.py", []),
