@@ -660,6 +660,34 @@ def build_claims(d):
             _v = float(_xf["xfamily_steady_pct"])
             _v1 = _m.ceil(_v * 10) / 10      # 向上取 1 位小数，与文档的 12.3% 对齐
             claims["跨模型族（零重标定，稳态口径）"] = f"{_v1:.1f}%"
+    # 质量-成本台阶：从 threshold_sensitivity.csv 派生（不许手写，否则会漂）
+    _thr_fp = RESULTS / "threshold_sensitivity.csv"
+    if _thr_fp.exists():
+        import csv as _csv
+        with _thr_fp.open(encoding="utf-8-sig") as _f:   # 该 CSV 带 BOM
+            _rows = list(_csv.DictReader(_f))
+        _by_drop = {float(r["drop"]): r for r in _rows}
+        _seg, _prev = [], None
+        for _d in sorted(_by_drop):
+            _cid = _by_drop[_d]["cell_id"]
+            if _cid != _prev:
+                _seg.append((_d, _cid, float(_by_drop[_d]["cost"]),
+                             float(_by_drop[_d]["acc"])))
+                _prev = _cid
+        if _seg:
+            claims["质量-成本台阶（按 SLA 与质量底线）"] = "；".join(
+                f"{_d:.1f}pp→{_cid.split('_ctx')[0]}@{_cid.split('_')[-1]}"
+                f"（{_cost:.0f}，{_acc*100:.1f}%）"
+                for _d, _cid, _cost, _acc in _seg)
+            if len(_seg) >= 2:
+                _d0, _c0, _cost0, _acc0 = _seg[0]
+                _d1, _c1, _cost1, _acc1 = _seg[1]
+                _dq = (_acc0 - _acc1) * 100
+                if _dq > 0 and _cost1 > 0:
+                    claims["第一个台阶的质量价格"] = (
+                        f"{_dq:.1f}pp 换成本 ×{_cost0/_cost1:.2f}"
+                        f"（≈ 每 pp {(_cost0/_cost1)**(1/_dq)*100-100:+.1f}%）")
+
     _fit_fp0 = RESULTS / "fit.json"
     if _fit_fp0.exists():
         _f0 = json.loads(_fit_fp0.read_text(encoding="utf-8"))
@@ -992,7 +1020,8 @@ def write_md(claims, d):
         "",
         "- **400 题 × 10 组合，配对 McNemar + Holm 校正：45 对里 32 对显著**（上一版 140 题说无差异是样本量假象）。",
         "- 7B-Q4 91.0% 显著最优；Q2 量化灾难（1.5B-Q2 仅 30.2%）；Q4 与 Q8 无显著差异。",
-        "- 质量—成本：0–6pp 损失 → 7B（20847）；8pp → 3B-Q8（4919）；≥10pp → 1.5B-Q4（2182）。每 1 点质量约贵 27%。",
+        "- **质量—成本台阶**：见 `results/CLAIMS.md` 表格行「质量-成本台阶」（由 `threshold_sensitivity.csv` 派生）。",
+
         "- 推荐器用硬阈值剪枝，而 **7B→3B-Q8 的翻转点在 7.5 pp（20847→4919），3B→1.5B-Q4 在 10 pp（4919→2182）**。",
         "- 因此质量—成本权衡的结论不应作为硬判断，应报出阈值敏感性。",
         f"- **后悔值的负对照**：模型 {_control('model')} / 随机选 {_control('random')}"
