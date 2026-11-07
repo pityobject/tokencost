@@ -94,6 +94,7 @@ COMMANDS = {
     "mixedprobe":    ("tc_measure_mixed.py", []),
     "turnsprobe":    ("tc_measure_turns.py", []),
     "ladder":        ("tc_bandwidth_ladder.py", []),
+    "prefixprobe":   ("tc_measure_prefix.py", []),
     "tailflip":      ("tc_tail_flip.py", []),
     "datadict":      ("tc_docs_data.py", []),
     "audit":         ("tc_audit.py", []),
@@ -137,6 +138,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
