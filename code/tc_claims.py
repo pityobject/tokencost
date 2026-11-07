@@ -487,6 +487,13 @@ def build_claims(d):
 
     claims["ubatch 对高并发 TTFT（c32, L=307）"] = (
         "ub=64 → **2464 ms** ／ ub=512 → **438 ms**（**5.6×** 差距；c32/c1 从 20.1× 降到 5.7×）")
+    _rb = RESULTS / "decision_robust.json"
+    if _rb.exists():
+        _d = json.loads(_rb.read_text(encoding="utf-8"))
+        claims["决策鲁棒性（参数 5–95% 区间内）"] = (
+            f"推荐稳定率中位 **{_d['median_stability_pct']:.0f}%**"
+            f"（范围 {_d['min_stability_pct']:.0f}–{_d['max_stability_pct']:.0f}%，"
+            f"{_d['unstable_combos']}/{_d['n_combos']} 个组合 <70%）")
     _ct = RESULTS / "capacity_trace.json"
     if _ct.exists():
         _d = json.loads(_ct.read_text(encoding="utf-8"))

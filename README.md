@@ -368,13 +368,13 @@ python code/tc_decompose_csrv.py   # c_srv 三向分解
 ## 目录
 
 ```
-code/          90 个脚本（采集 / 分析 / 拟合 / 推荐 / 探针 / 对账）
+code/          91 个脚本（采集 / 分析 / 拟合 / 推荐 / 探针 / 对账）
 data/          原始数据（raw_cells.jsonl 300 行、raw_requests.jsonl 逐请求明细）
 results/       fit.json（6 参数）、predictions.csv、recommendation.csv
 figures/       fig1–fig5（吞吐、成本、带宽、预测vs实测、Pareto）
 报告/          技术报告定稿、迁移一页纸、简历条目与答辩稿、交接清单
-手册/          从零复现的 10 篇教程（含每一步的"为什么"）；写于 45 格时期，数字以 results/CLAIMS.md 为准
-notes/         学习笔记与踩坑记录
+docs/tutorial/  从零复现的 10 篇教程（含每一步的"为什么"）；写于 45 格时期，数字以 results/CLAIMS.md 为准
+docs/notes/     指标口径与核心问题的随手笔记（学习痕迹，非交付物）
 ```
 
 ---

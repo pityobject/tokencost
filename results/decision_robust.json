@@ -1,0 +1,374 @@
+{
+  "draws": 120,
+  "n_candidates": 80,
+  "n_combos": 48,
+  "intervals": {
+    "bw": [
+      233.496,
+      267.644
+    ],
+    "peak": [
+      11.956,
+      16.776
+    ],
+    "peak_prefill": [
+      29.886,
+      36.119
+    ],
+    "c_srv": [
+      0.641,
+      1.023
+    ],
+    "b_sat": [
+      12.506,
+      14.56
+    ],
+    "ovh": [
+      12.175,
+      34.69
+    ]
+  },
+  "median_stability_pct": 100.0,
+  "min_stability_pct": 45.8,
+  "max_stability_pct": 100.0,
+  "unstable_combos": 2,
+  "rows": [
+    {
+      "scenario": "实时对话-严",
+      "tier": 6,
+      "pick": "7B-q4_k_m@2",
+      "stability": 53.3,
+      "second": "7B-q4_k_m@1"
+    },
+    {
+      "scenario": "实时对话-严",
+      "tier": 8,
+      "pick": "3B-q8_0@4",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "实时对话-严",
+      "tier": 10,
+      "pick": "1.5B-q4_k_m@8",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "实时对话-严",
+      "tier": 15,
+      "pick": "1.5B-q4_k_m@8",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "实时对话-中",
+      "tier": 6,
+      "pick": "7B-q4_k_m@2",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "实时对话-中",
+      "tier": 8,
+      "pick": "3B-q8_0@8",
+      "stability": 74.2,
+      "second": "3B-q8_0@4"
+    },
+    {
+      "scenario": "实时对话-中",
+      "tier": 10,
+      "pick": "1.5B-q4_k_m@32",
+      "stability": 98.3,
+      "second": "1.5B-q4_k_m@24"
+    },
+    {
+      "scenario": "实时对话-中",
+      "tier": 15,
+      "pick": "1.5B-q4_k_m@32",
+      "stability": 98.3,
+      "second": "1.5B-q4_k_m@24"
+    },
+    {
+      "scenario": "实时对话-松",
+      "tier": 6,
+      "pick": "7B-q4_k_m@4",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "实时对话-松",
+      "tier": 8,
+      "pick": "3B-q8_0@12",
+      "stability": 45.8,
+      "second": "3B-q8_0@32"
+    },
+    {
+      "scenario": "实时对话-松",
+      "tier": 10,
+      "pick": "1.5B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "实时对话-松",
+      "tier": 15,
+      "pick": "1.5B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "通用问答-中",
+      "tier": 6,
+      "pick": "7B-q4_k_m@4",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "通用问答-中",
+      "tier": 8,
+      "pick": "3B-q8_0@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "通用问答-中",
+      "tier": 10,
+      "pick": "1.5B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "通用问答-中",
+      "tier": 15,
+      "pick": "1.5B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "通用问答-松",
+      "tier": 6,
+      "pick": "7B-q4_k_m@32",
+      "stability": 75.8,
+      "second": "7B-q4_k_m@12"
+    },
+    {
+      "scenario": "通用问答-松",
+      "tier": 8,
+      "pick": "3B-q8_0@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "通用问答-松",
+      "tier": 10,
+      "pick": "1.5B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "通用问答-松",
+      "tier": 15,
+      "pick": "1.5B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "长文档-严",
+      "tier": 6,
+      "pick": "7B-q4_k_m@8",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "长文档-严",
+      "tier": 8,
+      "pick": "3B-q8_0@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "长文档-严",
+      "tier": 10,
+      "pick": "1.5B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "长文档-严",
+      "tier": 15,
+      "pick": "1.5B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "长文档-松",
+      "tier": 6,
+      "pick": "7B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "长文档-松",
+      "tier": 8,
+      "pick": "3B-q8_0@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "长文档-松",
+      "tier": 10,
+      "pick": "1.5B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "长文档-松",
+      "tier": 15,
+      "pick": "1.5B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "批处理-中",
+      "tier": 6,
+      "pick": "7B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "批处理-中",
+      "tier": 8,
+      "pick": "3B-q8_0@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "批处理-中",
+      "tier": 10,
+      "pick": "1.5B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "批处理-中",
+      "tier": 15,
+      "pick": "1.5B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "批处理-松",
+      "tier": 6,
+      "pick": "7B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "批处理-松",
+      "tier": 8,
+      "pick": "3B-q8_0@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "批处理-松",
+      "tier": 10,
+      "pick": "1.5B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "批处理-松",
+      "tier": 15,
+      "pick": "1.5B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "高并发-中",
+      "tier": 6,
+      "pick": "7B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "高并发-中",
+      "tier": 8,
+      "pick": "3B-q8_0@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "高并发-中",
+      "tier": 10,
+      "pick": "1.5B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "高并发-中",
+      "tier": 15,
+      "pick": "1.5B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "高并发-松",
+      "tier": 6,
+      "pick": "7B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "高并发-松",
+      "tier": 8,
+      "pick": "3B-q8_0@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "高并发-松",
+      "tier": 10,
+      "pick": "1.5B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "高并发-松",
+      "tier": 15,
+      "pick": "1.5B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "宽松-高吞吐",
+      "tier": 6,
+      "pick": "7B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "宽松-高吞吐",
+      "tier": 8,
+      "pick": "3B-q8_0@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "宽松-高吞吐",
+      "tier": 10,
+      "pick": "1.5B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    },
+    {
+      "scenario": "宽松-高吞吐",
+      "tier": 15,
+      "pick": "1.5B-q4_k_m@32",
+      "stability": 100.0,
+      "second": "—"
+    }
+  ],
+  "note": "参数在 CLAIMS 的 5–95% 区间内对数均匀抽样；每个 (场景, 质量档) 选满足 SLA 的最便宜配置"
+}

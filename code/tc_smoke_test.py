@@ -125,7 +125,7 @@ def main():
             print("判定：正常。这组数字可以直接作为 S2 的起点。")
 
         print(f"\n总耗时 {time.time()-t_all:.1f}s")
-        print("下一步：按 手册/03_测量基础设施_S2.md 跑单格实验，然后用 tc_probe.py 体检槽位上下文。")
+        print("下一步：按 docs/tutorial/03_测量基础设施_S2.md 跑单格实验，然后用 tc_probe.py 体检槽位上下文。")
 
     finally:
         if proc is not None:

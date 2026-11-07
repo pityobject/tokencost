@@ -112,6 +112,7 @@ COMMANDS = {
     "trace":         ("tc_trace_analysis.py", []),
     "capacity":      ("tc_capacity_trace.py", []),
     "demo":          ("tc_demo.py", []),
+    "robust":        ("tc_decision_robust.py", []),
     "tailflip":      ("tc_tail_flip.py", []),
     "datadict":      ("tc_docs_data.py", []),
     "audit":         ("tc_audit.py", []),
