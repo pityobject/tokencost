@@ -82,6 +82,16 @@ PARAM_PAT = re.compile(r"(\d+)\s*个\s*(?:待定)?参数")
 # 【数字损坏检测】正常中文文档里几乎不会出现"带前导零的整数"（02、008、032、0000、06）。
 # 2026-11-06 一次批量替换把简历稿里所有 1 换成 0，产生的正是这类 token，且所有既有检查都没抓到。
 LEADING_ZERO_PAT = re.compile(r"(?<![\w.：:/\-,])0\d+(?![\w.%/\-,])")
+# 【过期论断】这类错误不是数字错，而是"结论更新了、表述没跟"。
+# 已经犯过两次：A10 之后局限还写"单机单栈"；V100 之后局限还写"只有两块 GPU"。
+# 数字检查抓不到它们，因为句子里根本没有被校验的数字。
+STALE_CLAIM = [
+    (re.compile(r"只有两块\s*GPU"), "现在有三块 GPU（4060/A10/V100）"),
+    (re.compile(r"V100[^。\n]{0,24}还没跑"), "V100 已跑完（反推 775.5 GB/s）"),
+    (re.compile(r"单机单栈"), "现在是三块 GPU × 两个栈"),
+    (re.compile(r"两块\s*GPU[^。\n]{0,10}不足以"), "三点已给出 79–92%，不再是两点连线"),
+]
+
 # 声称 vs 讨论：只有「声称模型有 N 个参数」才必须等于 PARAM_COUNT。
 # 讨论语气里出现任何数字都合法——F16 正是在讲「试过第 7 个参数但失败」。
 DISCUSS_HINTS = ("试了", "试过", "尝试", "失败", "原先", "曾经",
@@ -93,6 +103,12 @@ MUL2_PAT = re.compile(r"(\d+)\s*[×x]\s*(\d+)\s*[=＝]\s*(\d+)")
 def consistent_checks(text, rel, line_no, line):
     """返回 [(级别, 说明)]；只做"能机器判定"的两种。"""
     out = []
+    # 过期论断（"结论更新了、表述没跟"这类）
+    for pat, why in STALE_CLAIM:
+        m = pat.search(line)
+        if m:
+            out.append(("过期论断", f"{m.group(0)!r} —— {why}"))
+
     # 跳过标题行：`# 03 · S2 …` 这类是章节编号，不是被改坏的数字
     if not line.lstrip().startswith("#"):
         for m in LEADING_ZERO_PAT.finditer(line):

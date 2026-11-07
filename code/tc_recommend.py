@@ -25,6 +25,10 @@ from tc_model import predict
 
 Z_90 = 1.645
 
+# 生成长度（可用 --gen 覆盖；真实 trace 中位只有 36，而实验默认 128）
+GEN_MEAN = cfg.GEN_TOKENS
+GEN_CV = 0.0
+
 
 # ---------------------------------------------------------------- 钱（W2）
 # 成本单位一直是「GPU 秒 / 百万 token」——工程上准确，但对业务方不直观。
@@ -119,12 +123,12 @@ def simulate(params, model, quant, conc, prompt_mean, prompt_sigma,
     rng = np.random.default_rng(seed)
     L = rng.lognormal(mean=np.log(max(prompt_mean, 1.0)), sigma=prompt_sigma, size=n)
     if ctx is not None:
-        L = np.minimum(L, max(ctx - cfg.GEN_TOKENS, 1))   # 超出槽位的部分不可行
+        L = np.minimum(L, max(ctx - GEN_MEAN, 1))   # 超出槽位的部分不可行
 
     tpot, ttft = [], []
     for l in L:
         row = dict(model=model, quant=quant, conc=conc,
-                   ctx_avg_tokens=float(l) + cfg.GEN_TOKENS / 2,
+                   ctx_avg_tokens=float(l) + GEN_MEAN / 2,
                    prompt_tokens=float(l))
         pr = predict(params, row)
         tpot.append(pr["pred_tpot_ms"])
@@ -136,8 +140,8 @@ def simulate(params, model, quant, conc, prompt_mean, prompt_sigma,
     # 一条请求占用槽位的时间 = TTFT + 生成长度×TPOT
     tpot_mean = float(tpot.mean())
     ttft_mean = float(ttft.mean())
-    per_req_s = (ttft_mean + cfg.GEN_TOKENS * tpot_mean) / 1e3
-    thr = conc * cfg.GEN_TOKENS / per_req_s
+    per_req_s = (ttft_mean + GEN_MEAN * tpot_mean) / 1e3
+    thr = conc * GEN_MEAN / per_req_s
     return dict(
         tpot_p50=float(np.median(tpot)), tpot_cvar90=cvar(tpot, 0.9),
         ttft_p50=float(np.median(ttft)), ttft_cvar90=cvar(ttft, 0.9),
@@ -172,7 +176,15 @@ def main():
                     help="GPU 价格（元/小时），接受数字或预设：laptop / a10 / 4090 / a100_40g。"
                          "不给则只报 GPU·秒——价格是外部假设，不设默认值")
     ap.add_argument("--top", type=int, default=12)
+    ap.add_argument("--gen", type=int, default=None,
+                    help="平均生成长度（默认 128；真实负载中位约 36）")
+    ap.add_argument("--gen-cv", type=float, default=0.0,
+                    help="生成长度的变异系数（真实 trace 约 2.15）；影响上下文预留")
     args = ap.parse_args()
+    global GEN_MEAN, GEN_CV
+    if args.gen:
+        GEN_MEAN = int(args.gen)
+    GEN_CV = float(args.gen_cv or 0.0)
 
     # 质量表（如果跑过 tc_eval.py）
     quality = {}
@@ -235,7 +247,7 @@ def main():
     # 请求长度的 95 分位：用来检查"这一格的每槽位上下文装不装得下这种请求"。
     # 不检查这一条，推荐器会推 ctx=512 的配置去跑 2048 token 的长文档——物理上根本塞不进去。
     p95_prompt = float(np.exp(np.log(max(args.prompt_mean, 1.0)) + 1.645 * args.prompt_sigma))
-    need_ctx = p95_prompt + cfg.GEN_TOKENS
+    need_ctx = p95_prompt + GEN_MEAN
     print(f"上下文需求：提示长度 95 分位约 {p95_prompt:.0f} token，加生成长度共需 {need_ctx:.0f} token")
 
     rows = []
