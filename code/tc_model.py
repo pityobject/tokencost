@@ -31,9 +31,14 @@ tc_model.py —— 本项目的核心：把"推理有多贵"写成两条公式�
 
 import json
 
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
+# 【延迟导入】matplotlib 只在 plot() 里用；云端最小环境可能没有它。
+# 早期版本在模块顶层 import，导致"只要拟合就不要跑"——V100 镜像上直接崩过一次。
+try:
+    import matplotlib as _mpl
+    _mpl.use("Agg")
+    import matplotlib.pyplot as plt
+except Exception:      # 缺库或没有显示后端
+    plt = None
 import numpy as np
 import pandas as pd
 from scipy import stats as st
@@ -41,8 +46,9 @@ from scipy.optimize import minimize
 
 import tc_config as cfg
 
-plt.rcParams["font.sans-serif"] = ["Microsoft YaHei", "SimHei", "DejaVu Sans"]
-plt.rcParams["axes.unicode_minus"] = False
+if plt is not None:
+    plt.rcParams["font.sans-serif"] = ["Microsoft YaHei", "SimHei", "DejaVu Sans"]
+    plt.rcParams["axes.unicode_minus"] = False
 
 Z_90 = 1.645          # 大样本下 90% 区间的正态分位数（小样本改用 t 分布，见 report()）
 
@@ -375,6 +381,9 @@ def report(pred, params, sigma_noise=0.0, repeats=3, n_params_fit=3):
 
 
 def plot(pred):
+    if plt is None:
+        print("[绘图] 未安装 matplotlib，跳过作图（拟合与指标不受影响）")
+        return
     fig, axes = plt.subplots(1, 2, figsize=(12, 4.8))
 
     ax = axes[0]
