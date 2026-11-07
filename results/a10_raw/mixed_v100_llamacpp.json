@@ -1,0 +1,40 @@
+{
+  "hardware": "V100 16GB / llama.cpp",
+  "backend": "llamacpp",
+  "model": "gguf/qwen3b-fp16.gguf",
+  "distribution": {
+    "p_long": 0.25,
+    "long": 1800,
+    "short": 200
+  },
+  "cells": {
+    "1": {
+      "n": 16,
+      "mean_target_len": 600.0,
+      "mean_actual_len": 626.2,
+      "ttft_p50": 101.8,
+      "tpot_p50": 12.32,
+      "err_mean_len_pct": 30.0,
+      "err_per_request_pct": 24.3
+    },
+    "4": {
+      "n": 16,
+      "mean_target_len": 600.0,
+      "mean_actual_len": 626.2,
+      "ttft_p50": 486.1,
+      "tpot_p50": 30.56,
+      "err_mean_len_pct": 9.9,
+      "err_per_request_pct": 82.3
+    },
+    "8": {
+      "n": 32,
+      "mean_target_len": 600.0,
+      "mean_actual_len": 626.2,
+      "ttft_p50": 345.8,
+      "tpot_p50": 41.44,
+      "err_mean_len_pct": 123.1,
+      "err_per_request_pct": 145.6
+    }
+  },
+  "note": "均值口径 = 用该格平均长度预测后与实测中位比；逐请求口径 = 每个请求用自己的真实长度预测后与自身实测比"
+}

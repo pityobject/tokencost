@@ -1,0 +1,62 @@
+{
+  "hardware": "V100 16GB / llama.cpp",
+  "backend": "llamacpp",
+  "model": "gguf/qwen3b-fp16.gguf",
+  "turns": 6,
+  "gen": 128,
+  "conc": 1,
+  "rows": [
+    {
+      "turn": 1,
+      "prompt_tokens": 252,
+      "ttft_ms": 304.979,
+      "tpot_ms": 12.393,
+      "pred_ttft_ms": 75.4,
+      "pred_tpot_ms": 11.83
+    },
+    {
+      "turn": 2,
+      "prompt_tokens": 533,
+      "ttft_ms": 87.165,
+      "tpot_ms": 12.246,
+      "pred_ttft_ms": 121.4,
+      "pred_tpot_ms": 11.84
+    },
+    {
+      "turn": 3,
+      "prompt_tokens": 815,
+      "ttft_ms": 129.265,
+      "tpot_ms": 11.939,
+      "pred_ttft_ms": 167.5,
+      "pred_tpot_ms": 11.86
+    },
+    {
+      "turn": 4,
+      "prompt_tokens": 1098,
+      "ttft_ms": 158.307,
+      "tpot_ms": 11.615,
+      "pred_ttft_ms": 213.8,
+      "pred_tpot_ms": 11.87
+    },
+    {
+      "turn": 5,
+      "prompt_tokens": 1382,
+      "ttft_ms": 177.448,
+      "tpot_ms": 11.711,
+      "pred_ttft_ms": 260.2,
+      "pred_tpot_ms": 11.88
+    },
+    {
+      "turn": 6,
+      "prompt_tokens": 1664,
+      "ttft_ms": 219.261,
+      "tpot_ms": 11.712,
+      "pred_ttft_ms": 306.3,
+      "pred_tpot_ms": 11.9
+    }
+  ],
+  "tpot_slope_meas_pct_per_turn": -1.229,
+  "tpot_slope_pred_pct_per_turn": 0.116,
+  "slope_ratio": -10.6,
+  "note": "多轮 KV 增长斜率；与本机 E3 的 4.6× 对比（未复现）"
+}

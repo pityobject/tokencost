@@ -485,6 +485,19 @@ def build_claims(d):
         claims[_label] = (f"{_r['n_holdout']} 格 · MAPE {_r['mape_cost']:.2f}% · "
                           f"覆盖率 {_r['coverage']*100:.1f}%")
 
+    _mx = RESULTS / "a10_raw" / "mixed_v100_llamacpp.json"
+    if _mx.exists():
+        _d = json.loads(_mx.read_text(encoding="utf-8"))
+        _c8 = (_d.get("cells") or {}).get("8") or {}
+        if _c8:
+            claims["混合长度在 V100 的 TTFT 误差（c8，均值/逐请求）"] = (
+                f"{_c8['err_mean_len_pct']:.0f}% / {_c8['err_per_request_pct']:.0f}%")
+    _tp = RESULTS / "a10_raw" / "turns_v100_llamacpp.json"
+    if _tp.exists():
+        _d = json.loads(_tp.read_text(encoding="utf-8"))
+        claims["多轮在 V100 的 TPOT 斜率（实测 vs 预测）"] = (
+            f"{_d['tpot_slope_meas_pct_per_turn']:+.2f}%/轮 vs "
+            f"{_d['tpot_slope_pred_pct_per_turn']:+.2f}%/轮")
     lad = {}
     _p = RESULTS / "bandwidth_ladder.json"
     if _p.exists():
