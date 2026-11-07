@@ -295,8 +295,8 @@ def main():
     best = valid.iloc[0]
     worst = valid.iloc[-1]
     print(f"\n推荐配置：{best['cell_id']}")
-    print(f"  预测首字延迟（90% 置信上限）  {best['ttft_hi_ms']:7.1f} ms   （上限 {args.ttft:.0f}）")
-    print(f"  预测出字间隔（90% 置信上限）  {best['tpot_hi_ms']:7.1f} ms   （上限 {args.tpot:.0f}）")
+    print(f"  预测首字延迟（**经验上界，非验证过的 90% 区间**）  {best['ttft_hi_ms']:7.1f} ms   （上限 {args.ttft:.0f}）")
+    print(f"  预测出字间隔（TPOT 口径 90% 上界）  {best['tpot_hi_ms']:7.1f} ms   （上限 {args.tpot:.0f}）")
     print(f"  预测吞吐                      {best['throughput_tps']:7.1f} token/s")
     print(f"  预测成本                      {best['cost']:7.0f} GPU 秒 / 百万 token")
     if price is not None:

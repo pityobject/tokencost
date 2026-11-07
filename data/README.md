@@ -9,12 +9,12 @@
 
 | 文件 | 内容 | 规模 |
 |---|---|---|
-| `raw_cells.jsonl` | **一格一轮一行**的原始测量（延迟、吞吐、温度、频率、功耗） | 324 行 = 108 格 × 3 轮 |
+| `raw_cells.jsonl` | **一格一轮一行**的原始测量（延迟、吞吐、温度、频率、功耗） | 423 行 = 142 格 × 3 轮 |
 | `raw_requests.jsonl` | **一条请求一行**的明细（逐请求 TTFT / TPOT / token 数） | 约 1.2 万行 |
-| `summary.csv` | 按格聚合的**墙钟口径**汇总 | 108 行 |
-| `summary_steady.csv` | 按格聚合的**稳态口径**汇总（模型与推荐器用这个） | 108 行 |
+| `summary.csv` | 按格聚合的**墙钟口径**汇总 | 138 行 |
+| `summary_steady.csv` | 按格聚合的**稳态口径**汇总（模型与推荐器用这个） | 138 行 |
 | `quality.csv` | 质量基准：准确率 + Wilson 区间 | 10 个组合 |
-| `quality_details.jsonl` | 质量基准逐题明细（含 `iid`，配对检验用） | 4000 行 |
+| `quality_details.jsonl` | 质量基准逐题明细（含 `iid`，配对检验用） | 4600 行 |
 | `probe_cpu.csv` | CPU 后端迁移实验 | — |
 | `probe_kvquant.csv` | KV 量化对照（f16 ↔ q8_0） | — |
 | `probe_poisson.csv` | 泊松到达实验 | — |

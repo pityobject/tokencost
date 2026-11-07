@@ -55,7 +55,7 @@ COL_DOC = {
     "tpot_p50_ms": "出字间隔中位数（ms）",
     "throughput_tps": "吞吐（token/s），= 总生成 token ÷ 墙钟",
     "cost_gpu_s_per_1m": "**墙钟**口径成本（GPU·秒/百万 token），含收尾空闲",
-    "steady_cost_gpu_s_per_1m": "**稳态**口径成本；`tc_model` 用这一列，对外 8.59% 基于它",
+    "steady_cost_gpu_s_per_1m": "**稳态**口径成本；`tc_model` 用这一列，对外 8.58% 基于它",
     "vram_est_gb": "显存估计（GB）= 权重 + KV",
     "clock_sm_median": "SM 时钟中位（MHz）；相对可达参考判据见 clock_gate",
     "power_w_median": "整卡功耗中位（W）",
@@ -184,7 +184,7 @@ def build():
              "> 由 CI 比对，过期即失败。共 18 个数据文件 + results/ 产物。", "",
              "## 口径提醒（最容易踩的两条）", "",
              "1. **成本有两列**：`cost_gpu_s_per_1m`（墙钟）与 `steady_cost_gpu_s_per_1m`（稳态）。",
-             "   `tc_model` 用后者；混用会让 MAPE 从 8.59% 变成 11.28%（F15）。",
+             "   `tc_model` 用后者；混用会让 MAPE 从 8.58% 变成 11.15%（F15）。",
              "2. **`repeat` 是局部编号**：同一格换批会从 0 重来，跨批分析须按回退切分（F11）。",
              ""]
 

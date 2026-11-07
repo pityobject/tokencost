@@ -36,42 +36,46 @@ Write-Host ""
 
 $fail = 0
 
-Write-Host "[CI] 1/8 regenerate claims table ..."
+Write-Host "[CI] 1/9 regenerate claims table ..."
 & $py "code\tc_claims.py" | Out-Null
 if ($LASTEXITCODE -ne 0) { $fail = 1 }
 
-Write-Host "[CI] 2/8 verify docs match artifacts ..."
+Write-Host "[CI] 2/9 verify docs match artifacts ..."
 & $py "code\tc_claims.py" --check
 if ($LASTEXITCODE -ne 0) { $fail = 1 }
 
 Write-Host ""
-Write-Host "[CI] 3/8 unit tests ..."
+Write-Host "[CI] 3/9 core unit tests ..."
 & $py "tests\test_core.py"
-if ($LASTEXITCODE -ne 0) { $fail = 1 }
-& $py "tests\test_guardrails.py"
-if ($LASTEXITCODE -ne 0) { Write-Host "[FAIL] 护栏测试未通过"; $fail = 1 }
 if ($LASTEXITCODE -ne 0) { $fail = 1 }
 
 Write-Host ""
-Write-Host "[CI] 4/8 doc number lint + README coverage ..."
+Write-Host "[CI] 4/9 guardrail tests (the three silent-failure accidents) ..."
+& $py "tests\test_guardrails.py"
+if ($LASTEXITCODE -ne 0) { Write-Host "[FAIL] 护栏测试未通过"; $fail = 1 }
+
+Write-Host ""
+Write-Host "[CI] 5/9 doc lint (hard gate: deprecated / stale / bare coverage / table order) ..."
 & $py "code\tc_lint_docs.py"
-$lintExit = $LASTEXITCODE
-if ($lintExit -ne 0) {
-    Write-Host "[CI] lint reported suspects (not failing the build)" -ForegroundColor Yellow
+if ($LASTEXITCODE -ne 0) {
+    # v10 复核 P0-1：lint 里挂着覆盖率 / 表格编号 / 过期论断三道硬 gate，
+    # 这里再"只警告不失败"等于把闸门拆了。
+    Write-Host "[CI] lint FAILED (hard gate)" -ForegroundColor Red
+    $fail = 1
 }
 
 Write-Host ""
-Write-Host "[CI] 5/8 project audit (hygiene / self-contained / data chain / contract) ..."
+Write-Host "[CI] 6/9 project audit (hygiene / self-contained / data chain / contract) ..."
 & $py "code\tc_audit.py" --fast
 if ($LASTEXITCODE -ne 0) { $fail = 1 }
 
 Write-Host ""
-Write-Host "[CI] 6/8 self-calibration pipeline selftest (synthetic data, no server) ..."
+Write-Host "[CI] 7/9 self-calibration pipeline selftest (synthetic data, no server) ..."
 & $py "code\tc_profile.py" --selftest
 if ($LASTEXITCODE -ne 0) { $fail = 1 }
 
 Write-Host ""
-Write-Host "[CI] 7/8 static calculator matches artifacts ..."
+Write-Host "[CI] 8/9 static calculator matches artifacts ..."
 & $py "code\tc_web.py" | Out-Null
 if (-not (Test-Path "site\index.html")) {
   Write-Host "[FAIL] site/index.html 没有生成"; $fail = 1
@@ -86,7 +90,7 @@ if (-not (Test-Path "site\index.html")) {
 }
 
 Write-Host ""
-Write-Host "[CI] 8/8 data dictionary matches artifacts ..."
+Write-Host "[CI] 9/9 data dictionary matches artifacts ..."
 & $py "code\tc_docs_data.py" --check
 if ($LASTEXITCODE -ne 0) {
   Write-Host "[FAIL] 数据字典与产物不一致 —— 运行 python code/tc_docs_data.py 后提交"

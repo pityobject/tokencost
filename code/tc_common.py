@@ -98,7 +98,14 @@ def candidates():
 
 def evaluate(params, fit, cell, prompt_mean=256.0, prompt_sigma=0.5,
              ttft_cap=600.0, tpot_cap=60.0):
-    """单格评估：预测成本 + 90% 上界 + 是否满足显存/上下文/SLA。"""
+    """单格评估：预测成本 + 延迟上界 + 是否满足显存/上下文/SLA。
+
+    注意两个上界的性质不同：
+      · TPOT 用 half_width_log（0.1772，标定集残差的 t 校正半宽）
+      · TTFT 用 ttft_envelope_log（0.3008，**留出集 90 分位，描述性上界**，
+        不是有覆盖保证的 90% 区间；标定集 conformal 半宽只有 0.1117，
+        而它在留出集上的 out-of-sample 覆盖率仅 61.8%）
+    """
     hl = half_log(fit)
     need_ctx = int(prompt_mean * np.exp(1.645 * prompt_sigma) + cfg.GEN_TOKENS)
     sim = simulate(params, cell["model"], cell["quant"], int(cell["conc"]),

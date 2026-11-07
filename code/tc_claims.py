@@ -1024,7 +1024,7 @@ def write_md(claims, d):
         "- 7B-Q4 91.0% 显著最优；Q2 量化灾难（1.5B-Q2 仅 30.2%）；Q4 与 Q8 无显著差异。",
         "- **质量—成本台阶**：见 `results/CLAIMS.md` 表格行「质量-成本台阶」（由 `threshold_sensitivity.csv` 派生）。",
 
-        "- 推荐器用硬阈值剪枝，而 **7B→3B-Q8 的翻转点在 7.5 pp（20847→4919），3B→1.5B-Q4 在 10 pp（4919→2182）**。",
+        "- 推荐器用硬阈值剪枝，翻转点：**7B→3B-Q8 在 7.5 pp（20852→15900）、3B→1.5B-Q4 在 10 pp（15900→2182）**；注意 3B-Q8 只能跑 c1（TTFT 上限），所以它只比 7B 便宜 24%。",
         "- 因此质量—成本权衡的结论不应作为硬判断，应报出阈值敏感性。",
         f"- **后悔值的负对照**：模型 {_control('model')} / 随机选 {_control('random')}"
         f" / 选最大模型 {_control('largest')} —— 指标有分辨力。",
@@ -1076,6 +1076,37 @@ def _known_values(d, claims):
     }
 
 
+
+def _num_from_claim(claims, key, idx=0):
+    """从 claim 的文本里取第 idx 个数字（如 "[8.54%, 12.28%]" → 8.54）。
+
+    为什么不写死期望值：写死等于"只认昨天的数字"，文档写旧值反而会通过。
+    """
+    import re as _re
+    v = claims.get(key)
+    if not v:
+        return None
+    nums = _re.findall(r"\d+(?:\.\d+)?", str(v))
+    return nums[idx] if idx < len(nums) else None
+
+
+def _ladder_costs():
+    """从 threshold_sensitivity.csv 取"每换一次配置"的成本（取整），按出现顺序。"""
+    import csv as _csv
+    fp = RESULTS / "threshold_sensitivity.csv"
+    if not fp.exists():
+        return []
+    with fp.open(encoding="utf-8-sig") as f:
+        rows = list(_csv.DictReader(f))
+    segs, prev = [], None
+    for r in sorted(rows, key=lambda x: float(x["drop"])):
+        cid = r["cell_id"]
+        if cid != prev:
+            segs.append(str(int(round(float(r["cost"])))))
+            prev = cid
+    return segs
+
+
 def _need(claims, key):
     """取 claims 里的键；取不到就抛错。
 
@@ -1118,6 +1149,18 @@ def check(claims, d):
         # 覆盖率的值现在带口径后缀（"86.8%（TPOT 口径；成本 80.9%…）"），
         # 文档里只要求出现**数字本身**；口径是否有说明由 lint 的"裸覆盖率"规则管。
         ("区间覆盖率", _need(claims, "90% 区间覆盖率").split("（")[0], None),
+        # ---- v10 复核：新 claim 必须有对应断言，否则只生成不校验 ----
+        ("墙钟成本 MAPE", _need(claims, "墙钟口径的成本 MAPE"), None),
+        ("随机划分 5% 分位", _num_from_claim(claims, "随机 12 点重划分的 5–95% 区间", 0), None),
+        ("随机划分 95% 分位", _num_from_claim(claims, "随机 12 点重划分的 5–95% 区间", 1), None),
+        ("随机划分中位", _need(claims, "随机 12 点重划分的中位"), None),
+        ("全仓格数", _need(claims, "数据规模：全仓格数"), None),
+        ("全仓测量次数", _need(claims, "数据规模：全仓测量次数"), None),
+        ("跨族稳态 MAPE", _need(claims, "跨模型族（零重标定，稳态口径）"), None),
+        ("成本口径 TTFT 覆盖率", _num_from_claim(claims, "分口径覆盖率（TPOT / 成本 / TTFT）", 2), None),
+        ("质量台阶第一级成本", (_ladder_costs() or [None])[0], None),
+        ("质量台阶第二级成本", (_ladder_costs() or [None, None])[1] if len(_ladder_costs()) > 1 else None, None),
+        ("质量台阶第三级成本", (_ladder_costs() or [None, None, None])[2] if len(_ladder_costs()) > 2 else None, None),
     ]
     # 曾经对外用过、现已作废的数字；留在文档里就是漂移
     stale = ["100 个配置格", "300 次会话级", "21 个脚本", "6.13%", "19.46%",

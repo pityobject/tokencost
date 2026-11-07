@@ -10,7 +10,7 @@ tc_web.py —— 生成一个**单文件、离线可用**的配置计算器（si
 
 1. **所有数字由 Python 现算**（复用 `tc_recommend.simulate` 与项目自己的 6 参数）；
 2. 页面里只有**筛选与排序**，没有任何物理公式；
-3. 页面加载时做**自检**：用 Python 预算好的 3 个用例校验筛选结果，
+3. 页面加载时做**自检**：用 Python 预算好的若干用例校验筛选结果，
    一旦不一致就在页面上显示红字——**网页自己证明自己没有过期**。
 
 ## 用法
@@ -49,7 +49,10 @@ def load_quality():
     q = pd.read_csv(p)
     if "acc" not in q.columns:
         return {}
-    g = q.groupby(["model", "quant"])["acc"].mean()
+    # v10 P1-2：CLI 默认用 Wilson 下界（acc_lo），网页原来用点估计，
+    # 同一组质量容差网页会更宽松地推荐。这里对齐到 acc_lo（缺失才退回点估计）。
+    col = "acc_lo" if "acc_lo" in q.columns else "acc"
+    g = q.groupby(["model", "quant"])[col].mean()
     return {k: float(v) for k, v in g.items()}
 
 
@@ -103,6 +106,7 @@ def build_grid():
         mape=fit.get("mape_cost"), cells=len({r["id"] for r in rows}),
         best_acc=(round(best_acc, 4) if best_acc else None),
         gen=cfg.GEN_TOKENS, half_log=round(half_log, 4),
+                half_ttft=round(half_ttft, 4),
         prices=rec.PRICE_CNY_PER_HOUR,
     )
     return rows, meta, checks
@@ -231,9 +235,9 @@ function render(){
   });
   document.getElementById('foot').innerHTML =
     `数据：${meta.cells} 个配置格 · 成本 MAPE ${meta.mape.toFixed(2)}%（留出集）· ` +
-    `生成长度 ${meta.gen} token · 延迟按 90% 上界（模型误差半宽 ${meta.half_log}）<br>` +
+    `生成长度 ${meta.gen} token · 延迟上界：TPOT 半宽 ${meta.half_log}、TTFT 经验包络 ${meta.half_ttft}（描述性，非验证过的 90% 区间）<br>` +
     `自检：${fail? '<span class="bad">'+fail+' 项不一致——页面可能过期，请重新生成</span>'
-                   : '<span class="ok">通过（Python 预算的 3 个用例与页面结果一致）</span>'}<br>` +
+                   : '<span class="ok">通过（Python 预算的 ${checks.length} 个用例与页面结果一致）</span>'}<br>` +
     `价格预设：${Object.entries(meta.prices).map(([k,v])=>k+'='+v).join(' / ')} 元/时。` +
     `同一份 GPU·秒，本地电费与云租用可差 175 倍——<b>多少钱必须和什么价一起说</b>。`;
 }

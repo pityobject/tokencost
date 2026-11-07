@@ -2,14 +2,9 @@ name: ci
 
 # 说明：
 #   · 本仓库同时托管在 GitHub（本文件生效）与 Gitee（用 scripts/ci.ps1 本地跑）。
-#   · 两边**必须同为 5 步**，否则"绿勾"的含义在两端不同。
-#
-# 五步与 scripts/ci.ps1 一一对应：
-#   ① tc_claims.py          生成对外数字表
-#   ② tc_claims.py --check  文档与产物对账（漂移即失败）
-#   ③ tests/test_core.py    三个零依赖单元测试
-#   ④ tc_lint_docs.py       "已作废数字"扫描（warning 级，不阻断）
-#   ⑤ tc_audit.py --fast    全项目体检（CI 跳过裸克隆以控时）
+#   · 两边**必须同为 9 步**，否则"绿勾"的含义在两端不同。
+#   · v10 复核指出：lint 原来带 continue-on-error（硬闸门形同虚设），
+#     且 guardrails 不在远程 CI。现在两边跑同一组 9 步，任何一步非零即失败。
 
 on:
   push:
@@ -30,24 +25,42 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          pip install numpy pandas scipy matplotlib httpx psutil
+          pip install "numpy>=1.24,<3" "pandas>=2.0,<3" "scipy>=1.10,<2" \
+                      "matplotlib>=3.7,<4" "httpx>=0.24,<1" "psutil>=5.9,<7"
 
-      - name: Generate claim table and verify docs match artifacts
+      - name: (1) regenerate claim table
         working-directory: code
-        run: |
-          python tc_claims.py
-          python tc_claims.py --check
+        run: python tc_claims.py
 
-      - name: Unit tests
+      - name: (2) docs must match artifacts
+        working-directory: code
+        run: python tc_claims.py --check
+
+      - name: (3) core unit tests
         run: python tests/test_core.py
 
-      # 与 scripts/ci.ps1 的第 4、5 步保持一致：
-      # 本地 5 步、CI 也必须 5 步，否则"绿勾"的含义在两端不同（第七轮复核指出）。
-      - name: Doc number lint (warning only)
+      - name: (4) guardrail tests
+        run: python tests/test_guardrails.py
+
+      # v10 复核 P0-1：这里**不再** continue-on-error。
+      # 覆盖率 / 表格编号 / 过期论断 / 裸覆盖率四道硬 gate 都在这个脚本里。
+      - name: (5) doc lint (hard gate)
         working-directory: code
-        continue-on-error: true
         run: python tc_lint_docs.py
 
-      - name: Project audit (skip bare-clone in CI for runtime)
+      - name: (6) project audit
         working-directory: code
         run: python tc_audit.py --fast
+
+      - name: (7) calibration pipeline selftest (synthetic, no GPU)
+        run: python code/tc_profile.py --selftest
+
+      - name: (8) calculator site is in sync
+        run: |
+          python code/tc_web.py
+          git diff --exit-code -- site/index.html
+
+      - name: (9) data dictionary is in sync
+        run: |
+          python code/tc_docs_data.py
+          git diff --exit-code -- 报告/数据字典.md
