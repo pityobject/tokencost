@@ -1,0 +1,38 @@
+{
+  "hardware": "A10 / llama.cpp 3B-vs-1.8B",
+  "backend": "llamacpp",
+  "delta_params": 1240000000.0,
+  "slope_ms_per_b": 0.39163,
+  "intercept_ms": -12.1,
+  "r2": 0.9056,
+  "expected_intercept_ms": 5.3,
+  "peak_dec_tflops": 6.3,
+  "rows": [
+    {
+      "conc": 32,
+      "tpot_a": 57.91,
+      "tpot_b": 56.92,
+      "dt": 0.99
+    },
+    {
+      "conc": 64,
+      "tpot_a": 105.84,
+      "tpot_b": 97.3,
+      "dt": 8.55
+    },
+    {
+      "conc": 96,
+      "tpot_a": 178.48,
+      "tpot_b": 145.82,
+      "dt": 32.65
+    },
+    {
+      "conc": 128,
+      "tpot_a": 187.51,
+      "tpot_b": 152.78,
+      "dt": 34.73
+    }
+  ],
+  "verdict": "失败：截距符号与理论相反、R²=0.91、解出的 6.3 与下界 15.8 矛盾。根因是 128 槽时调度开销主导（c32 就要 57.9 ms），且两服务开销不等，c_srv 抵消的前提不成立。",
+  "note": "双差法第三次尝试；PEAK_dec 仍只能给下界"
+}

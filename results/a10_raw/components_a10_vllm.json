@@ -1,0 +1,48 @@
+{
+  "hardware": "A10 24GB / vLLM",
+  "backend": "vllm",
+  "model": "qwen3b",
+  "conc": 1,
+  "length": 64,
+  "gen": 128,
+  "variants": {
+    "baseline（stream, T=0）": {
+      "tpot_ms": 16.9,
+      "ttft_ms": 25.4,
+      "n": 8,
+      "gen": 128
+    },
+    "sampling（T=1.2）": {
+      "tpot_ms": 16.94,
+      "ttft_ms": 25.4,
+      "n": 8,
+      "gen": 128
+    },
+    "logprobs 开": {
+      "tpot_ms": 17.27,
+      "ttft_ms": 25.5,
+      "n": 8,
+      "gen": 128
+    },
+    "非流式": {
+      "tpot_ms": null,
+      "ttft_ms": null,
+      "total_ms": 2161.1,
+      "n": 8,
+      "gen": 128
+    },
+    "短输出（gen=32）": {
+      "tpot_ms": 16.73,
+      "ttft_ms": 25.5,
+      "n": 8,
+      "gen": 32
+    }
+  },
+  "deltas_ms_per_step": {
+    "sampling": 0.04,
+    "logprobs": 0.37,
+    "short_output": 0.06
+  },
+  "sse_overhead_total_ms": -18.5,
+  "note": "逐项关掉一个环节，用 TPOT 差值归因；非流式无法分离 prefill，故用总时长相减得 SSE 开销"
+}

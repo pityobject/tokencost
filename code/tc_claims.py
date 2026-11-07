@@ -485,6 +485,14 @@ def build_claims(d):
         claims[_label] = (f"{_r['n_holdout']} 格 · MAPE {_r['mape_cost']:.2f}% · "
                           f"覆盖率 {_r['coverage']*100:.1f}%")
 
+    _cp = RESULTS / "a10_raw" / "components_a10_vllm.json"
+    if _cp.exists():
+        _d = json.loads(_cp.read_text(encoding="utf-8"))
+        _dd = _d.get("deltas_ms_per_step") or {}
+        claims["c_srv 拆解：采样/logprobs/推流"] = (
+            f"采样 {_dd.get('sampling', 0):+.2f} ms/步、"
+            f"logprobs {_dd.get('logprobs', 0):+.2f} ms/步、"
+            f"推流 {_d.get('sse_overhead_total_ms', 0):+.1f} ms/请求（负=流式更快）")
     _tv = RESULTS / "tail_variance.json"
     if _tv.exists():
         _d = json.loads(_tv.read_text(encoding="utf-8"))
