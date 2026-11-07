@@ -55,6 +55,7 @@ async def one(client, base_url, model, prompt, gen, backend,
     t0 = time.perf_counter()
     first = None
     n_out = 0
+    usage_tok = 0
     try:
         if stream:
             async with client.stream("POST", f"{base_url}/chat/completions",
@@ -70,6 +71,8 @@ async def one(client, base_url, model, prompt, gen, backend,
                         obj = json.loads(d)
                     except Exception:
                         continue
+                    if obj.get("usage"):
+                        usage_tok = int(obj["usage"].get("completion_tokens") or 0)
                     for ch in obj.get("choices") or []:
                         if (ch.get("delta") or {}).get("content"):
                             if first is None:
@@ -80,8 +83,8 @@ async def one(client, base_url, model, prompt, gen, backend,
             r.raise_for_status()
             obj = r.json()
             first = time.perf_counter()
-            n_out = len((obj["choices"][0]["message"].get("content") or "").split())
-            # 非流式拿不到逐 token 时间，只能算总时长/输出数
+            # 【修正】按空格分词会严重低估中文输出；必须用服务端返回的 completion_tokens
+            n_out = int(((obj.get("usage") or {}).get("completion_tokens")) or 0)
     except Exception as e:
         return None
     total = time.perf_counter() - t0
@@ -89,10 +92,13 @@ async def one(client, base_url, model, prompt, gen, backend,
         return None
     if stream:
         ttft_ms = (first - t0) * 1e3
-        tpot_ms = (time.perf_counter() - first) * 1e3 / (n_out - 1)
+        # 用 usage 的 token 数更准（比逐 chunk 计数少算最后一个）
+        n_eff = max(usage_tok, n_out) - 1
+        tpot_ms = (time.perf_counter() - first) * 1e3 / max(n_eff, 1)
     else:
+        # 非流式拿不到 TTFT，TPOT 无法从总时长里分离 prefill → 不报，只报总时长
         ttft_ms = None
-        tpot_ms = total * 1e3 / n_out
+        tpot_ms = None
     return dict(ttft_ms=ttft_ms, tpot_ms=tpot_ms, n_out=n_out,
                 total_ms=total * 1e3)
 
@@ -155,19 +161,33 @@ def main():
             print(f"  {name:<24} 失败")
             continue
         tp = med(rows, "tpot_ms")
-        results[name] = dict(tpot_ms=tp, ttft_ms=med(rows, "ttft_ms"),
+        tt = med(rows, "ttft_ms")
+        tot = med(rows, "total_ms")
+        results[name] = dict(tpot_ms=tp, ttft_ms=tt, total_ms=tot,
                              n=len(rows), gen=gen)
-        print(f"  {name:<24} TPOT={tp:>7.2f} ms  "
-              f"TTFT={str(med(rows, 'ttft_ms') or '—'):>8}  n={len(rows)}")
+        if tp is None:
+            print(f"  {name:<24} 总时长={tot:>8.1f} ms（非流式，TPOT 不可分）  n={len(rows)}")
+        else:
+            print(f"  {name:<24} TPOT={tp:>7.2f} ms  "
+                  f"TTFT={str(tt or '—'):>8}  总时长={tot:>8.1f}  n={len(rows)}")
 
     base = (results.get("baseline（stream, T=0）") or {}).get("tpot_ms")
     if base:
         print("\n  相对基准的差值（ms/步）：")
         for name, r in results.items():
-            if name == "baseline（stream, T=0）":
+            if name == "baseline（stream, T=0）" or r["tpot_ms"] is None:
                 continue
             d = r["tpot_ms"] - base
             print(f"    {name:<24} {d:+.2f}  ({(d/base*100):+.0f}%)")
+        # 非流式：用总时长的差算 SSE 推流开销
+        ns = results.get("非流式") or {}
+        bs = results.get("baseline（stream, T=0）") or {}
+        if ns.get("total_ms") and bs.get("total_ms"):
+            d = bs["total_ms"] - ns["total_ms"]
+            ntok = bs.get("gen") or 128
+            print(f"\n    SSE 推流开销：流式总时长 − 非流式总时长 = {d:+.1f} ms"
+                  f"（每 token {d/ntok:+.3f} ms）")
+            print("    （非流式无法分离 prefill，所以只能用总时长相减）")
         print("\n  读法：")
         print("    · sampling 差值 ≈ 采样开销")
         print("    · logprobs 差值 ≈ 每 token 额外计算/传输")
