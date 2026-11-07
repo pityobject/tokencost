@@ -91,6 +91,8 @@ COMMANDS = {
     "jitterprobe":   ("tc_measure_jitter.py", []),
     "jittercross":   ("tc_analyze_jitter_cross.py", []),
     "highconc":      ("tc_analyze_high_conc.py", []),
+    "mixedprobe":    ("tc_measure_mixed.py", []),
+    "turnsprobe":    ("tc_measure_turns.py", []),
     "tailflip":      ("tc_tail_flip.py", []),
     "datadict":      ("tc_docs_data.py", []),
     "audit":         ("tc_audit.py", []),
@@ -134,6 +136,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
