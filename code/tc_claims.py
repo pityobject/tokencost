@@ -665,9 +665,13 @@ def build_claims(d):
         _f0 = json.loads(_fit_fp0.read_text(encoding="utf-8"))
         if _f0.get("coverage_cost") is not None:
             claims["分口径覆盖率（TPOT / 成本 / TTFT）"] = (
-                f"{_f0['coverage']*100:.1f}% / {_f0['coverage_cost']:.1f}% / {_f0['coverage_ttft']:.1f}%")
-            claims["TTFT 的 90% 半宽（与 TPOT 分开）"] = (
-                f"{_f0.get('half_width_log_ttft', 0):.4f}（TPOT 为 {_f0['half_width_log']:.4f}）")
+                f"{_f0['coverage']*100:.1f}% / {_f0['coverage_cost']:.1f}% / "
+                f"{_f0.get('coverage_ttft_under_tpot_half', float('nan')):.1f}%"
+                f"（三者用同一 TPOT 半宽）")
+            claims["TTFT 区间：两条口径"] = (
+                f"标定集 conformal 半宽 {_f0.get('half_width_log_ttft_conformal', 0):.4f}"
+                f"（out-of-sample 覆盖 {_f0.get('coverage_ttft_at_conformal', 0):.1f}%，**欠覆盖**）｜"
+                f"经验包络 {_f0.get('ttft_envelope_log', 0):.4f}（描述性上界，用于 SLA）")
     _fit_fp = RESULTS / "fit.json"
     if _fit_fp.exists():
         _f = json.loads(_fit_fp.read_text(encoding="utf-8"))
