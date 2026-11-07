@@ -485,6 +485,17 @@ def build_claims(d):
         claims[_label] = (f"{_r['n_holdout']} 格 · MAPE {_r['mape_cost']:.2f}% · "
                           f"覆盖率 {_r['coverage']*100:.1f}%")
 
+    _tv = RESULTS / "tail_variance.json"
+    if _tv.exists():
+        _d = json.loads(_tv.read_text(encoding="utf-8"))
+        claims["抖动经验律"] = (
+            f"CV = {_d['c0']*100:.2f}% + a·(b-1)^{_d['exp_b']:.2f}·L^{_d['exp_L']:.2f}"
+            f"（R²={_d['r2']:.3f}）")
+        _o = _d.get("out_of_sample") or {}
+        if _o:
+            claims["尾部预测误差（样本外 136 格）"] = (
+                f"{_o['mape_pct']:.1f}%（常数 1.09 假设为 "
+                f"{_o['baseline_const_109_mape_pct']:.1f}%）")
     _l64 = RESULTS / "a10_raw" / "jitter_a10_vllm_L64.json"
     _l256 = RESULTS / "a10_raw" / "jitter_a10_vllm_L256.json"
     if _l64.exists() and _l256.exists():

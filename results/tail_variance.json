@@ -1,0 +1,15 @@
+{
+  "c0": 0.01087,
+  "a": 0.00012071,
+  "exp_b": 0.521,
+  "exp_L": 0.777,
+  "r2": 0.994,
+  "n_fit_points": 15,
+  "lognormal_check_median_err_pct": 0.8,
+  "out_of_sample": {
+    "n_cells": 136,
+    "mape_pct": 6.8,
+    "baseline_const_109_mape_pct": 9.8
+  },
+  "note": "CV = a·(b·L)^γ；p90/p50 ≈ exp(1.2816·CV)。拟合只用 A10 15 点，验证用本机 136 格"
+}
