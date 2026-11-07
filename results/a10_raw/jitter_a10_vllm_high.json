@@ -1,0 +1,34 @@
+{
+  "hardware": "A10 24GB / vLLM",
+  "backend": "vllm",
+  "model": "qwen3b",
+  "length": 300,
+  "gen": 128,
+  "cells": {
+    "48": {
+      "n": 96,
+      "ttft_p50": 845.12,
+      "tpot_p50": 33.361,
+      "tpot_cv": 0.1071,
+      "tpot_p90_over_p50": 1.156,
+      "ttft_p90_over_p50": 1.707
+    },
+    "64": {
+      "n": 128,
+      "ttft_p50": 1113.21,
+      "tpot_p50": 38.057,
+      "tpot_cv": 0.1239,
+      "tpot_p90_over_p50": 1.1709,
+      "ttft_p90_over_p50": 1.712
+    },
+    "128": {
+      "n": 256,
+      "ttft_p50": 2273.12,
+      "tpot_p50": 49.96,
+      "tpot_cv": 0.1939,
+      "tpot_p90_over_p50": 1.2559,
+      "ttft_p90_over_p50": 3.9228
+    }
+  },
+  "note": "逐请求抖动；用于检验『prefill 打断 decode 的排队效应』。若抖动随并发上升且两栈都有，则排队假说获得独立支持。"
+}

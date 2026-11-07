@@ -485,6 +485,19 @@ def build_claims(d):
         claims[_label] = (f"{_r['n_holdout']} 格 · MAPE {_r['mape_cost']:.2f}% · "
                           f"覆盖率 {_r['coverage']*100:.1f}%")
 
+    hconc = {}
+    _p = RESULTS / "high_conc_analysis.json"
+    if _p.exists():
+        hconc = json.loads(_p.read_text(encoding="utf-8"))
+    if hconc and hconc.get("peak_dec_lower_bound_tflops"):
+        claims["PEAK_dec 的硬下界（实测反推）"] = (
+            f"{hconc['peak_dec_lower_bound_tflops']:.1f} TFLOP/s（拟合值 13.8）")
+        _sl = (hconc.get("slot_effect") or {}).get("llamacpp") or {}
+        _sv = (hconc.get("slot_effect") or {}).get("vllm") or {}
+        if _sl:
+            claims["槽位 32→128 的 c_srv 变化（llama.cpp / vLLM）"] = (
+                f"{( _sl['c_srv_128'] / _sl['c_srv_32'] - 1) * 100:+.0f}% / "
+                f"{(_sv['c_srv_128'] / _sv['c_srv_32'] - 1) * 100:+.0f}%")
     jcross = {}
     _p = RESULTS / "jitter_cross_stack.json"
     if _p.exists():

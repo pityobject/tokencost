@@ -1,0 +1,34 @@
+{
+  "hardware": "A10 24GB / llama.cpp",
+  "backend": "llamacpp",
+  "model": "gguf/qwen3b-fp16.gguf",
+  "length": 300,
+  "gen": 128,
+  "cells": {
+    "48": {
+      "n": 96,
+      "ttft_p50": 2243.49,
+      "tpot_p50": 123.648,
+      "tpot_cv": 0.0918,
+      "tpot_p90_over_p50": 1.0858,
+      "ttft_p90_over_p50": 2.5063
+    },
+    "64": {
+      "n": 128,
+      "ttft_p50": 2116.96,
+      "tpot_p50": 154.494,
+      "tpot_cv": 0.0894,
+      "tpot_p90_over_p50": 1.0667,
+      "ttft_p90_over_p50": 3.0276
+    },
+    "128": {
+      "n": 256,
+      "ttft_p50": 5106.85,
+      "tpot_p50": 228.16,
+      "tpot_cv": 0.1949,
+      "tpot_p90_over_p50": 1.0491,
+      "ttft_p90_over_p50": 5.9199
+    }
+  },
+  "note": "逐请求抖动；用于检验『prefill 打断 decode 的排队效应』。若抖动随并发上升且两栈都有，则排队假说获得独立支持。"
+}

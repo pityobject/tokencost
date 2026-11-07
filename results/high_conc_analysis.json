@@ -1,0 +1,72 @@
+{
+  "prompt_len": 364.0,
+  "kv_bytes_per_token": 36864,
+  "high_conc": [
+    {
+      "stack": "llama.cpp",
+      "conc": 48,
+      "tpot": 123.648,
+      "floor": 26.1,
+      "implied_csrv": 2.032,
+      "fitted_csrv": 1.529,
+      "binding": "compute"
+    },
+    {
+      "stack": "llama.cpp",
+      "conc": 64,
+      "tpot": 154.494,
+      "floor": 34.8,
+      "implied_csrv": 1.87,
+      "fitted_csrv": 1.529,
+      "binding": "compute"
+    },
+    {
+      "stack": "llama.cpp",
+      "conc": 128,
+      "tpot": 228.16,
+      "floor": 69.6,
+      "implied_csrv": 1.239,
+      "fitted_csrv": 1.529,
+      "binding": "compute"
+    },
+    {
+      "stack": "vLLM",
+      "conc": 48,
+      "tpot": 33.361,
+      "floor": 21.4,
+      "implied_csrv": 0.25,
+      "fitted_csrv": 0.273,
+      "binding": "compute"
+    },
+    {
+      "stack": "vLLM",
+      "conc": 64,
+      "tpot": 38.057,
+      "floor": 28.5,
+      "implied_csrv": 0.149,
+      "fitted_csrv": 0.273,
+      "binding": "compute"
+    },
+    {
+      "stack": "vLLM",
+      "conc": 128,
+      "tpot": 49.96,
+      "floor": 57.0,
+      "implied_csrv": -0.055,
+      "fitted_csrv": 0.273,
+      "binding": "compute"
+    }
+  ],
+  "peak_dec_lower_bound_tflops": 15.78,
+  "slot_effect": {
+    "llamacpp": {
+      "c_srv_32": 1.5285488873302522,
+      "c_srv_128": 2.5116048351656826
+    },
+    "vllm": {
+      "c_srv_32": 0.2729086935109363,
+      "c_srv_128": 0.2853017202941571
+    }
+  },
+  "note": "隐含 c_srv 对 PEAK_dec 敏感；其走势比绝对值更可靠"
+}

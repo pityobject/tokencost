@@ -90,6 +90,7 @@ COMMANDS = {
     "a10repeat":     ("tc_a10_repeat.py", []),
     "jitterprobe":   ("tc_measure_jitter.py", []),
     "jittercross":   ("tc_analyze_jitter_cross.py", []),
+    "highconc":      ("tc_analyze_high_conc.py", []),
     "tailflip":      ("tc_tail_flip.py", []),
     "datadict":      ("tc_docs_data.py", []),
     "audit":         ("tc_audit.py", []),
