@@ -1,0 +1,7 @@
+{
+  "verdict": "unidentifiable",
+  "slope_ms_per_stream": 0.2013437499999999,
+  "intercept_ms": 24.35183333333332,
+  "r2": 0.9923,
+  "c_srv_ms": 0.2729086935109363
+}

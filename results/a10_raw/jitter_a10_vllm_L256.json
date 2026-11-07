@@ -1,0 +1,44 @@
+{
+  "hardware": "A10 24GB / vLLM (L=256)",
+  "backend": "vllm",
+  "model": "qwen3b",
+  "length": 256,
+  "gen": 128,
+  "cells": {
+    "1": {
+      "n": 16,
+      "ttft_p50": null,
+      "tpot_p50": 17.46,
+      "tpot_cv": 0.0144,
+      "tpot_p90_over_p50": 1.018
+    },
+    "4": {
+      "n": 16,
+      "ttft_p50": 143.4,
+      "tpot_p50": 18.86,
+      "tpot_cv": 0.0214,
+      "tpot_p90_over_p50": 1.039
+    },
+    "8": {
+      "n": 16,
+      "ttft_p50": 230.8,
+      "tpot_p50": 19.79,
+      "tpot_cv": 0.0258,
+      "tpot_p90_over_p50": 1.025
+    },
+    "16": {
+      "n": 32,
+      "ttft_p50": 353.8,
+      "tpot_p50": 22.41,
+      "tpot_cv": 0.0421,
+      "tpot_p90_over_p50": 1.065
+    },
+    "32": {
+      "n": 64,
+      "ttft_p50": 573.0,
+      "tpot_p50": 28.03,
+      "tpot_cv": 0.0724,
+      "tpot_p90_over_p50": 1.111
+    }
+  }
+}
