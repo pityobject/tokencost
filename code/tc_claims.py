@@ -487,6 +487,12 @@ def build_claims(d):
 
     claims["ubatch 对高并发 TTFT（c32, L=307）"] = (
         "ub=64 → **2464 ms** ／ ub=512 → **438 ms**（**5.6×** 差距；c32/c1 从 20.1× 降到 5.7×）")
+    _ct = RESULTS / "capacity_trace.json"
+    if _ct.exists():
+        _d = json.loads(_ct.read_text(encoding="utf-8"))
+        claims["容量折减（真实 trace vs 泊松，实测）"] = (
+            f"{_d['burstiness_derating']:.2f}×（泊松 {_d['capacity_poisson_rps']:.2f} → "
+            f"真实 {_d['capacity_real_rps']:.2f} 请求/秒）；经验值 0.70 偏保守")
     _tr = RESULTS / "trace_stats.json"
     if _tr.exists():
         _d = json.loads(_tr.read_text(encoding="utf-8"))

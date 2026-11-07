@@ -1,0 +1,17 @@
+{
+  "n": 60000,
+  "span_h": 229.24,
+  "rate_rps": 0.0727,
+  "gen": 36,
+  "sla_ms": 2000.0,
+  "service_ms": {
+    "mean": 423.6,
+    "p95": 687.5,
+    "single_stream_ceiling_rps": 2.361
+  },
+  "capacity_real_rps": 1.0904,
+  "capacity_poisson_rps": 1.2871,
+  "burstiness_derating": 1.18,
+  "heuristic_derating": 0.7,
+  "note": "FCFS 单台、同服务时间分布，只换到达序列；服务时间用本机模型单流预测。用来检验 ×0.7 这条经验"
+}
