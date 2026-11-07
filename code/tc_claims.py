@@ -485,6 +485,10 @@ def build_claims(d):
         claims[_label] = (f"{_r['n_holdout']} 格 · MAPE {_r['mape_cost']:.2f}% · "
                           f"覆盖率 {_r['coverage']*100:.1f}%")
 
+    claims["TTFT 尾部律的拟合度（两栈合并 / 单栈）"] = (
+        "R²=0.46（合并）／0.58（vLLM）／0.52（llama.cpp）→ 不可用幂律预测")
+    claims["TTFT 尾部的栈差异（c32, L≈1900）"] = (
+        "llama.cpp 9.34× vs vLLM 1.74×（差 5.4 倍）")
     _cp = RESULTS / "a10_raw" / "components_a10_vllm.json"
     if _cp.exists():
         _d = json.loads(_cp.read_text(encoding="utf-8"))

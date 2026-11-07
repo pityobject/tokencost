@@ -1,0 +1,36 @@
+{
+  "ttft_law": {
+    "a": 0.0091361663475261,
+    "exp_b": 1.5768173121896447,
+    "exp_L": 1.2952200008106955,
+    "r2": 0.4574277279157517,
+    "n": 16
+  },
+  "variance_law": {
+    "c0": 0.01087,
+    "a": 0.00012071,
+    "exp_b": 0.521,
+    "exp_L": 0.777
+  },
+  "confusion": {
+    "const": {
+      "tp": 6,
+      "fp": 0,
+      "fn": 28,
+      "tn": 98,
+      "recall_pct": 17.647058823529413,
+      "precision_pct": 100.0
+    },
+    "pred": {
+      "tp": 6,
+      "fp": 0,
+      "fn": 28,
+      "tn": 98,
+      "recall_pct": 17.647058823529413,
+      "precision_pct": 100.0
+    }
+  },
+  "measured_fail": 34,
+  "n_cells": 132,
+  "note": "TTFT 律由逐请求 p90/p50 拟合；TPOT 律来自 tail_variance.json"
+}
