@@ -184,6 +184,21 @@ assumption** — including three times the checker itself was silently broken
 > Only `bw` is a hardware property. `c_srv`, `b_sat` and `peak_prefill` describe
 > *this serving process under this configuration* — without the config they mean nothing.
 
+## Validated against a real workload trace (2026-11, BurstGPT)
+
+Public production trace: **1,429,737 requests over 61 days** (ChatGPT + GPT-4).
+
+| check | real | our assumption | verdict |
+|---|---|---|---|
+| inter-arrival CV | **9.77** | 1.0 (Poisson) | ❌ far from Poisson |
+| 10-second burstiness σ/μ | **3.02** | 1.0 | ❌ over-dispersed |
+| prompt-length CV | 1.26 | 0.5–1.3 (lognormal) | ✅ holds |
+| output median | **36 tokens** | we use 128 | ⚠️ 3.5× too large |
+
+**Capacity implication**: with the same service-time distribution, real arrivals sustain only
+**85%** of the Poisson-model capacity (1.09 vs 1.29 req/s at p95 ≤ 2 s).
+So our hand-waved `×0.7` derating is **safe but conservative by ~18%**.
+
 ## Repository layout
 
 ```

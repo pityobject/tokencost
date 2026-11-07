@@ -75,9 +75,27 @@ def tracked_files():
             return [ROOT / p for p in out.stdout.splitlines() if p.strip()]
     except Exception:
         pass
-    return [p for p in ROOT.rglob("*")
-            if p.is_file() and ".git" not in p.parts
-            and "__pycache__" not in p.parts]
+    # 兜底：没有 git 时用 rglob，但**必须**手动排除 .gitignore 里的东西，
+    # 否则会把这些本地文件当成"已跟踪"来检查（15 轮复核：49MB 的 data/traces
+    # 被判成超大文件）。原则：宁可少查，不可误报。
+    IGNORE_DIRS = {".git", "__pycache__", "logs", ".venv", "venv", "node_modules",
+                   "data/traces", "data/traces/"}
+    IGNORE_SUFFIX = (".gguf", ".tar", ".gz", ".tgz", ".zip", ".pt", ".safetensors",
+                     ".bin", ".so", ".dll", ".exe", ".pyc")
+    keep = []
+    for f in ROOT.rglob("*"):
+        if not f.is_file():
+            continue
+        parts = set(f.parts)
+        if parts & {".git", "__pycache__", "logs", ".venv", "venv", "node_modules"}:
+            continue
+        rel = f.relative_to(ROOT).as_posix()
+        if rel.startswith("data/traces/") or rel.startswith("data/traces"):
+            continue
+        if f.suffix.lower() in IGNORE_SUFFIX:
+            continue
+        keep.append(f)
+    return keep
 
 
 # ---------------------------------------------------------------- 类 1：仓库卫生
