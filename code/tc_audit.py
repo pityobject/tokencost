@@ -248,7 +248,7 @@ def audit_contract(files):
 
     ref_pat = re.compile(
         r"`((?:\.\./)+(?:[^`\s]+\.(?:py|csv|json|jsonl|md|png|ps1|yml))"   # 仓外
-        r"|(?:code|data|results|figures|tests|scripts|报告|手册)/[^`\s]+?\.(?:py|csv|json|jsonl|md|png|ps1|yml))`")
+        r"|(?:code|data|results|figures|tests|scripts|报告|docs)/[^`\s]+?\.(?:py|csv|json|jsonl|md|png|ps1|yml))`")
     missing = set()
     tracked_set = _tracked_names()   # None = 非 git 环境，跳过该检查
     for f in files:

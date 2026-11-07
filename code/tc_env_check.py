@@ -210,7 +210,7 @@ def main():
     if all([a, b, c, d]):
         print("环境就绪。可以跑 tc_smoke_test.py 做第一次推理了。")
     else:
-        print("上面标 [!!] 的项还没通过，先按手册 S0 一节修完再往下走。")
+        print("上面标 [!!] 的项还没通过，先按 `docs/tutorial/01_环境搭建_S0.md` 修完再往下走。")
 
 
 if __name__ == "__main__":
