@@ -108,6 +108,7 @@ COMMANDS = {
     "priors":        ("tc_priors.py", []),
     "diagnose":      ("tc_diagnose.py", []),
     "modelcompare":  ("tc_model_compare.py", []),
+    "floor":         ("tc_floor.py", []),
     "tailflip":      ("tc_tail_flip.py", []),
     "datadict":      ("tc_docs_data.py", []),
     "audit":         ("tc_audit.py", []),

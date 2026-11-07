@@ -487,6 +487,18 @@ def build_claims(d):
 
     claims["ubatch 对高并发 TTFT（c32, L=307）"] = (
         "ub=64 → **2464 ms** ／ ub=512 → **438 ms**（**5.6×** 差距；c32/c1 从 20.1× 降到 5.7×）")
+    _fl = RESULTS / "floor_analysis.json"
+    if _fl.exists():
+        _d = json.loads(_fl.read_text(encoding="utf-8"))
+        _c1 = {}
+        for r in _d["points"]:
+            if r["conc"] == 1:
+                _c1.setdefault(r["hw"], []).append(r["tpot_x"])
+        if _c1:
+            claims["单流 TPOT 离物理下界的倍数（4060 / A10 两栈平均 / V100）"] = (
+                f"{sum(_c1.get('RTX 4060', [0]))/max(len(_c1.get('RTX 4060', [1])),1):.2f}× / "
+                f"{sum(_c1.get('A10', [0]))/max(len(_c1.get('A10', [1])),1):.2f}× / "
+                f"{sum(_c1.get('V100', [0]))/max(len(_c1.get('V100', [1])),1):.2f}×")
     _mc = RESULTS / "model_compare.json"
     if _mc.exists():
         _d = json.loads(_mc.read_text(encoding="utf-8"))
