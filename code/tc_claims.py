@@ -487,6 +487,19 @@ def build_claims(d):
 
     claims["ubatch 对高并发 TTFT（c32, L=307）"] = (
         "ub=64 → **2464 ms** ／ ub=512 → **438 ms**（**5.6×** 差距；c32/c1 从 20.1× 降到 5.7×）")
+    _mc = RESULTS / "model_compare.json"
+    if _mc.exists():
+        _d = json.loads(_mc.read_text(encoding="utf-8"))
+        _m = {r["kind"]: r for r in _d["models"]}
+        if "m4" in _m and "m6" in _m:
+            claims["模型比较：6 参数 vs 4 参数"] = (
+                f"ΔBIC {_m['m6']['bic']-_m['m4']['bic']:+.0f}，"
+                f"留出误差 {_m['m4']['holdout_mape']:.0f}% → {_m['m6']['holdout_mape']:.0f}%")
+        if "m7" in _m:
+            claims["模型比较：加抖动项（第 7 参数）"] = (
+                f"ΔAIC {_m['m7']['aic']-_m['m6']['aic']:+.1f}、"
+                f"ΔBIC {_m['m7']['bic']-_m['m6']['bic']:+.1f}、"
+                f"留出误差 {_m['m6']['holdout_mape']:.1f}% → {_m['m7']['holdout_mape']:.1f}%")
     _pr = RESULTS / "params_prior.json"
     if _pr.exists():
         _d = json.loads(_pr.read_text(encoding="utf-8"))

@@ -348,7 +348,7 @@ python code/tc_decompose_csrv.py   # c_srv 三向分解
 ## 目录
 
 ```
-code/          85 个脚本（采集 / 分析 / 拟合 / 推荐 / 探针 / 对账）
+code/          86 个脚本（采集 / 分析 / 拟合 / 推荐 / 探针 / 对账）
 data/          原始数据（raw_cells.jsonl 300 行、raw_requests.jsonl 逐请求明细）
 results/       fit.json（6 参数）、predictions.csv、recommendation.csv
 figures/       fig1–fig5（吞吐、成本、带宽、预测vs实测、Pareto）

@@ -107,6 +107,7 @@ COMMANDS = {
     "ubatchrule":    ("tc_ubatch_rule.py", []),
     "priors":        ("tc_priors.py", []),
     "diagnose":      ("tc_diagnose.py", []),
+    "modelcompare":  ("tc_model_compare.py", []),
     "tailflip":      ("tc_tail_flip.py", []),
     "datadict":      ("tc_docs_data.py", []),
     "audit":         ("tc_audit.py", []),
