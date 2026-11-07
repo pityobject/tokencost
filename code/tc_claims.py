@@ -485,6 +485,19 @@ def build_claims(d):
         claims[_label] = (f"{_r['n_holdout']} 格 · MAPE {_r['mape_cost']:.2f}% · "
                           f"覆盖率 {_r['coverage']*100:.1f}%")
 
+    jcross = {}
+    _p = RESULTS / "jitter_cross_stack.json"
+    if _p.exists():
+        jcross = json.loads(_p.read_text(encoding="utf-8"))
+    if jcross:
+        _l, _v = jcross["llamacpp"], jcross["vllm"]
+        claims["跨栈抖动：TPOT 的 CV（c1 → c32，llama.cpp / vLLM）"] = (
+            f"{_l['cv'][0]:.1f}% → {_l['cv'][-1]:.1f}% / "
+            f"{_v['cv'][0]:.1f}% → {_v['cv'][-1]:.1f}%")
+        claims["跨栈抖动：与 log(并发) 的相关"] = (
+            f"{_l['corr_cv_logconc']:+.2f} / {_v['corr_cv_logconc']:+.2f}")
+        claims["跨栈 TTFT 尾部（c32/c1）"] = (
+            f"{_l['tail_c16_over_c1']:.2f}× / {_v['tail_c16_over_c1']:.2f}×")
     a10r = {}
     _p = RESULTS / "a10_repeat_longprompt_summary.json"
     if _p.exists():

@@ -1,0 +1,50 @@
+{
+  "hardware": "A10 24GB / llama.cpp",
+  "backend": "llamacpp",
+  "model": "models/gguf/qwen3b-fp16.gguf",
+  "length": 1900,
+  "gen": 128,
+  "cells": {
+    "1": {
+      "n": 16,
+      "ttft_p50": 266.71,
+      "tpot_p50": 15.01,
+      "tpot_cv": 0.0147,
+      "tpot_p90_over_p50": 1.0191,
+      "ttft_p90_over_p50": 1.0115
+    },
+    "4": {
+      "n": 16,
+      "ttft_p50": 604.58,
+      "tpot_p50": 23.586,
+      "tpot_cv": 0.0701,
+      "tpot_p90_over_p50": 1.0765,
+      "ttft_p90_over_p50": 1.3317
+    },
+    "8": {
+      "n": 16,
+      "ttft_p50": 636.79,
+      "tpot_p50": 36.4,
+      "tpot_cv": 0.1374,
+      "tpot_p90_over_p50": 1.0951,
+      "ttft_p90_over_p50": 3.4831
+    },
+    "16": {
+      "n": 32,
+      "ttft_p50": 1073.59,
+      "tpot_p50": 63.679,
+      "tpot_cv": 0.1797,
+      "tpot_p90_over_p50": 1.0462,
+      "ttft_p90_over_p50": 3.8539
+    },
+    "32": {
+      "n": 64,
+      "ttft_p50": 904.36,
+      "tpot_p50": 119.809,
+      "tpot_cv": 0.2076,
+      "tpot_p90_over_p50": 1.0503,
+      "ttft_p90_over_p50": 9.344
+    }
+  },
+  "note": "逐请求抖动；用于检验『prefill 打断 decode 的排队效应』"
+}

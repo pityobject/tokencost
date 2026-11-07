@@ -89,6 +89,7 @@ COMMANDS = {
     "backends":      ("tc_compare_backends.py", []),
     "a10repeat":     ("tc_a10_repeat.py", []),
     "jitterprobe":   ("tc_measure_jitter.py", []),
+    "jittercross":   ("tc_analyze_jitter_cross.py", []),
     "tailflip":      ("tc_tail_flip.py", []),
     "datadict":      ("tc_docs_data.py", []),
     "audit":         ("tc_audit.py", []),

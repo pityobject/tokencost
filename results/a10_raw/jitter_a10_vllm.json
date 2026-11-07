@@ -1,0 +1,50 @@
+{
+  "hardware": "A10 24GB / vLLM",
+  "backend": "vllm",
+  "model": "qwen3b",
+  "length": 1900,
+  "gen": 128,
+  "cells": {
+    "1": {
+      "n": 16,
+      "ttft_p50": 186.48,
+      "tpot_p50": 17.113,
+      "tpot_cv": 0.0107,
+      "tpot_p90_over_p50": 1.0144,
+      "ttft_p90_over_p50": 1.007
+    },
+    "4": {
+      "n": 16,
+      "ttft_p50": 461.9,
+      "tpot_p50": 21.142,
+      "tpot_cv": 0.0793,
+      "tpot_p90_over_p50": 1.1013,
+      "ttft_p90_over_p50": 1.6011
+    },
+    "8": {
+      "n": 16,
+      "ttft_p50": 834.35,
+      "tpot_p50": 25.704,
+      "tpot_cv": 0.1319,
+      "tpot_p90_over_p50": 1.1591,
+      "ttft_p90_over_p50": 1.6539
+    },
+    "16": {
+      "n": 32,
+      "ttft_p50": 1578.41,
+      "tpot_p50": 35.032,
+      "tpot_cv": 0.1944,
+      "tpot_p90_over_p50": 1.2739,
+      "ttft_p90_over_p50": 1.6989
+    },
+    "32": {
+      "n": 64,
+      "ttft_p50": 3055.04,
+      "tpot_p50": 52.318,
+      "tpot_cv": 0.2587,
+      "tpot_p90_over_p50": 1.3687,
+      "ttft_p90_over_p50": 1.7441
+    }
+  },
+  "note": "逐请求抖动；用于检验『prefill 打断 decode 的排队效应』"
+}
