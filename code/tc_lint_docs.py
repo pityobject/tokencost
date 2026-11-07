@@ -100,6 +100,13 @@ COVERAGE = [
 PARAM_PAT = re.compile(r"(\d+)\s*个\s*(?:待定)?参数")
 # 【数字损坏检测】正常中文文档里几乎不会出现"带前导零的整数"（02、008、032、0000、06）。
 # 2026-11-06 一次批量替换把简历稿里所有 1 换成 0，产生的正是这类 token，且所有既有检查都没抓到。
+
+# 【裸覆盖率】覆盖率是分口径的（TPOT 86.8% / 成本 80.9% / TTFT 67.7%），
+# 单独写"86.8%"会让人以为是整体覆盖率。v10 复核在报告里抓到过三处。
+# 规则：一行里出现覆盖率数字，但同一行既没写口径也没写分口径，就报出来。
+BARE_COVERAGE = re.compile(r"覆盖率[^\n]{0,12}?86\.8|86\.8%[^\n]{0,8}覆盖率")
+COVERAGE_OK = ("TPOT", "口径", "成本 80.9", "67.7", "67.6", "分口径")
+
 LEADING_ZERO_PAT = re.compile(r"(?<![\w.：:/\-,])0\d+(?![\w.%/\-,])")
 # 【过期论断】这类错误不是数字错，而是"结论更新了、表述没跟"。
 # 已经犯过两次：A10 之后局限还写"单机单栈"；V100 之后局限还写"只有两块 GPU"。
@@ -122,6 +129,10 @@ MUL2_PAT = re.compile(r"(\d+)\s*[×x]\s*(\d+)\s*[=＝]\s*(\d+)")
 def consistent_checks(text, rel, line_no, line):
     """返回 [(级别, 说明)]；只做"能机器判定"的两种。"""
     out = []
+    # 裸覆盖率：同一行必须有口径说明
+    if BARE_COVERAGE.search(line) and not any(k in line for k in COVERAGE_OK):
+        out.append(("裸覆盖率", f"{line.strip()[:46]} —— 覆盖率分 TPOT/成本/TTFT，必须带口径"))
+
     # 过期论断（"结论更新了、表述没跟"这类）
     for pat, why in STALE_CLAIM:
         m = pat.search(line)
