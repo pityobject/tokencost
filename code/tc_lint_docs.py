@@ -44,6 +44,8 @@ ROOT = cfg.PROJECT_ROOT
 TARGETS = [
     "results/CLAIMS.md",      # 自称"唯一数字源"，更要扫（第六轮复核指出）
     "README.md",
+    "README.en.md",
+    "报告/方法论_测量纪律.md",
     "报告/技术报告_定稿_两页.md",
     "报告/简历条目与答辩稿_实测版.md",
     "报告/英文摘要与一页报告.md",

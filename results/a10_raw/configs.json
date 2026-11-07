@@ -1,0 +1,127 @@
+{
+  "_说明": "每次标定时的服务端配置。P0-1 的根因是：把 -ub 不同的两次标定 当成'同配置漂移'来相减，得出 +99% 这个错误上限。",
+  "configs": {
+    "calib_a10_llamacpp.json": {
+      "hardware": "A10 24GB",
+      "stack": "llama.cpp",
+      "slots": 32,
+      "ubatch": "default",
+      "ctx_total": 73728,
+      "cache_prompt": false,
+      "date": "2026-11-06",
+      "note": "基准标定（run1）"
+    },
+    "calib_a10_llamacpp_rep2.json": {
+      "hardware": "A10 24GB",
+      "stack": "llama.cpp",
+      "slots": 32,
+      "ubatch": "default",
+      "ctx_total": 73728,
+      "cache_prompt": false,
+      "date": "2026-11-06",
+      "note": "同配置重复（run2）"
+    },
+    "calib_a10_llamacpp_rep3.json": {
+      "hardware": "A10 24GB",
+      "stack": "llama.cpp",
+      "slots": 128,
+      "ubatch": "default",
+      "ctx_total": 294912,
+      "cache_prompt": false,
+      "date": "2026-11-07",
+      "note": "**槽位改为 128**，与 run1/run2 不同配置，不能当同配置漂移"
+    },
+    "calib_a10_llamacpp_long.json": {
+      "hardware": "A10 24GB",
+      "stack": "llama.cpp",
+      "slots": 32,
+      "ubatch": "default",
+      "ctx_total": 73728,
+      "cache_prompt": false,
+      "date": "2026-11-06",
+      "note": "长 prompt 探针"
+    },
+    "calib_a10_vllm.json": {
+      "hardware": "A10 24GB",
+      "stack": "vLLM",
+      "slots": 32,
+      "ubatch": "n/a",
+      "ctx_total": 73728,
+      "cache_prompt": false,
+      "date": "2026-11-06",
+      "note": "vLLM run1"
+    },
+    "calib_a10_vllm_rep2.json": {
+      "hardware": "A10 24GB",
+      "stack": "vLLM",
+      "slots": 32,
+      "ubatch": "n/a",
+      "ctx_total": 73728,
+      "cache_prompt": false,
+      "date": "2026-11-06",
+      "note": "vLLM 同配置重复"
+    },
+    "calib_a10_vllm_rep3.json": {
+      "hardware": "A10 24GB",
+      "stack": "vLLM",
+      "slots": 128,
+      "ubatch": "n/a",
+      "ctx_total": 294912,
+      "cache_prompt": false,
+      "date": "2026-11-07",
+      "note": "槽位 128（配置变化）"
+    },
+    "calib_a10_vllm_long.json": {
+      "hardware": "A10 24GB",
+      "stack": "vLLM",
+      "slots": 32,
+      "ubatch": "n/a",
+      "ctx_total": 73728,
+      "cache_prompt": false,
+      "date": "2026-11-06",
+      "note": "长 prompt 探针"
+    },
+    "calib_v100_llamacpp.json": {
+      "hardware": "V100 16GB",
+      "stack": "llama.cpp",
+      "slots": 32,
+      "ubatch": "default",
+      "ctx_total": 73728,
+      "cache_prompt": false,
+      "date": "2026-11-07",
+      "note": "带宽阶梯第 3 点"
+    },
+    "calib_ub64.json": {
+      "hardware": "A10 24GB",
+      "stack": "llama.cpp",
+      "slots": 32,
+      "ubatch": 64,
+      "ctx_total": 73728,
+      "date": "2026-11-07"
+    },
+    "calib_ub128.json": {
+      "hardware": "A10 24GB",
+      "stack": "llama.cpp",
+      "slots": 32,
+      "ubatch": 128,
+      "ctx_total": 73728,
+      "date": "2026-11-07"
+    },
+    "calib_ub256.json": {
+      "hardware": "A10 24GB",
+      "stack": "llama.cpp",
+      "slots": 32,
+      "ubatch": 256,
+      "ctx_total": 73728,
+      "date": "2026-11-07"
+    },
+    "calib_ub512.json": {
+      "hardware": "A10 24GB",
+      "stack": "llama.cpp",
+      "slots": 32,
+      "ubatch": 512,
+      "ctx_total": 73728,
+      "date": "2026-11-07"
+    }
+  }
+}

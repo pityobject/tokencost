@@ -187,7 +187,7 @@ assumption** — including three times the checker itself was silently broken
 
 | symptom | measurement | what to do |
 |---|---|---|
-| Re-calibrating the same machine hours later | `c_srv` 1.53 → 2.25–3.04 (**+47–99%**) | always publish parameters together with the server config; recalibrate across sessions |
+| Re-calibrating the same machine hours later | `c_srv` 1.53 → 1.96 (**+28%**, same config); changing slots 32→128 gives 2.51 (**+64%**, different config) | always publish parameters together with the server config; recalibrate across sessions |
 | Changing a startup flag such as `-ub` | `c_srv` −26%, `b_sat` **−66%**, `peak_prefill` **+60%**, but `bw` only −6% | estimate `bw` from hardware; measure the other three per deployment |
 
 > Only `bw` is a hardware property. `c_srv`, `b_sat` and `peak_prefill` describe

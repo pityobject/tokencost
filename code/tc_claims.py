@@ -567,21 +567,50 @@ def build_claims(d):
         claims["抖动修正的跨栈迁移（每栈 k）"] = (
             "vLLM→llama.cpp k=1.16（改善 21%）／llama.cpp→vLLM k=2.24（变差 4%）"
             " → k 随栈变，不可当通用修正项")
+    # c_srv 的配置相关变化：**必须按"同配置"分组**，不能跨配置相减。
+    # 真实教训（v8 复核 P0-1）：早先把 -ub 不同的两次标定当成"同配置漂移"，
+    # 得出 +99% 这个错误上限，并从 CLAIMS 一路污染 README / 报告 / 矩阵。
+    _cfgs_fp = RESULTS / "a10_raw" / "configs.json"
+    _cfgs = {}
+    if _cfgs_fp.exists():
+        _cfgs = (json.loads(_cfgs_fp.read_text(encoding="utf-8")) or {}).get("configs") or {}
+
+    def _load_csrv(name):
+        fp = RESULTS / "a10_raw" / name
+        if not fp.exists():
+            return None, None
+        d = json.loads(fp.read_text(encoding="utf-8"))
+        return float(d["c_srv"]), d
+
+    def _same_config(a, b):
+        """两份标定是否同配置（缺配置信息就当不同配置，宁可不报）。"""
+        ca, cb = _cfgs.get(a), _cfgs.get(b)
+        if not ca or not cb:
+            return False
+        keys = ("hardware", "stack", "slots", "ubatch", "ctx_total")
+        return all(ca.get(k) == cb.get(k) for k in keys)
+
+    _base_name = "calib_a10_llamacpp.json"
+    _base, _ = _load_csrv(_base_name)
+    if _base is not None:
+        _same = []
+        for _n in ("calib_a10_llamacpp_rep2.json", "calib_a10_llamacpp_rep3.json"):
+            _c, _ = _load_csrv(_n)
+            if _c is not None and _same_config(_base_name, _n):
+                _same.append((_n, _c))
+        if _same:
+            _lo = min(c for _, c in _same)
+            _hi = max(c for _, c in _same)
+            claims["c_srv 的同配置重复（32 槽，两次）"] = (
+                f"{_base:.3f} → {_lo:.3f}–{_hi:.3f} ms"
+                f"（**+{(_hi/_base-1)*100:.0f}%**）")
+        # 配置变化（不是漂移）：32 槽 → 128 槽
+        _c128, _ = _load_csrv("calib_a10_llamacpp_rep3.json")
+        if _c128 is not None and not _same_config(_base_name, "calib_a10_llamacpp_rep3.json"):
+            claims["c_srv 随槽位数变化（32→128 槽，不是漂移）"] = (
+                f"{_base:.3f} → {_c128:.3f} ms（**+{(_c128/_base-1)*100:.0f}%**，配置不同）")
+
     _ub = RESULTS / "a10_raw" / "ubatch_sweep_a10.json"
-    if _ub.exists():
-        _d = json.loads(_ub.read_text(encoding="utf-8"))
-        _r = _d["runs"]
-        _lo, _hi = _r[0], _r[-1]
-        claims["ubatch 对参数的影响（64→512）"] = (
-            f"c_srv {( _hi['c_srv']/_lo['c_srv']-1)*100:+.0f}%、"
-            f"b_sat {( _hi['b_sat']/_lo['b_sat']-1)*100:+.0f}%、"
-            f"peak_prefill {( _hi['peak_prefill']/_lo['peak_prefill']-1)*100:+.0f}%、"
-            f"bw {( _hi['bw']/_lo['bw']-1)*100:+.0f}%")
-        _b = _d.get("baseline_morning_same_slots") or {}
-        if _b.get("c_srv"):
-            claims["c_srv 的跨会话漂移（同日同配置）"] = (
-                f"{_b['c_srv']:.2f} → {_lo['c_srv']:.2f}–{_hi['c_srv']:.2f} ms"
-                f"（{(_lo['c_srv']/_b['c_srv']-1)*100:+.0f}%）")
     _ph = RESULTS / "prefix_hit.json"
     if _ph.exists():
         _d = json.loads(_ph.read_text(encoding="utf-8"))
@@ -617,6 +646,29 @@ def build_claims(d):
             f"采样 {_dd.get('sampling', 0):+.2f} ms/步、"
             f"logprobs {_dd.get('logprobs', 0):+.2f} ms/步、"
             f"推流 {_d.get('sse_overhead_total_ms', 0):+.1f} ms/请求（负=流式更快）")
+    # v8 复核 P0-4：这些数字以前只在散文里，claims 抓不到 → 漂移不报警。
+    _fit_fp = RESULTS / "fit.json"
+    if _fit_fp.exists():
+        _f = json.loads(_fit_fp.read_text(encoding="utf-8"))
+        if _f.get("mape_cost_wall") is not None:
+            claims["墙钟口径的成本 MAPE"] = f"{_f['mape_cost_wall']:.2f}%"
+            claims["墙钟口径的最大误差"] = f"{_f.get('max_err_wall', 0):.2f}%"
+    _cv_fp = RESULTS / "cv_summary.json"
+    if _cv_fp.exists():
+        _c = json.loads(_cv_fp.read_text(encoding="utf-8"))
+        claims["随机 12 点重划分的中位"] = f"{_c['random_median']:.2f}%"
+        claims["随机 12 点重划分的 5–95% 区间"] = (
+            f"[{_c['random_p5']:.2f}%, {_c['random_p95']:.2f}%]")
+    # 全仓格数/测量次数：从 CLAIMS 自己已有的数据口径行派生
+    _raw = pathlib.Path(__file__).resolve().parent.parent / "data" / "raw_cells.jsonl"
+    if _raw.exists():
+        import json as _json
+        _rows = [_json.loads(l) for l in _raw.read_text(encoding="utf-8").splitlines() if l.strip()]
+        # 【口径】只有 status=='ok' 的行算"测量"；failed 行（端口占用）如实保留但不计数
+        _ok = [r for r in _rows if r.get("status") == "ok"]
+        claims["数据规模：全仓格数"] = f"{len({r.get('cell_id') for r in _ok})} 格"
+        claims["数据规模：全仓测量次数"] = f"{len(_ok)} 次"
+        claims["数据规模：失败行数"] = f"{len(_rows) - len(_ok)} 行"
     _tv = RESULTS / "tail_variance.json"
     if _tv.exists():
         _d = json.loads(_tv.read_text(encoding="utf-8"))
