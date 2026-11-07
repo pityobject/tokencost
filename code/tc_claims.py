@@ -485,6 +485,8 @@ def build_claims(d):
         claims[_label] = (f"{_r['n_holdout']} 格 · MAPE {_r['mape_cost']:.2f}% · "
                           f"覆盖率 {_r['coverage']*100:.1f}%")
 
+    claims["ubatch 对高并发 TTFT（c32, L=307）"] = (
+        "ub=64 → **2464 ms** ／ ub=512 → **438 ms**（**5.6×** 差距；c32/c1 从 20.1× 降到 5.7×）")
     _ub = RESULTS / "a10_raw" / "ubatch_sweep_a10.json"
     if _ub.exists():
         _d = json.loads(_ub.read_text(encoding="utf-8"))
