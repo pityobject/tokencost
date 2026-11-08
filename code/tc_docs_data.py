@@ -223,6 +223,10 @@ def build():
     for p in sorted(res.iterdir()):
         if not p.is_file() or p.suffix not in (".csv", ".json", ".md"):
             continue
+        # 跳过被 .gitignore 的本地标定文件（干净 checkout 里不存在，
+        # 否则 --check 在 CI 上必然失败；v12 复核 P0-1）
+        if p.name.startswith("calib_") and f"results/{p.name}" not in FILE_DOC:
+            continue
         rel = f"results/{p.name}"
         key = p.name
         meta = FILE_DOC.get(rel) or FILE_DOC.get(key)

@@ -2660,7 +2660,7 @@ ValueError: max_num_batched_tokens (512) is smaller than max_model_len (16384)
 | A10 | 1.012 | 0.308 | **3.3×** |
 | V100 | 1.200 | 0.382 | **3.1×** |
 
-（`c_srv` = TPOT 对并发的斜率，ms/流/步；三个 ctx 取中位）
+（**表内是 TPOT 对并发的斜率，不是 `tc_model.fit` 拟合出的 `c_srv`**；ms/流/步，三个 ctx 取中位。fit 的 `c_srv` 更小：4060 上 1.5B llama 0.819 / vLLM 0.094）
 
 **因子分解**
 
