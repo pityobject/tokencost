@@ -673,7 +673,9 @@ def build_claims(d):
         claims["A10+vLLM 网格：跨栈参数复现"] = (
             "bw 360.3 vs 384.9（−6.4%）｜c_srv 0.317 vs 0.273（+16%）｜PEAK_pre 76.4 vs 76.7（−0.4%）")
         claims["1.5B 三卡双栈 TPOT 斜率（3×2 因子）"] = (
-            "**TPOT 斜率**（非 fit 的 c_srv）：llama.cpp 1.084/1.012/1.200｜vLLM 0.140/0.308/0.382"
+            f"**TPOT 斜率**（现算，非 fit 的 c_srv）：llama.cpp "
+            f"{_slope_med('llama_4060_fp16_ctx*.json'):.3f}/{_slope_med('v15_a10_llama_ctx*.json'):.3f}/{_slope_med('v15_v100_llama_ctx*.json'):.3f}｜vLLM "
+            f"{_slope_med('vllm_4060_ctx*.json'):.3f}/{_slope_med('v15_a10_vllm_ctx*.json'):.3f}/{_slope_med('v15_v100_vllm_ctx*.json'):.3f}"
             "（4060/A10/V100）→ 栈比 **7.7×/3.3×/3.1×**")
         claims["因子分解：栈主效应与交互"] = (
             "栈主效应 **3.3×**（3.1–7.7）｜机器效应 llama 1.19× vs vLLM **2.72×**｜"
@@ -1140,6 +1142,21 @@ def _ladder_costs():
             segs.append(str(int(round(float(r["cost"])))))
             prev = cid
     return segs
+
+
+
+def _slope_med(pattern):
+    """从 24 格数据现算 TPOT~conc 斜率中位（不再写死）。"""
+    import glob as _g, json as _j
+    import pathlib as _pl
+    import numpy as _np
+    vals = []
+    for fp in _g.glob(str((_pl.Path(__file__).resolve().parent.parent / "results" / "a10_raw") / pattern)):
+        d = _j.loads(_pl.Path(fp).read_text(encoding="utf-8"))
+        c = [m["conc"] for m in d["measurements"]]
+        t = [m["tpot"] for m in d["measurements"]]
+        vals.append(_np.polyfit(c, t, 1)[0])
+    return float(_np.median(vals)) if vals else float("nan")
 
 
 def _need(claims, key):
