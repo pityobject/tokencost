@@ -79,7 +79,7 @@ DEFAULT_PLAN = [
 def resolve_spec(spec_key=None, spec_json=None):
     """返回 (model_name, quant, spec_dict)。"""
     if spec_json:
-        d = json.loads(Path(spec_json).read_text(encoding="utf-8"))
+        d = json.loads(Path(spec_json).read_text(encoding="utf-8-sig"))   # 兼容 PowerShell 写的 BOM
         m = d.get("model", d)
         need = ["name", "quant", "weight_bytes", "n_params",
                 "n_layers", "n_kv_heads", "head_dim"]

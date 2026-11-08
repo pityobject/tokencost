@@ -672,6 +672,11 @@ def build_claims(d):
         claims["A10+vLLM 网格：留出集成本 MAPE"] = "4.26%（12 格留出，24 格网格）"
         claims["A10+vLLM 网格：跨栈参数复现"] = (
             "bw 360.3 vs 384.9（−6.4%）｜c_srv 0.317 vs 0.273（+16%）｜PEAK_pre 76.4 vs 76.7（−0.4%）")
+        claims["4060 双栈（同 fp16 权重）：c_srv 与留出误差"] = (
+            "vLLM 0.140 / llama.cpp **1.084**（**7.7×**）；留出 MAPE vLLM **0.42%** vs llama.cpp 18.72%；"
+            "c1 TPOT 1.03×、c32 **0.46×**")
+        claims["量化混杂修正（跨栈对照）"] = (
+            "q8_0 vs fp16 的权重差 64% 曾让 c1 TPOT 相差 1.79×；对齐 fp16 后只差 1.03×")
         claims["V100+vLLM 网格：留出集成本 MAPE"] = "2.55%（12 格留出，24 格网格；A10 为 4.26%）"
         claims["跨卡 c_srv：llama.cpp 2.5× vs vLLM 1.07×"] = (
             "A10 1.529 → V100 3.848（2.5×，llama.cpp）｜A10 0.317 → V100 0.338（1.07×，vLLM）"

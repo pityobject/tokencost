@@ -1,0 +1,1 @@
+﻿{"name":"1.5B","quant":"fp16","weight_bytes":3087007744,"n_params":1540000000,"n_layers":28,"n_kv_heads":2,"head_dim":128}
