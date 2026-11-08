@@ -2633,3 +2633,14 @@ attention 成本被折叠进了 `c_srv`。
   两者槽位语义不同，这是栈本身的差异，不是配置失误；
 - 24 格全部 `n_ok=96`。
 
+**未完成的加强项：`--max-num-batched-tokens` 扫描（vLLM 版的 `-ub`）**
+
+想验证"批预算是一阶旋钮"（结论 4）是否跨栈成立，但在 vLLM 0.6.6 上受阻：
+
+```
+ValueError: max_num_batched_tokens (512) is smaller than max_model_len (16384)
+```
+
+加 `--enable-chunked-prefill` 后本机仍未能在 6 分钟内就绪（8 GB + 1.5B 上启动开销大）。
+**如实记录为"未做"**：这条悬而未决的推论是
+"批预算可能是栈无关的一阶旋钮"——目前**只有 llama.cpp 一个证据**（c32 TTFT 2464 → 438 ms，5.6×）。
