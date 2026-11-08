@@ -863,7 +863,7 @@ def build_claims(d):
     if a10r:
         _r = a10r.get("csrv_ratio_range") or []
         if len(_r) == 2:
-            claims["栈间 c_srv 比值（重复性区间）"] = f"{_r[0]:.1f}–{_r[1]:.1f}×"
+            claims["栈间 c_srv 比值（**A10/3B 六点标定**，范围来自三次重复；三卡 1.5B 的 24 格实测见下一行）"] = f"{_r[0]:.1f}–{_r[1]:.1f}×"
         _rep = a10r.get("repeatability") or {}
         if "c_srv" in _rep:
             claims["c_srv 重复性（llama.cpp / vLLM）"] = (
