@@ -1,4 +1,5 @@
 name: Deploy calculator to GitHub Pages
+# trigger: 2026-11-08 启用 Pages 后重跑一次（Source 已设为 GitHub Actions）
 
 on:
   push:
