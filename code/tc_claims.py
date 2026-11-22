@@ -672,6 +672,12 @@ def build_claims(d):
         claims["A10+vLLM 网格：留出集成本 MAPE"] = "4.26%（12 格留出，24 格网格）"
         claims["A10+vLLM 网格：跨栈参数复现"] = (
             "bw 360.3 vs 384.9（−6.4%）｜c_srv 0.317 vs 0.273（+16%）｜PEAK_pre 76.4 vs 76.7（−0.4%）")
+        claims["llama.cpp 槽位选择方式（A10 日志实证）"] = (
+            "2376 次分配中 **2034 次按 LCP 前缀相似度**（**85.6%**）、342 次按 LRU；"
+            "prompt eval 双峰：p25 **0.16 ms/token**（命中）vs 中位 **0.46 ms/token**（全量 prefill）")
+        claims["llama.cpp 服务端配置（A10 上的 1.5B）"] = (
+            "n_slots = 32, n_ctx_slot = 1024, kv_unified = false（即 -c 32768 --parallel 32）；"
+            "n_ubatch 未传、取默认 **512** → ubatch 在变的假设被排除")
         claims["1.5B 三卡双栈 TPOT 斜率（3×2 因子）"] = (
             f"**TPOT 斜率**（现算，非 fit 的 c_srv）：llama.cpp "
             f"{_slope_med('llama_4060_fp16_ctx*.json'):.3f}/{_slope_med('v15_a10_llama_ctx*.json'):.3f}/{_slope_med('v15_v100_llama_ctx*.json'):.3f}｜vLLM "
